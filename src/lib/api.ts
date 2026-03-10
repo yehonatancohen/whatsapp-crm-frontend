@@ -1,14 +1,22 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api';
+let API_URL = import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api';
+
+// Extract the base domain for normalization
+const BASE_HOST = API_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_HOST,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach access token to every request
+// Attach /api prefix to every request if missing, and attach access token
 api.interceptors.request.use((config) => {
+  // Ensure the request starts with /api if it is a relative request
+  if (config.url && !config.url.startsWith('/api') && !config.url.startsWith('http')) {
+    config.url = `/api${config.url.startsWith('/') ? '' : '/'}${config.url}`;
+  }
+
   const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -60,7 +68,7 @@ api.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${BASE_HOST}/api/auth/refresh`, { refreshToken });
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         processQueue(null, data.accessToken);
