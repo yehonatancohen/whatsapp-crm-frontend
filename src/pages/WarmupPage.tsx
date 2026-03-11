@@ -118,10 +118,6 @@ export function WarmupPage() {
                       <div className={`w-10 h-10 rounded-full ${config.bg} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
                         {step.level}
                       </div>
-                      {/* Connector line */}
-                      {i < levelProgression.length - 1 && (
-                        <div className="w-full h-0.5 bg-slate-700 mt-5 absolute" />
-                      )}
                     </div>
                     <div className="ml-3 pr-4">
                       <p className={`text-sm font-medium ${config.color}`}>{step.name}</p>
