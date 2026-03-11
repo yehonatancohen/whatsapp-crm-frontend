@@ -47,8 +47,8 @@ export function AdminUsersPage() {
     <>
       <h1 className="text-2xl font-semibold text-slate-100 mb-6">User Management</h1>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-x-auto">
+        <table className="w-full text-sm min-w-[700px]">
           <thead>
             <tr className="border-b border-slate-700/50">
               <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase">User</th>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
+import { extractApiError } from '../lib/errorUtils';
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -26,8 +27,9 @@ export function SettingsPage() {
         localStorage.setItem('user', JSON.stringify(parsed));
       }
       setProfileMsg({ type: 'success', text: 'Profile updated successfully' });
-    } catch {
-      setProfileMsg({ type: 'error', text: 'Failed to update profile' });
+    } catch (err) {
+      const { message } = extractApiError(err);
+      setProfileMsg({ type: 'error', text: message });
     } finally {
       setProfileSaving(false);
     }
@@ -51,8 +53,10 @@ export function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setPasswordMsg({ type: 'success', text: 'Password changed successfully' });
-    } catch {
-      setPasswordMsg({ type: 'error', text: 'Failed to change password' });
+    } catch (err) {
+      const { message, details } = extractApiError(err);
+      const detailText = details.length > 0 ? details.map((d) => d.message).join('. ') : message;
+      setPasswordMsg({ type: 'error', text: detailText });
     } finally {
       setPasswordSaving(false);
     }
@@ -65,7 +69,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-semibold text-slate-100 mb-6">Settings</h1>
 
       {/* Profile Section */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 mb-6">
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6">
         <h2 className="text-sm font-semibold text-slate-300 mb-4">Profile</h2>
         {profileMsg && (
           <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${profileMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
@@ -88,7 +92,7 @@ export function SettingsPage() {
       </div>
 
       {/* Change Password Section */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 sm:p-6">
         <h2 className="text-sm font-semibold text-slate-300 mb-4">Change Password</h2>
         {passwordMsg && (
           <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${passwordMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>

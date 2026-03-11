@@ -41,7 +41,7 @@ export function AccountCard({ account, onRemove }: Props) {
         </div>
         <button
           onClick={() => onRemove(account.id)}
-          className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+          className="text-slate-600 hover:text-red-400 transition-colors md:opacity-0 md:group-hover:opacity-100"
           title="Remove account"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">

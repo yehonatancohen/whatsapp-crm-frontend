@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { extractApiError } from '../lib/errorUtils';
+import { FormError } from '../components/shared/FormError';
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -9,17 +11,21 @@ export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<Array<{ field: string; message: string }>>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setErrorDetails([]);
     setLoading(true);
     try {
       await register(email, password, name);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Registration failed');
+    } catch (err: unknown) {
+      const { message, details } = extractApiError(err);
+      setError(message);
+      setErrorDetails(details);
     } finally {
       setLoading(false);
     }
@@ -80,7 +86,7 @@ export function RegisterPage() {
             </div>
           </div>
 
-          {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+          <FormError error={error} details={errorDetails} className="mt-3" />
 
           <button
             type="submit"

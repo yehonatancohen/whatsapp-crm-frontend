@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { extractApiError } from '../lib/errorUtils';
 
 interface Props {
   open: boolean;
@@ -42,18 +43,19 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
       await onAdd(label.trim(), proxy.trim() || undefined);
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to add account');
+      const { message } = extractApiError(err);
+      setError(message);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <form
         onSubmit={handleSubmit}
-        className="relative bg-slate-900 border border-slate-700/50 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        className="relative bg-slate-900 border border-slate-700/50 rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
       >
         <h2 className="text-lg font-semibold text-slate-100 mb-5">Add Account</h2>
 

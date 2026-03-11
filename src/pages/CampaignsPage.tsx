@@ -7,9 +7,12 @@ import {
   usePauseCampaign,
   useResumeCampaign,
   useCancelCampaign,
+  useCampaignFailures,
 } from '../hooks/useCampaigns';
 import { useContactLists } from '../hooks/useContacts';
 import { useAccounts, useAccountGroups } from '../hooks/useAccounts';
+import { extractApiError } from '../lib/errorUtils';
+import { FormError } from '../components/shared/FormError';
 import type { Campaign, CampaignStatus, CampaignType, CreateCampaignData } from '../types';
 
 const statusConfig: Record<CampaignStatus, { label: string; bg: string; text: string; pulse?: boolean }> = {
@@ -54,7 +57,7 @@ export function CampaignsPage() {
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Campaigns</h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -63,7 +66,7 @@ export function CampaignsPage() {
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -161,6 +164,11 @@ function CampaignCard({
   onDelete: () => void;
   isActionPending: boolean;
 }) {
+  const [showFailures, setShowFailures] = useState(false);
+  const { data: failures, isLoading: failuresLoading } = useCampaignFailures(
+    showFailures ? campaign.id : null,
+  );
+
   const progressPercent = campaign.totalMessages > 0
     ? Math.round((campaign.sentCount / campaign.totalMessages) * 100)
     : 0;
@@ -191,7 +199,7 @@ function CampaignCard({
       </p>
 
       {/* Stats row */}
-      <div className="flex items-center gap-4 mb-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
         <div className="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-500">
             <path d="M22 2L11 13" />
@@ -219,7 +227,7 @@ function CampaignCard({
             Failed: <span className="text-red-400">{campaign.failedCount}</span>
           </span>
         </div>
-        <div className="flex items-center gap-1.5 ml-auto">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
           <span className="text-xs text-slate-500">
             {campaign.messagesPerMinute} msg/min &middot; {campaign.dailyLimitPerAccount}/day per account
           </span>
@@ -239,6 +247,43 @@ function CampaignCard({
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Failure details */}
+      {campaign.failedCount > 0 && (
+        <div className="mb-3">
+          <button
+            onClick={() => setShowFailures(!showFailures)}
+            className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-3 h-3 transition-transform ${showFailures ? 'rotate-90' : ''}`}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            {showFailures ? 'Hide' : 'View'} failure reasons ({campaign.failedCount})
+          </button>
+          {showFailures && (
+            <div className="mt-2 max-h-48 overflow-y-auto bg-slate-900/50 border border-slate-700/50 rounded-lg">
+              {failuresLoading ? (
+                <p className="text-xs text-slate-500 p-3">Loading...</p>
+              ) : failures && failures.length > 0 ? (
+                <div className="divide-y divide-slate-800">
+                  {failures.map((f: any) => (
+                    <div key={f.id} className="px-3 py-2 text-xs">
+                      <span className="text-slate-400">
+                        {f.contact?.name || f.contact?.phoneNumber || f.groupJid || 'Unknown'}
+                      </span>
+                      <span className="text-red-400/80 ml-2">
+                        {f.errorMessage || 'Unknown error'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 p-3">No failure details available</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -371,6 +416,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [formErrorDetails, setFormErrorDetails] = useState<Array<{ field: string; message: string }>>([]);
 
   const authenticatedAccounts = accounts.filter((a) => a.status === 'AUTHENTICATED');
   const { data: groups, isLoading: groupsLoading } = useAccountGroups(selectedAccountId);
@@ -386,6 +432,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setFormErrorDetails([]);
 
     if (!name.trim()) {
       setFormError('Campaign name is required');
@@ -420,15 +467,16 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
       await createMutation.mutateAsync(data);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to create campaign';
-      setFormError(msg);
+      const { message, details } = extractApiError(err);
+      setFormError(message);
+      setFormErrorDetails(details);
     }
   };
 
   const selectClass = "w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors";
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 mb-6">
+    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-semibold text-slate-100">Create Campaign</h2>
         <button
@@ -442,11 +490,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {formError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-4">
-          <p className="text-red-400 text-sm">{formError}</p>
-        </div>
-      )}
+      <FormError error={formError} details={formErrorDetails} className="mb-4" />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
@@ -605,7 +649,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
             max={200}
             value={dailyLimitPerAccount}
             onChange={(e) => setDailyLimitPerAccount(Math.min(200, Math.max(1, Number(e.target.value))))}
-            className="w-full max-w-[180px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full max-w-full sm:max-w-[180px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
           />
           <p className="text-xs text-slate-500 mt-1">Between 1 and 200 messages per account per day</p>
         </div>
@@ -635,7 +679,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full max-w-[280px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors [color-scheme:dark]"
+              className="w-full max-w-full sm:max-w-[280px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors [color-scheme:dark]"
             />
           )}
         </div>

@@ -132,3 +132,14 @@ export function useCancelCampaign() {
     },
   });
 }
+
+export function useCampaignFailures(id: string | null) {
+  return useQuery({
+    queryKey: ['campaigns', id, 'failures'],
+    queryFn: async () => {
+      const { data } = await api.get(`/campaigns/${id}/failures`);
+      return data;
+    },
+    enabled: !!id,
+  });
+}
