@@ -109,7 +109,7 @@ export function WarmupPage() {
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 mt-3">
             {/* Timeline */}
             <div className="flex items-start gap-0 overflow-x-auto pb-2">
-              {levelProgression.map((step, i) => {
+              {levelProgression.map((step) => {
                 const config = levelConfig[step.level as WarmupLevel];
                 return (
                   <div key={step.level} className="flex items-start min-w-[180px] flex-1">

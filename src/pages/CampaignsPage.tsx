@@ -534,19 +534,24 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {/* Message template */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Message Template</label>
-          <textarea
-            value={messageTemplate}
-            onChange={(e) => setMessageTemplate(e.target.value)}
-            placeholder="Type your message here..."
-            rows={4}
-            className="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
-          />
-          <p className="text-xs text-slate-500 mt-1">
-            Use <span className="text-slate-400 font-mono">{'{option1|option2}'}</span> for spintax variations
-          </p>
+        {/* Message template and Preview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Message Template</label>
+            <textarea
+              value={messageTemplate}
+              onChange={(e) => setMessageTemplate(e.target.value)}
+              placeholder="Type your message here..."
+              className="w-full flex-1 min-h-[160px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+            />
+            <p className="text-xs text-slate-500 mt-2">
+              Supports <span className="text-slate-400 font-mono">*bold*</span>, <span className="text-slate-400 font-mono">_italic_</span>, <span className="text-slate-400 font-mono">~strike~</span> and <span className="text-slate-400 font-mono">{'{spintax|opts}'}</span>
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">WhatsApp Preview</label>
+            <WhatsAppPreview text={messageTemplate} />
+          </div>
         </div>
 
         {/* Target: Contact List or Groups */}
@@ -713,6 +718,66 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function WhatsAppPreview({ text }: { text: string }) {
+  const formatText = (input: string) => {
+    if (!input) return null;
+    let html = input
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br />')
+      .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>')
+      .replace(/~(.*?)~/g, '<del>$1</del>')
+      .replace(/```(.*?)```/gs, '<code class="bg-black/20 rounded px-1 font-mono text-xs">$1</code>');
+      
+    // Handle spintax optionally by highlighting it mentally, or just let users see it raw.
+    html = html.replace(/(\{[^{}]+\})/g, '<span class="text-emerald-300 opacity-80">$1</span>');
+
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  };
+
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  return (
+    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-slate-700/50 shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
+      {/* Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.06] pointer-events-none z-0" 
+        style={{ backgroundImage: 'url("https://static.whatsapp.net/rsrc.php/v3/yl/r/r_QNOpNGJ6t.png")' }}
+      />
+      
+      <div className="flex-1 overflow-y-auto z-10 custom-scrollbar flex flex-col justify-end">
+        {text ? (
+          <div className="relative self-end bg-[#005c4b] text-[#e9edef] text-[14.2px] leading-[19px] px-2 py-1.5 rounded-lg rounded-tr-none max-w-[95%] shadow-sm mt-2">
+            {/* Tail */}
+            <svg viewBox="0 0 8 13" width="8" height="13" className="absolute top-0 -right-[8px] text-[#005c4b]">
+              <path fill="currentColor" d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.026 1.533 2.568z"></path>
+            </svg>
+            
+            <div className="font-sans whitespace-pre-wrap break-words inline-block max-w-full">
+              {formatText(text)}
+              <span className="inline-block w-14 h-3"></span> {/* Spacer for time float */}
+            </div>
+            
+            <div className="absolute bottom-1 right-2 flex items-center justify-end gap-1">
+              <span className="text-[11px] text-[#ffffff99] leading-none">{time}</span>
+              <svg viewBox="0 0 16 11" width="16" height="11">
+                <path fill="#53bdeb" d="M11.8 1.6l-7.7 7.7-3.7-3.7-1.1 1.1 4.8 4.8 8.8-8.8z" />
+                <path fill="#53bdeb" d="M14.9 1.6l-1.1-1.1-3.7 3.7 1.1 1.1z" />
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full opacity-50 text-slate-400 text-sm italic">
+            Message preview
+          </div>
+        )}
+      </div>
     </div>
   );
 }
