@@ -3,24 +3,32 @@ import { useState, useRef } from 'react';
 interface Props {
   open: boolean;
   onClose: () => void;
-  onImport: (file: File) => Promise<any>;
+  onImport: (data: { file: File; listName?: string }) => Promise<any>;
   isImporting: boolean;
 }
 
 export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
   const [file, setFile] = useState<File | null>(null);
+  const [listName, setListName] = useState('');
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
 
+  function handleFileSelect(f: File | null) {
+    setFile(f);
+    if (f && !listName) {
+      setListName(f.name.replace(/\.(csv|xlsx|xls)$/i, ''));
+    }
+  }
+
   async function handleImport() {
     if (!file) return;
     setError(null);
     setResult(null);
     try {
-      const res = await onImport(file);
+      const res = await onImport({ file, listName: listName.trim() || undefined });
       setResult(res);
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Import failed');
@@ -29,6 +37,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
 
   function handleClose() {
     setFile(null);
+    setListName('');
     setResult(null);
     setError(null);
     onClose();
@@ -51,7 +60,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
               />
               {file ? (
                 <p className="text-slate-200 text-sm">{file.name}</p>
@@ -61,6 +70,20 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
                   <p className="text-slate-600 text-xs">CSV or Excel (.xlsx, .xls)</p>
                 </>
               )}
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm text-slate-400 mb-1.5">List Name</label>
+              <input
+                type="text"
+                value={listName}
+                onChange={(e) => setListName(e.target.value)}
+                placeholder="e.g., March Leads"
+                className="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              />
+              <p className="text-slate-600 text-xs mt-1">
+                Imported contacts will be added to this list. Leave empty to skip list creation.
+              </p>
             </div>
 
             <p className="text-slate-600 text-xs mt-3">
@@ -104,6 +127,12 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
                 <span className="text-slate-400">Errors</span>
                 <span className="text-red-400">{result.errors}</span>
               </div>
+              {result.listName && (
+                <div className="flex justify-between pt-1 border-t border-slate-800">
+                  <span className="text-slate-400">Added to list</span>
+                  <span className="text-emerald-400">{result.listName}</span>
+                </div>
+              )}
             </div>
 
             {/* Error details */}

@@ -59,15 +59,19 @@ export function useContacts(page = 1, search?: string, tags?: string[]) {
   });
 
   const importMutation = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, listName }: { file: File; listName?: string }) => {
       const formData = new FormData();
       formData.append('file', file);
+      if (listName) formData.append('listName', listName);
       const { data } = await api.post('/contacts/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['contactLists'] });
+    },
   });
 
   return {
@@ -101,9 +105,17 @@ export function useContactLists() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactLists'] }),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/contacts/lists/${id}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactLists'] }),
+  });
+
   return {
     lists: query.data || [],
     loading: query.isLoading,
     createList: createMutation.mutateAsync,
+    deleteList: deleteMutation.mutateAsync,
   };
 }
