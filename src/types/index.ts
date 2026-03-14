@@ -106,8 +106,24 @@ export interface AdminUser {
   name: string;
   role: 'ADMIN' | 'USER';
   isActive: boolean;
+  emailVerified: boolean;
   createdAt: string;
   _count: { accounts: number; campaigns: number };
+  subscription: {
+    planTier: string;
+    status: string;
+    trialEndsAt: string | null;
+  } | null;
+}
+
+export interface AdminOverview {
+  totalUsers: number;
+  verifiedUsers: number;
+  activeUsers: number;
+  newUsersWeek: number;
+  newUsersMonth: number;
+  subsByStatus: Record<string, number>;
+  subsByTier: Record<string, number>;
 }
 
 // ─── Activity ────────────────────────────────────────────────────

@@ -3,11 +3,11 @@ import { useWarmupOverview, useToggleWarmup } from '../hooks/useWarmup';
 import type { WarmupLevel, WarmupStatus } from '../types';
 
 const levelConfig: Record<WarmupLevel, { color: string; bg: string; border: string; label: string }> = {
-  L1: { color: 'text-slate-300', bg: 'bg-slate-600', border: 'border-slate-500', label: 'Starter' },
+  L1: { color: 'text-charcoal', bg: 'bg-slate-600', border: 'border-slate-500', label: 'Starter' },
   L2: { color: 'text-blue-400', bg: 'bg-blue-500', border: 'border-blue-400', label: 'Warming' },
   L3: { color: 'text-amber-400', bg: 'bg-amber-500', border: 'border-amber-400', label: 'Active' },
   L4: { color: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-400', label: 'Trusted' },
-  L5: { color: 'text-emerald-400', bg: 'bg-emerald-500', border: 'border-emerald-400', label: 'Fully Warmed' },
+  L5: { color: 'text-accent', bg: 'bg-accent', border: 'border-emerald-400', label: 'Fully Warmed' },
 };
 
 const levelProgression = [
@@ -26,7 +26,7 @@ export function WarmupPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <svg className="animate-spin w-6 h-6 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin w-6 h-6 text-faded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
@@ -46,8 +46,8 @@ export function WarmupPage() {
     <>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-100">Warmup Engine</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-semibold text-charcoal">Warmup Engine</h1>
+        <p className="text-sm text-faded mt-1">
           {totalEnabled} account{totalEnabled !== 1 ? 's' : ''} enabled
           {' \u00B7 '}
           {totalMessages24h} message{totalMessages24h !== 1 ? 's' : ''} sent today
@@ -56,15 +56,15 @@ export function WarmupPage() {
 
       {/* Empty state */}
       {accounts.length === 0 && (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-12 text-center">
-          <div className="w-14 h-14 rounded-full bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-slate-500">
+        <div className="bg-white border border-charcoal rounded-xl p-12 shadow-soft text-center">
+          <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
               <path d="M12 2v10l4.5 4.5" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </div>
-          <h3 className="text-slate-300 font-medium mb-1">No authenticated accounts</h3>
-          <p className="text-slate-500 text-sm max-w-md mx-auto">
+          <h3 className="text-charcoal font-medium mb-1">No authenticated accounts</h3>
+          <p className="text-faded text-sm max-w-md mx-auto">
             Add and authenticate WhatsApp accounts first, then come back to enable warmup.
           </p>
         </div>
@@ -88,7 +88,7 @@ export function WarmupPage() {
       <div className="mt-2">
         <button
           onClick={() => setInfoOpen(!infoOpen)}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+          className="flex items-center gap-2 text-sm text-muted hover:text-charcoal transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ export function WarmupPage() {
         </button>
 
         {infoOpen && (
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 mt-3">
+          <div className="bg-white border border-charcoal rounded-xl p-6 shadow-soft mt-3">
             {/* Timeline */}
             <div className="flex items-start gap-0 overflow-x-auto pb-2">
               {levelProgression.map((step) => {
@@ -121,9 +121,9 @@ export function WarmupPage() {
                     </div>
                     <div className="ml-3 pr-4">
                       <p className={`text-sm font-medium ${config.color}`}>{step.name}</p>
-                      <p className="text-xs text-slate-400 mt-1">{step.messages}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{step.activities}</p>
-                      <p className="text-xs text-slate-600 mt-0.5">{step.days}</p>
+                      <p className="text-xs text-muted mt-1">{step.messages}</p>
+                      <p className="text-xs text-faded mt-0.5">{step.activities}</p>
+                      <p className="text-xs text-faded mt-0.5">{step.days}</p>
                     </div>
                   </div>
                 );
@@ -155,13 +155,13 @@ function WarmupCard({
   };
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/50 transition-colors">
+    <div className="bg-white border border-charcoal rounded-xl p-5 shadow-soft hover:border-slate-600/50 transition-colors">
       {/* Top row: label + toggle */}
       <div className="flex items-start justify-between mb-3">
         <div className="min-w-0">
-          <h3 className="text-slate-100 font-medium text-sm truncate">{account.label}</h3>
+          <h3 className="text-charcoal font-medium text-sm truncate">{account.label}</h3>
           {account.warmupStartedAt && (
-            <p className="text-slate-500 text-xs mt-0.5">
+            <p className="text-faded text-xs mt-0.5">
               Warming since {new Date(account.warmupStartedAt).toLocaleDateString()}
             </p>
           )}
@@ -172,7 +172,7 @@ function WarmupCard({
           onClick={handleToggle}
           disabled={isToggling}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-            account.isEnabled ? 'bg-emerald-500' : 'bg-slate-600'
+            account.isEnabled ? 'bg-accent' : 'bg-slate-600'
           }`}
           role="switch"
           aria-checked={account.isEnabled}
@@ -191,18 +191,18 @@ function WarmupCard({
         <span className={`text-xs font-bold px-2 py-0.5 rounded border ${config.color} ${config.border} bg-transparent`}>
           {account.level}
         </span>
-        <span className="text-xs text-slate-400">{config.label}</span>
+        <span className="text-xs text-muted">{config.label}</span>
       </div>
 
       {/* Overall progress toward next level */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-slate-400">Level progress</span>
-          <span className="text-xs text-slate-500">{account.progress}%</span>
+          <span className="text-xs text-muted">Level progress</span>
+          <span className="text-xs text-faded">{account.progress}%</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            className="h-full bg-accent rounded-full transition-all duration-500"
             style={{ width: `${account.progress}%` }}
           />
         </div>
@@ -211,14 +211,14 @@ function WarmupCard({
       {/* Messages today */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-slate-400">Messages today</span>
-          <span className="text-xs text-slate-300">
+          <span className="text-xs text-muted">Messages today</span>
+          <span className="text-xs text-charcoal">
             {account.messagesSentToday} / {account.maxMessagesPerDay}
           </span>
         </div>
-        <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
           <div
-            className="h-full bg-emerald-500/70 rounded-full transition-all duration-500"
+            className="h-full bg-accent/70 rounded-full transition-all duration-500"
             style={{ width: `${messagesPercent}%` }}
           />
         </div>
@@ -226,15 +226,15 @@ function WarmupCard({
 
       {/* Days at level */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-400">Days at level</span>
-        <span className="text-xs text-slate-300">
+        <span className="text-xs text-muted">Days at level</span>
+        <span className="text-xs text-charcoal">
           {account.daysAtLevel} / {account.minDaysForLevelUp} days
         </span>
       </div>
 
       {/* Disabled overlay hint */}
       {!account.isEnabled && (
-        <div className="mt-3 text-xs text-slate-600 flex items-center gap-1.5">
+        <div className="mt-3 text-xs text-faded flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
             <circle cx="12" cy="12" r="10" />
             <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />

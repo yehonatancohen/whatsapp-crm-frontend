@@ -17,10 +17,10 @@ export function AppLayout() {
 
       <main className="flex-1 md:ml-60 min-w-0">
         {/* Mobile top bar */}
-        <div className="sticky top-0 z-20 flex items-center gap-3 bg-slate-950/95 backdrop-blur-sm px-4 py-3 border-b border-slate-800 md:hidden">
+        <div className="sticky top-0 z-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-3 border-b border-border md:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="text-muted hover:text-charcoal transition-colors"
             aria-label="Open menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -32,13 +32,16 @@ export function AppLayout() {
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-4 h-4">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 0 1-4.11-1.14l-.29-.174-3.01.79.8-2.93-.19-.3A7.96 7.96 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z" />
+            <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+                <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4" />
+                <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1" />
               </svg>
             </div>
-            <span className="text-slate-100 font-semibold text-base">parties247</span>
+            <span className="font-logo text-charcoal text-base">שדר</span>
           </div>
         </div>
 

@@ -16,12 +16,12 @@ import { FormError } from '../components/shared/FormError';
 import type { Campaign, CampaignStatus, CampaignType, CreateCampaignData } from '../types';
 
 const statusConfig: Record<CampaignStatus, { label: string; bg: string; text: string; pulse?: boolean }> = {
-  DRAFT: { label: 'Draft', bg: 'bg-slate-600/30', text: 'text-slate-400' },
+  DRAFT: { label: 'Draft', bg: 'bg-slate-600/30', text: 'text-muted' },
   SCHEDULED: { label: 'Scheduled', bg: 'bg-blue-500/20', text: 'text-blue-400' },
-  RUNNING: { label: 'Running', bg: 'bg-emerald-500/20', text: 'text-emerald-400', pulse: true },
+  RUNNING: { label: 'Running', bg: 'bg-accent/20', text: 'text-accent', pulse: true },
   PAUSED: { label: 'Paused', bg: 'bg-amber-500/20', text: 'text-amber-400' },
-  COMPLETED: { label: 'Completed', bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
-  CANCELLED: { label: 'Cancelled', bg: 'bg-slate-600/30', text: 'text-slate-400' },
+  COMPLETED: { label: 'Completed', bg: 'bg-accent/20', text: 'text-accent' },
+  CANCELLED: { label: 'Cancelled', bg: 'bg-slate-600/30', text: 'text-muted' },
   FAILED: { label: 'Failed', bg: 'bg-red-500/20', text: 'text-red-400' },
 };
 
@@ -38,7 +38,7 @@ export function CampaignsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <svg className="animate-spin w-6 h-6 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin w-6 h-6 text-faded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
@@ -59,14 +59,14 @@ export function CampaignsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-100">Campaigns</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-semibold text-charcoal">Campaigns</h1>
+          <p className="text-sm text-faded mt-1">
             {campaigns?.length ? `${campaigns.length} campaign${campaigns.length !== 1 ? 's' : ''}` : 'Create and manage messaging campaigns'}
           </p>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
+          className="flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -83,20 +83,20 @@ export function CampaignsPage() {
 
       {/* Empty state */}
       {(!campaigns || campaigns.length === 0) && !showCreateForm && (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-12 text-center">
-          <div className="w-14 h-14 rounded-full bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-slate-500">
+        <div className="bg-white border border-charcoal rounded-xl p-12 shadow-soft text-center">
+          <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
               <path d="M22 2L11 13" />
               <path d="M22 2L15 22L11 13L2 9L22 2Z" />
             </svg>
           </div>
-          <h3 className="text-slate-300 font-medium mb-1">No campaigns yet</h3>
-          <p className="text-slate-500 text-sm max-w-md mx-auto mb-4">
+          <h3 className="text-charcoal font-medium mb-1">No campaigns yet</h3>
+          <p className="text-faded text-sm max-w-md mx-auto mb-4">
             Create your first campaign to start sending messages to your contacts.
           </p>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -138,8 +138,8 @@ function StatusBadge({ status }: { status: CampaignStatus }) {
     <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.text}`}>
       {config.pulse && (
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
         </span>
       )}
       {config.label}
@@ -176,12 +176,12 @@ function CampaignCard({
   const showProgress = campaign.status === 'RUNNING' || campaign.status === 'COMPLETED' || campaign.status === 'PAUSED';
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/50 transition-colors">
+    <div className="bg-white border border-charcoal rounded-xl p-5 shadow-soft hover:border-slate-600/50 transition-colors">
       {/* Top row: name + status */}
       <div className="flex items-start justify-between mb-3">
         <div className="min-w-0 flex-1 mr-3">
-          <h3 className="text-slate-100 font-medium text-sm truncate">{campaign.name}</h3>
-          <p className="text-slate-500 text-xs mt-0.5">
+          <h3 className="text-charcoal font-medium text-sm truncate">{campaign.name}</h3>
+          <p className="text-faded text-xs mt-0.5">
             Created {new Date(campaign.createdAt).toLocaleDateString()}
             {campaign.scheduledAt && (
               <> &middot; Scheduled for {new Date(campaign.scheduledAt).toLocaleString()}</>
@@ -192,7 +192,7 @@ function CampaignCard({
       </div>
 
       {/* Message template preview */}
-      <p className="text-slate-400 text-sm mb-3 line-clamp-2">
+      <p className="text-muted text-sm mb-3 line-clamp-2">
         {campaign.messageTemplate.length > 80
           ? campaign.messageTemplate.substring(0, 80) + '...'
           : campaign.messageTemplate}
@@ -201,20 +201,20 @@ function CampaignCard({
       {/* Stats row */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
         <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-faded">
             <path d="M22 2L11 13" />
             <path d="M22 2L15 22L11 13L2 9L22 2Z" />
           </svg>
-          <span className="text-xs text-slate-400">
-            Total: <span className="text-slate-300">{campaign.totalMessages}</span>
+          <span className="text-xs text-muted">
+            Total: <span className="text-charcoal">{campaign.totalMessages}</span>
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-emerald-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-accent">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          <span className="text-xs text-slate-400">
-            Sent: <span className="text-emerald-400">{campaign.sentCount}</span>
+          <span className="text-xs text-muted">
+            Sent: <span className="text-accent">{campaign.sentCount}</span>
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -223,12 +223,12 @@ function CampaignCard({
             <line x1="15" y1="9" x2="9" y2="15" />
             <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-muted">
             Failed: <span className="text-red-400">{campaign.failedCount}</span>
           </span>
         </div>
         <div className="flex items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-faded">
             {campaign.messagesPerMinute} msg/min &middot; {campaign.dailyLimitPerAccount}/day per account
           </span>
         </div>
@@ -238,12 +238,12 @@ function CampaignCard({
       {showProgress && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-slate-400">Progress</span>
-            <span className="text-xs text-slate-500">{progressPercent}%</span>
+            <span className="text-xs text-muted">Progress</span>
+            <span className="text-xs text-faded">{progressPercent}%</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
             <div
-              className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+              className="h-full bg-accent rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -263,14 +263,14 @@ function CampaignCard({
             {showFailures ? 'Hide' : 'View'} failure reasons ({campaign.failedCount})
           </button>
           {showFailures && (
-            <div className="mt-2 max-h-48 overflow-y-auto bg-slate-900/50 border border-slate-700/50 rounded-lg">
+            <div className="mt-2 max-h-48 overflow-y-auto bg-white border border-charcoal rounded-lg">
               {failuresLoading ? (
-                <p className="text-xs text-slate-500 p-3">Loading...</p>
+                <p className="text-xs text-faded p-3">Loading...</p>
               ) : failures && failures.length > 0 ? (
                 <div className="divide-y divide-slate-800">
                   {failures.map((f: any) => (
                     <div key={f.id} className="px-3 py-2 text-xs">
-                      <span className="text-slate-400">
+                      <span className="text-muted">
                         {f.contact?.name || f.contact?.phoneNumber || f.groupJid || 'Unknown'}
                       </span>
                       <span className="text-red-400/80 ml-2">
@@ -280,7 +280,7 @@ function CampaignCard({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 p-3">No failure details available</p>
+                <p className="text-xs text-faded p-3">No failure details available</p>
               )}
             </div>
           )}
@@ -383,10 +383,10 @@ function ActionButton({
   children: React.ReactNode;
 }) {
   const variantClasses = {
-    emerald: 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20',
+    emerald: 'bg-accent/10 text-accent hover:bg-accent/20 border-emerald-500/20',
     red: 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20',
     amber: 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20',
-    slate: 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 border-slate-600/50',
+    slate: 'bg-cream text-charcoal hover:bg-cream border-slate-600/50',
   };
 
   return (
@@ -473,15 +473,15 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const selectClass = "w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors";
+  const selectClass = "w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6">
+    <div className="bg-white border border-charcoal rounded-xl p-4 sm:p-6 shadow-soft mb-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-slate-100">Create Campaign</h2>
+        <h2 className="text-lg font-semibold text-charcoal">Create Campaign</h2>
         <button
           onClick={onClose}
-          className="text-slate-500 hover:text-slate-300 transition-colors"
+          className="text-faded hover:text-charcoal transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -495,27 +495,27 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Campaign Name</label>
+          <label className="block text-sm font-medium text-charcoal mb-1.5">Campaign Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., March Promo Blast"
-            className="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
         </div>
 
         {/* Campaign Type */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Campaign Type</label>
+          <label className="block text-sm font-medium text-charcoal mb-1.5">Campaign Type</label>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setCampaignType('DIRECT_MESSAGE')}
               className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
                 campaignType === 'DIRECT_MESSAGE'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-300'
+                  ? 'bg-accent/10 border-emerald-500/30 text-accent'
+                  : 'bg-white border-charcoal text-muted hover:text-charcoal'
               }`}
             >
               Direct Message
@@ -525,8 +525,8 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               onClick={() => setCampaignType('GROUP_MESSAGE')}
               className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
                 campaignType === 'GROUP_MESSAGE'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-300'
+                  ? 'bg-accent/10 border-emerald-500/30 text-accent'
+                  : 'bg-white border-charcoal text-muted hover:text-charcoal'
               }`}
             >
               Group Message
@@ -537,19 +537,19 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
         {/* Message template and Preview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col">
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Message Template</label>
+            <label className="block text-sm font-medium text-charcoal mb-1.5">Message Template</label>
             <textarea
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
               placeholder="Type your message here..."
-              className="w-full flex-1 min-h-[160px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+              className="w-full flex-1 min-h-[160px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors resize-none"
             />
-            <p className="text-xs text-slate-500 mt-2">
-              Supports <span className="text-slate-400 font-mono">*bold*</span>, <span className="text-slate-400 font-mono">_italic_</span>, <span className="text-slate-400 font-mono">~strike~</span> and <span className="text-slate-400 font-mono">{'{spintax|opts}'}</span>
+            <p className="text-xs text-faded mt-2">
+              Supports <span className="text-muted font-mono">*bold*</span>, <span className="text-muted font-mono">_italic_</span>, <span className="text-muted font-mono">~strike~</span> and <span className="text-muted font-mono">{'{spintax|opts}'}</span>
             </p>
           </div>
           <div className="flex flex-col">
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">WhatsApp Preview</label>
+            <label className="block text-sm font-medium text-charcoal mb-1.5">WhatsApp Preview</label>
             <WhatsAppPreview text={messageTemplate} />
           </div>
         </div>
@@ -557,7 +557,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
         {/* Target: Contact List or Groups */}
         {campaignType === 'DIRECT_MESSAGE' ? (
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Contact List</label>
+            <label className="block text-sm font-medium text-charcoal mb-1.5">Contact List</label>
             <select
               value={contactListId}
               onChange={(e) => setContactListId(e.target.value)}
@@ -574,7 +574,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Select Groups</label>
+            <label className="block text-sm font-medium text-charcoal mb-1.5">Select Groups</label>
             {/* Account selector */}
             <select
               value={selectedAccountId || ''}
@@ -591,20 +591,20 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
 
             {/* Group list */}
             {selectedAccountId && groupsLoading && (
-              <p className="text-sm text-slate-500">Loading groups...</p>
+              <p className="text-sm text-faded">Loading groups...</p>
             )}
             {selectedAccountId && !groupsLoading && groups && groups.length === 0 && (
-              <p className="text-sm text-slate-500">No groups found for this account.</p>
+              <p className="text-sm text-faded">No groups found for this account.</p>
             )}
             {groups && groups.length > 0 && (
-              <div className="max-h-48 overflow-y-auto space-y-1 border border-slate-700 rounded-lg p-2">
+              <div className="max-h-48 overflow-y-auto space-y-1 border border-charcoal rounded-lg p-2">
                 {groups.map((group) => {
                   const isSelected = selectedGroupJids.some((g) => g.jid === group.id);
                   return (
                     <label
                       key={group.id}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                        isSelected ? 'bg-emerald-500/10' : 'hover:bg-slate-700/50'
+                        isSelected ? 'bg-accent/10' : 'hover:bg-cream'
                       }`}
                     >
                       <input
@@ -613,23 +613,23 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
                         onChange={() => toggleGroup(group.id, group.name)}
                         className="accent-emerald-500"
                       />
-                      <span className="text-sm text-slate-200">{group.name}</span>
-                      <span className="text-xs text-slate-500 ml-auto">{group.participantsCount} members</span>
+                      <span className="text-sm text-charcoal">{group.name}</span>
+                      <span className="text-xs text-faded ml-auto">{group.participantsCount} members</span>
                     </label>
                   );
                 })}
               </div>
             )}
             {selectedGroupJids.length > 0 && (
-              <p className="text-xs text-emerald-400 mt-2">{selectedGroupJids.length} group{selectedGroupJids.length !== 1 ? 's' : ''} selected</p>
+              <p className="text-xs text-accent mt-2">{selectedGroupJids.length} group{selectedGroupJids.length !== 1 ? 's' : ''} selected</p>
             )}
           </div>
         )}
 
         {/* Messages per minute */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">
-            Messages per Minute: <span className="text-emerald-400">{messagesPerMinute}</span>
+          <label className="block text-sm font-medium text-charcoal mb-1.5">
+            Messages per Minute: <span className="text-accent">{messagesPerMinute}</span>
           </label>
           <input
             type="range"
@@ -639,7 +639,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
             onChange={(e) => setMessagesPerMinute(Number(e.target.value))}
             className="w-full accent-emerald-500"
           />
-          <div className="flex justify-between text-xs text-slate-600 mt-0.5">
+          <div className="flex justify-between text-xs text-faded mt-0.5">
             <span>1</span>
             <span>10</span>
           </div>
@@ -647,16 +647,16 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
 
         {/* Daily limit per account */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Daily Limit per Account</label>
+          <label className="block text-sm font-medium text-charcoal mb-1.5">Daily Limit per Account</label>
           <input
             type="number"
             min={1}
             max={200}
             value={dailyLimitPerAccount}
             onChange={(e) => setDailyLimitPerAccount(Math.min(200, Math.max(1, Number(e.target.value))))}
-            className="w-full max-w-full sm:max-w-[180px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full max-w-full sm:max-w-[180px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
-          <p className="text-xs text-slate-500 mt-1">Between 1 and 200 messages per account per day</p>
+          <p className="text-xs text-faded mt-1">Between 1 and 200 messages per account per day</p>
         </div>
 
         {/* Schedule toggle */}
@@ -666,7 +666,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => setScheduleEnabled(!scheduleEnabled)}
               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                scheduleEnabled ? 'bg-emerald-500' : 'bg-slate-600'
+                scheduleEnabled ? 'bg-accent' : 'bg-slate-600'
               }`}
               role="switch"
               aria-checked={scheduleEnabled}
@@ -677,14 +677,14 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
                 }`}
               />
             </button>
-            <span className="text-sm font-medium text-slate-300">Schedule for later</span>
+            <span className="text-sm font-medium text-charcoal">Schedule for later</span>
           </div>
           {scheduleEnabled && (
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full max-w-full sm:max-w-[280px] bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors [color-scheme:dark]"
+              className="w-full max-w-full sm:max-w-[280px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors [color-scheme:dark]"
             />
           )}
         </div>
@@ -694,7 +694,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {createMutation.isPending ? (
               <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -712,7 +712,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-slate-400 hover:text-slate-200 px-4 py-2.5 transition-colors"
+            className="text-sm text-muted hover:text-charcoal px-4 py-2.5 transition-colors"
           >
             Cancel
           </button>
@@ -744,7 +744,7 @@ function WhatsAppPreview({ text }: { text: string }) {
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-slate-700/50 shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
+    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-charcoal shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-[0.06] pointer-events-none z-0" 
@@ -773,7 +773,7 @@ function WhatsAppPreview({ text }: { text: string }) {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full opacity-50 text-slate-400 text-sm italic">
+          <div className="flex items-center justify-center h-full opacity-50 text-muted text-sm italic">
             Message preview
           </div>
         )}

@@ -6,6 +6,7 @@ interface User {
   email: string;
   name: string;
   role: 'ADMIN' | 'USER';
+  emailVerified: boolean;
 }
 
 interface AuthContextType {
@@ -14,6 +15,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -65,8 +68,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const resendVerification = useCallback(async () => {
+    await api.post('/auth/resend-verification');
+  }, []);
+
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, resendVerification, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -107,32 +107,35 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {/* Mobile backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-60 bg-slate-900 border-r border-slate-800 flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-screen w-60 bg-white border-r border-border flex flex-col z-50 transition-transform duration-300 ease-in-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 md:z-30`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-800">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-4.5 h-4.5">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 0 1-4.11-1.14l-.29-.174-3.01.79.8-2.93-.19-.3A7.96 7.96 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z" />
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5">
+                <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+                <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4" />
+                <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1" />
               </svg>
             </div>
-            <span className="text-slate-100 font-semibold text-lg">parties247</span>
+            <span className="font-logo text-charcoal text-lg">שדר</span>
           </div>
-          {/* Close button — mobile only */}
+          {/* Close button -- mobile only */}
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-300 transition-colors md:hidden"
+            className="text-faded hover:text-ink transition-colors md:hidden"
             aria-label="Close menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -153,8 +156,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     onClick={() => navigate(item.path)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-400'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                        ? 'bg-accent-subtle text-accent border-l-2 border-accent'
+                        : 'text-muted hover:text-charcoal hover:bg-cream'
                     }`}
                   >
                     {item.icon}
@@ -169,8 +172,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   onClick={() => navigate('/admin/users')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     location.pathname.startsWith('/admin')
-                      ? 'bg-violet-500/10 text-violet-400 border-l-2 border-violet-400'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                      ? 'bg-violet-50 text-violet-600 border-l-2 border-violet-500'
+                      : 'text-muted hover:text-charcoal hover:bg-cream'
                   }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -184,18 +187,18 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* User + Logout */}
-        <div className="p-3 border-t border-slate-800">
+        <div className="p-3 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium text-slate-300">
+            <div className="w-8 h-8 rounded-full bg-cream-dark flex items-center justify-center text-xs font-medium text-ink">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-200 truncate">{user?.name}</p>
-              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+              <p className="text-sm text-charcoal truncate">{user?.name}</p>
+              <p className="text-xs text-faded truncate">{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="text-slate-500 hover:text-red-400 transition-colors"
+              className="text-faded hover:text-red-500 transition-colors"
               title="Logout"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">

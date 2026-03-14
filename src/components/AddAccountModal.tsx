@@ -55,23 +55,23 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <form
         onSubmit={handleSubmit}
-        className="relative bg-slate-900 border border-slate-700/50 rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
+        className="relative bg-white border border-charcoal rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
       >
-        <h2 className="text-lg font-semibold text-slate-100 mb-5">Add Account</h2>
+        <h2 className="text-lg font-semibold text-charcoal mb-5">Add Account</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1.5">Account Label</label>
+            <label className="block text-sm text-muted mb-1.5">Account Label</label>
             <input
               type="text"
               placeholder="e.g. account-1"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               autoFocus
-              className={`w-full bg-slate-800 border text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none transition-colors ${
+              className={`w-full bg-white border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none transition-colors ${
                 label.trim() && !labelValid
                   ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                  : 'border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                  : 'border-charcoal focus:border-accent focus:ring-1 focus:ring-accent'
               }`}
             />
             {label.trim() && !labelValid && (
@@ -80,13 +80,13 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1.5">Proxy URL <span className="text-slate-600">(optional)</span></label>
+            <label className="block text-sm text-muted mb-1.5">Proxy URL <span className="text-faded">(optional)</span></label>
             <input
               type="text"
               placeholder="e.g. http://user:pass@host:port"
               value={proxy}
               onChange={(e) => setProxy(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
             />
           </div>
         </div>
@@ -97,14 +97,14 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+            className="px-4 py-2 text-sm text-muted hover:text-charcoal transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting || !label.trim() || !labelValid}
-            className="px-5 py-2 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent disabled:bg-cream disabled:text-faded disabled:cursor-not-allowed text-white rounded-lg transition-colors"
           >
             {submitting ? 'Adding...' : 'Add Account'}
           </button>

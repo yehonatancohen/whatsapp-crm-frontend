@@ -2,8 +2,43 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
+  --font-logo: 'Gloria Hallelujah', cursive;
+
+  /* Brand colors */
+  --color-cream: #F4F4F0;
+  --color-cream-dark: #EAEAE4;
+  --color-charcoal: #111111;
+  --color-ink: #333333;
+  --color-muted: #777777;
+  --color-faded: #AAAAAA;
+  --color-border: #E0DED8;
+  --color-border-strong: #111111;
+
+  /* Accent — Tangerine/Signal Orange */
+  --color-accent: #FF5722;
+  --color-accent-hover: #E64A19;
+  --color-accent-light: #FFF3E0;
+  --color-accent-subtle: #FFECE4;
+  
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-cream text-charcoal antialiased;
+}
+
+/* Scrollbar for light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
 }

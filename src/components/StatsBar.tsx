@@ -14,9 +14,9 @@ export function StatsBar({ accounts }: Props) {
     {
       label: 'Total',
       value: total,
-      color: 'text-slate-100',
-      bg: 'bg-slate-800/50',
-      iconColor: 'text-slate-400',
+      color: 'text-charcoal',
+      bg: 'bg-white',
+      iconColor: 'text-muted',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -29,9 +29,9 @@ export function StatsBar({ accounts }: Props) {
     {
       label: 'Active',
       value: active,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/5',
-      iconColor: 'text-emerald-500',
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+      iconColor: 'text-green-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -42,9 +42,9 @@ export function StatsBar({ accounts }: Props) {
     {
       label: 'QR Pending',
       value: qrPending,
-      color: 'text-sky-400',
-      bg: 'bg-sky-500/5',
-      iconColor: 'text-sky-500',
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      iconColor: 'text-blue-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <rect x="3" y="3" width="7" height="7" />
@@ -57,8 +57,8 @@ export function StatsBar({ accounts }: Props) {
     {
       label: 'Disconnected',
       value: disconnected,
-      color: 'text-red-400',
-      bg: 'bg-red-500/5',
+      color: 'text-red-600',
+      bg: 'bg-red-50',
       iconColor: 'text-red-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -75,12 +75,12 @@ export function StatsBar({ accounts }: Props) {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`${stat.bg} border border-slate-700/50 rounded-xl px-4 py-4 flex items-center gap-4`}
+          className={`${stat.bg} border border-border rounded-xl px-4 py-4 flex items-center gap-4 shadow-sm`}
         >
           <div className={`${stat.iconColor}`}>{stat.icon}</div>
           <div>
             <p className={`text-2xl font-semibold ${stat.color}`}>{stat.value}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">{stat.label}</p>
+            <p className="text-xs text-muted uppercase tracking-wide">{stat.label}</p>
           </div>
         </div>
       ))}
