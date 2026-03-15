@@ -75,7 +75,7 @@ export function StatsBar({ accounts }: Props) {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`${stat.bg} border border-border rounded-xl px-4 py-4 flex items-center gap-4 shadow-sm flex-row-reverse text-right`}
+          className={`${stat.bg} border border-border rounded-xl px-4 py-4 flex items-center gap-4 shadow-sm text-right`}
         >
           <div className={`${stat.iconColor}`}>{stat.icon}</div>
           <div>

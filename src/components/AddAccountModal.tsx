@@ -34,7 +34,7 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white border border-border rounded-2xl w-full max-w-md p-6 shadow-xl text-right">
-        <div className="flex items-center justify-between mb-6 flex-row-reverse">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-charcoal">הוספת חשבון וואטסאפ</h2>
           <button onClick={onClose} className="text-muted hover:text-charcoal transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">

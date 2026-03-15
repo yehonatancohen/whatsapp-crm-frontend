@@ -47,8 +47,8 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
   return (
     <div className="bg-white border border-border rounded-xl p-5 hover:border-border shadow-soft group">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4 flex-row-reverse">
-        <div className="flex-1 min-w-0 ml-2 text-right">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1 min-w-0 text-right">
           {isEditing ? (
             <div className="flex items-center gap-2">
               <input

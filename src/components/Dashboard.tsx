@@ -31,7 +31,7 @@ export function Dashboard() {
         {activity && activity.length > 0 && (
           <div className="space-y-3">
             {activity.map((entry) => (
-              <div key={entry.id} className="flex items-start gap-3 flex-row-reverse text-right">
+              <div key={entry.id} className="flex items-start gap-3 text-right">
                 <div className="w-2 h-2 rounded-full bg-accent mt-1.5 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-ink">{entry.message}</p>

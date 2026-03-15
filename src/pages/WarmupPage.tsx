@@ -47,7 +47,7 @@ export function WarmupPage() {
                     : 'bg-white border-border text-charcoal hover:border-accent/30'
                 }`}
               >
-                <div className="flex items-center gap-3 flex-row-reverse">
+                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-xs font-bold">
                     {acc.label.charAt(0)}
                   </div>
@@ -68,7 +68,7 @@ export function WarmupPage() {
         <div className="lg:col-span-2">
           {selectedAccountId ? (
             <div className="bg-white border border-border rounded-2xl p-6 shadow-soft">
-              <div className="flex items-center justify-between mb-8 flex-row-reverse">
+              <div className="flex items-center justify-between mb-8">
                 <div>
                   <h2 className="text-lg font-bold text-charcoal">הגדרות חימום</h2>
                   <p className="text-xs text-muted">מצב: {currentConfig?.isEnabled ? 'פעיל' : 'כבוי'}</p>
@@ -87,7 +87,7 @@ export function WarmupPage() {
 
               <div className="space-y-8">
                 <div>
-                  <div className="flex justify-between mb-4 flex-row-reverse">
+                  <div className="flex justify-between mb-4">
                     <label className="text-sm font-semibold text-charcoal">רמת חימום נוכחית</label>
                     <span className="text-sm font-bold text-accent">{currentConfig?.level || 'L1'}</span>
                   </div>
@@ -97,7 +97,7 @@ export function WarmupPage() {
                       style={{ width: `${currentConfig?.progress || 0}%` }}
                     />
                   </div>
-                  <div className="flex justify-between mt-2 text-[10px] text-faded flex-row-reverse">
+                  <div className="flex justify-between mt-2 text-[10px] text-faded">
                     <span>מתחיל</span>
                     <span>מתקדם</span>
                     <span>מומחה</span>

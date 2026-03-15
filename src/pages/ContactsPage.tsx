@@ -74,7 +74,7 @@ export function ContactsPage() {
           </div>
         ) : lists.map((list) => (
           <div key={list.id} className="bg-white border border-border rounded-xl p-6 shadow-soft hover:border-accent/20 transition-colors flex flex-col">
-            <div className="flex items-start justify-between mb-4 flex-row-reverse">
+            <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-charcoal font-semibold">{list.name}</h3>
                 <p className="text-xs text-muted mt-1">{list._count.entries} אנשי קשר</p>
@@ -90,7 +90,7 @@ export function ContactsPage() {
               </button>
             </div>
             
-            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between flex-row-reverse">
+            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
               <span className="text-[10px] text-faded uppercase font-medium">נוצר ב-{new Date(list.createdAt).toLocaleDateString('he-IL')}</span>
               <button className="text-accent hover:text-accent-hover text-xs font-medium">נהל אנשי קשר</button>
             </div>
