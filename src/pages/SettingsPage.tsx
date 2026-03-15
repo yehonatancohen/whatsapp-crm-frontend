@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { extractApiError } from '../lib/errorUtils';
-import { useSubscription, useBillingPortal } from '../hooks/useSubscription';
+import { useBillingPortal } from '../hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 
 export function SettingsPage() {
