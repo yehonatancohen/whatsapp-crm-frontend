@@ -6,9 +6,8 @@ import { useSubscription, useBillingPortal } from '../hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 
 export function SettingsPage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
-  const { data: subscription, isLoading: subLoading } = useSubscription();
   const billingPortal = useBillingPortal();
   const [name, setName] = useState(user?.name || '');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -19,18 +18,17 @@ export function SettingsPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
 
+  const subscription = user?.subscription;
+  const usage = user?.usage;
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileMsg(null);
     setProfileSaving(true);
     try {
       await api.patch('/auth/profile', { name });
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        parsed.name = name;
-        localStorage.setItem('user', JSON.stringify(parsed));
-      }
+      // The backend now returns full info, but we also refresh from /me for consistency
+      await refreshUser();
       setProfileMsg({ type: 'success', text: 'Profile updated successfully' });
     } catch (err) {
       const { message } = extractApiError(err);
@@ -99,22 +97,38 @@ export function SettingsPage() {
       {/* Subscription & Billing Section */}
       <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft mb-6">
         <h2 className="text-sm font-semibold text-charcoal mb-4">Subscription & Billing</h2>
-        {subLoading ? (
-          <p className="text-sm text-faded">Loading...</p>
-        ) : subscription ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted">Plan:</span>
-              <span className="text-sm font-medium text-charcoal">{subscription.planTier}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                subscription.status === 'ACTIVE' ? 'bg-accent-light text-accent' :
-                subscription.status === 'TRIALING' ? 'bg-blue-50 text-blue-600' :
-                subscription.status === 'PAST_DUE' ? 'bg-amber-50 text-amber-600' :
-                'bg-red-50 text-red-600'
-              }`}>
-                {subscription.status === 'TRIALING' ? 'Trial' : subscription.status}
-              </span>
+        {subscription ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-4 border-b border-border">
+              <div>
+                <p className="text-xs text-muted mb-1">Plan</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-charcoal">{subscription.planTier}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                    subscription.status === 'ACTIVE' ? 'bg-accent-light text-accent' :
+                    subscription.status === 'TRIALING' ? 'bg-blue-50 text-blue-600' :
+                    'bg-red-50 text-red-600'
+                  }`}>
+                    {subscription.status === 'TRIALING' ? 'Trial' : subscription.status}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted mb-1">Accounts</p>
+                <p className="text-sm font-semibold text-charcoal">{usage?.totalAccounts || 0}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted mb-1">Campaigns</p>
+                <p className="text-sm font-semibold text-charcoal">{usage?.totalCampaigns || 0}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted mb-1">Renewal</p>
+                <p className="text-sm font-semibold text-charcoal">
+                  {subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+                </p>
+              </div>
             </div>
+
             {subscription.status === 'TRIALING' && subscription.trialEndsAt && (
               <p className="text-sm text-muted">
                 Trial ends: {new Date(subscription.trialEndsAt).toLocaleDateString()}

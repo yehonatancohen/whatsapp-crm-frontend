@@ -33,6 +33,16 @@ export function useAccounts() {
     },
   });
 
+  const renameMutation = useMutation({
+    mutationFn: async ({ id, label }: { id: string; label: string }) => {
+      const { data } = await api.patch(`/accounts/${id}`, { label });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+
   const addAccount = async (label: string, proxy?: string) => {
     await addMutation.mutateAsync({ label, proxy });
   };
@@ -41,12 +51,17 @@ export function useAccounts() {
     await removeMutation.mutateAsync(id);
   };
 
+  const renameAccount = async (id: string, label: string) => {
+    await renameMutation.mutateAsync({ id, label });
+  };
+
   return {
     accounts,
     loading,
     error: queryError?.message || null,
     addAccount,
     removeAccount,
+    renameAccount,
   };
 }
 

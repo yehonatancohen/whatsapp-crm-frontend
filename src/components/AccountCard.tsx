@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { AccountResponse } from '../types';
 
@@ -11,21 +12,71 @@ const statusConfig: Record<string, { color: string; dot: string; label: string }
 interface Props {
   account: AccountResponse;
   onRemove: (id: string) => Promise<void>;
+  onRename: (id: string, label: string) => Promise<void>;
 }
 
-export function AccountCard({ account, onRemove }: Props) {
+export function AccountCard({ account, onRemove, onRename }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newLabel, setNewLabel] = useState(account.label);
+  const [isRenaming, setIsRenaming] = useState(false);
+
   const status = statusConfig[account.status] ?? {
     color: 'text-muted',
     dot: 'bg-muted',
     label: account.status,
   };
 
+  const handleRename = async () => {
+    if (newLabel.trim() === '' || newLabel === account.label) {
+      setIsEditing(false);
+      setNewLabel(account.label);
+      return;
+    }
+    setIsRenaming(true);
+    try {
+      await onRename(account.id, newLabel);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Rename failed:', err);
+      setNewLabel(account.label);
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
   return (
-    <div className="bg-white border border-border rounded-xl p-5 hover:border-border shadow-soft">
+    <div className="bg-white border border-border rounded-xl p-5 hover:border-border shadow-soft group">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-charcoal font-medium text-sm">{account.label}</h3>
+        <div className="flex-1 min-w-0 mr-2">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                onBlur={handleRename}
+                onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+                autoFocus
+                disabled={isRenaming}
+                className="text-sm font-medium text-charcoal bg-cream border border-accent rounded px-2 py-0.5 outline-none w-full"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 group/title">
+              <h3 className="text-charcoal font-medium text-sm truncate">{account.label}</h3>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-muted hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Rename account"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+            </div>
+          )}
           {account.phoneNumber && (
             <p className="text-muted text-xs mt-0.5">+{account.phoneNumber}</p>
           )}

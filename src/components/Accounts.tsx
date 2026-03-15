@@ -4,7 +4,7 @@ import { AccountCard } from './AccountCard';
 import { AddAccountModal } from './AddAccountModal';
 
 export function Accounts() {
-    const { accounts, loading, error, addAccount, removeAccount } = useAccounts();
+    const { accounts, loading, error, addAccount, removeAccount, renameAccount } = useAccounts();
     const [modalOpen, setModalOpen] = useState(false);
 
     return (
@@ -48,7 +48,12 @@ export function Accounts() {
             {!loading && accounts.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {accounts.map((account) => (
-                        <AccountCard key={account.id} account={account} onRemove={removeAccount} />
+                        <AccountCard
+                            key={account.id}
+                            account={account}
+                            onRemove={removeAccount}
+                            onRename={renameAccount}
+                        />
                     ))}
                 </div>
             )}

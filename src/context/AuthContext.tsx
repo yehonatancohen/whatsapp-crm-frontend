@@ -7,6 +7,17 @@ interface User {
   name: string;
   role: 'ADMIN' | 'USER';
   emailVerified: boolean;
+  subscription?: {
+    planTier: 'STARTER' | 'PRO' | 'ENTERPRISE';
+    status: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'UNPAID';
+    trialEndsAt: string | null;
+    currentPeriodEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+  };
+  usage?: {
+    totalAccounts: number;
+    totalCampaigns: number;
+  };
 }
 
 interface AuthContextType {
@@ -17,6 +28,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   resendVerification: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -25,6 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await api.get('/auth/me');
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
+    }
+  }, []);
+
   // Restore user from stored tokens on mount
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -32,12 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token && storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        // Silently refresh in background to get latest subscription/usage
+        refreshUser();
       } catch {
         localStorage.clear();
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [refreshUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
@@ -45,7 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('refreshToken', data.tokens.refreshToken);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
-  }, []);
+    // Fetch full profile after login
+    await refreshUser();
+  }, [refreshUser]);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
     const { data } = await api.post('/auth/register', { email, password, name });
@@ -53,7 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('refreshToken', data.tokens.refreshToken);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
-  }, []);
+    // Fetch full profile after registration
+    await refreshUser();
+  }, [refreshUser]);
 
   const logout = useCallback(async () => {
     const refreshToken = localStorage.getItem('refreshToken');
@@ -82,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, resendVerification, updateUser }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, resendVerification, updateUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
