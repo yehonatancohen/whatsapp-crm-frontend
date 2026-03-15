@@ -128,3 +128,37 @@ export function useContactLists() {
     addContactsToList: addContactsToList.mutateAsync,
   };
 }
+
+export function useContactListDetail(listId: string | null) {
+  const queryClient = useQueryClient();
+
+  const query = useQuery<{
+    id: string;
+    name: string;
+    entries: Array<{ id: string; contact: { id: string; phoneNumber: string; name: string | null; tags: string[] } }>;
+  }>({
+    queryKey: ['contactLists', listId, 'detail'],
+    queryFn: async () => {
+      const { data } = await api.get(`/contacts/lists/${listId}`);
+      return data;
+    },
+    enabled: !!listId,
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async ({ listId, contactIds }: { listId: string; contactIds: string[] }) => {
+      await api.delete(`/contacts/lists/${listId}/contacts`, { data: { contactIds } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contactLists'] });
+      queryClient.invalidateQueries({ queryKey: ['contactLists', listId, 'detail'] });
+    },
+  });
+
+  return {
+    list: query.data,
+    loading: query.isLoading,
+    removeContacts: removeMutation.mutateAsync,
+    isRemoving: removeMutation.isPending,
+  };
+}

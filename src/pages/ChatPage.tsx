@@ -193,12 +193,12 @@ export function ChatPage() {
                     const prev = index > 0 ? sortedMsgs[index - 1] : null;
                     const showTail = !prev || prev.fromMe !== msg.fromMe;
                     
-                    // RTL Logic for Hebrew WhatsApp:
-                    // Incoming (NOT fromMe) -> Right side (justify-start in RTL)
-                    // Outgoing (fromMe) -> Left side (justify-end in RTL)
+                    // RTL context: justify-start = right, justify-end = left
+                    // User messages (fromMe) → right side → justify-start
+                    // Other messages (!fromMe) → left side → justify-end
                     return (
-                      <div key={msg.id} className={`flex ${msg.fromMe ? 'justify-end' : 'justify-start'} ${showTail ? 'mt-1' : ''}`}>
-                        <div className={`relative max-w-[75%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tl-none' : 'rounded-tr-none') : ''}`}>
+                      <div key={msg.id} className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''}`}>
+                        <div className={`relative max-w-[75%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && msg.author && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{msg.author}</p>

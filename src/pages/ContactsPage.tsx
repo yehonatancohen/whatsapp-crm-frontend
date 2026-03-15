@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useContactLists, useContacts } from '../hooks/useContacts';
+import { useContactLists, useContacts, useContactListDetail } from '../hooks/useContacts';
 import { ImportWizard } from '../components/contacts/ImportWizard';
 import { DataTable } from '../components/shared/DataTable';
 
@@ -9,7 +9,7 @@ export function ContactsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('all');
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  
+
   const { lists, loading: listsLoading, deleteList, addContactsToList } = useContactLists();
   const { contacts, loading: contactsLoading, importContacts, isImporting, deleteContact, pagination } = useContacts(page, search);
 
@@ -17,6 +17,7 @@ export function ContactsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAddingToList, setIsAddingToList] = useState(false);
   const [targetListId, setTargetListId] = useState('');
+  const [managingListId, setManagingListId] = useState<string | null>(null);
 
   // Selection handlers
   const handleSelect = (id: string | number) => {
@@ -109,7 +110,7 @@ export function ContactsPage() {
         <div className="space-y-4">
           {/* Toolbar for selection */}
           {selectedIds.size > 0 && (
-            <div className="bg-accent-light border border-accent/20 rounded-xl p-4 mb-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
+            <div className="bg-accent-light border border-accent/20 rounded-xl p-4 mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm font-medium text-accent">
                 {selectedIds.size} אנשי קשר נבחרו
               </div>
@@ -188,7 +189,13 @@ export function ContactsPage() {
           )}
         </div>
       ) : (
-        <ContactListsView lists={lists} loading={listsLoading} onDelete={deleteList} />
+        <ContactListsView
+          lists={lists}
+          loading={listsLoading}
+          onDelete={deleteList}
+          managingListId={managingListId}
+          onManage={setManagingListId}
+        />
       )}
 
       {/* Import Wizard */}
@@ -202,7 +209,19 @@ export function ContactsPage() {
   );
 }
 
-function ContactListsView({ lists, loading, onDelete }: { lists: any[], loading: boolean, onDelete: (id: string) => void }) {
+function ContactListsView({
+  lists,
+  loading,
+  onDelete,
+  managingListId,
+  onManage,
+}: {
+  lists: any[];
+  loading: boolean;
+  onDelete: (id: string) => void;
+  managingListId: string | null;
+  onManage: (id: string | null) => void;
+}) {
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState('');
   const { createList } = useContactLists();
@@ -214,6 +233,11 @@ function ContactListsView({ lists, loading, onDelete }: { lists: any[], loading:
     setNewListName('');
     setIsCreating(false);
   };
+
+  // If managing a list, show the detail view
+  if (managingListId) {
+    return <ListDetailView listId={managingListId} onBack={() => onManage(null)} />;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -269,13 +293,84 @@ function ContactListsView({ lists, loading, onDelete }: { lists: any[], loading:
               </svg>
             </button>
           </div>
-          
+
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
             <span className="text-[10px] text-faded uppercase font-medium">נוצר ב-{new Date(list.createdAt).toLocaleDateString('he-IL')}</span>
-            <button className="text-accent hover:text-accent-hover text-xs font-medium">נהל אנשי קשר</button>
+            <button
+              onClick={() => onManage(list.id)}
+              className="text-accent hover:text-accent-hover text-xs font-medium transition-colors"
+            >
+              נהל אנשי קשר →
+            </button>
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ListDetailView({ listId, onBack }: { listId: string; onBack: () => void }) {
+  const { list, loading, removeContacts, isRemoving } = useContactListDetail(listId);
+
+  const handleRemove = async (contactId: string) => {
+    if (!confirm('להסיר את איש הקשר מהרשימה?')) return;
+    await removeContacts({ listId, contactIds: [contactId] });
+  };
+
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-accent hover:text-accent-hover text-sm font-medium mb-4 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+        חזרה לרשימות
+      </button>
+
+      <div className="bg-white border border-border rounded-xl shadow-soft overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-charcoal">{list?.name || 'טוען...'}</h3>
+          <span className="text-xs text-muted">{list?.entries?.length || 0} אנשי קשר</span>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : !list?.entries?.length ? (
+          <div className="py-12 text-center text-muted text-sm">הרשימה ריקה</div>
+        ) : (
+          <div className="divide-y divide-border">
+            {list.entries.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between px-5 py-3 hover:bg-cream/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-xs font-bold text-muted">
+                    {(entry.contact.name || entry.contact.phoneNumber).charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-charcoal">{entry.contact.name || 'ללא שם'}</p>
+                    <p className="text-xs text-muted" dir="ltr">
+                      {entry.contact.phoneNumber.startsWith('+') ? entry.contact.phoneNumber : `+${entry.contact.phoneNumber}`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemove(entry.contact.id)}
+                  disabled={isRemoving}
+                  className="text-faded hover:text-red-500 transition-colors disabled:opacity-50"
+                  title="הסר מהרשימה"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
