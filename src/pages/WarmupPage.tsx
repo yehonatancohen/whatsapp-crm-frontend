@@ -1,247 +1,142 @@
 import { useState } from 'react';
 import { useWarmupOverview, useToggleWarmup } from '../hooks/useWarmup';
-import type { WarmupLevel, WarmupStatus } from '../types';
-
-const levelConfig: Record<WarmupLevel, { color: string; bg: string; border: string; label: string }> = {
-  L1: { color: 'text-charcoal', bg: 'bg-gray-400', border: 'border-gray-400', label: 'Starter' },
-  L2: { color: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-400', label: 'Warming' },
-  L3: { color: 'text-amber-600', bg: 'bg-amber-500', border: 'border-amber-400', label: 'Active' },
-  L4: { color: 'text-purple-600', bg: 'bg-purple-500', border: 'border-purple-400', label: 'Trusted' },
-  L5: { color: 'text-accent', bg: 'bg-accent', border: 'border-accent', label: 'Fully Warmed' },
-};
-
-const levelProgression = [
-  { level: 'L1', name: 'Starter', messages: '5-10/day', activities: 'Self-to-self messaging', days: '3 days' },
-  { level: 'L2', name: 'Warming', messages: '10-25/day', activities: '+ Peer messaging', days: '5 days' },
-  { level: 'L3', name: 'Active', messages: '25-50/day', activities: '+ Profile updates, status posts', days: '7 days' },
-  { level: 'L4', name: 'Trusted', messages: '50-80/day', activities: '+ Group interactions', days: '10 days' },
-  { level: 'L5', name: 'Fully Warmed', messages: '80-120/day', activities: 'All activities unlocked', days: 'Final level' },
-];
+import { useAccounts } from '../hooks/useAccounts';
+import type { WarmupStatus } from '../types';
 
 export function WarmupPage() {
-  const { accounts, totalEnabled, totalMessages24h, loading, error } = useWarmupOverview();
-  const { toggleWarmup, isToggling } = useToggleWarmup();
-  const [infoOpen, setInfoOpen] = useState(false);
+  const { accounts: allAccounts } = useAccounts();
+  const { accounts: warmupStatuses, loading: isLoading } = useWarmupOverview();
+  const { toggleWarmup } = useToggleWarmup();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <svg className="animate-spin w-6 h-6 text-faded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    );
-  }
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-        <p className="text-red-600 text-sm">{error}</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-charcoal">Warmup Engine</h1>
-        <p className="text-sm text-faded mt-1">
-          {totalEnabled} account{totalEnabled !== 1 ? 's' : ''} enabled
-          {' \u00B7 '}
-          {totalMessages24h} message{totalMessages24h !== 1 ? 's' : ''} sent today
-        </p>
-      </div>
-
-      {/* Empty state */}
-      {accounts.length === 0 && (
-        <div className="bg-white border border-border rounded-xl p-12 shadow-soft text-center">
-          <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
-              <path d="M12 2v10l4.5 4.5" />
-              <circle cx="12" cy="12" r="10" />
-            </svg>
-          </div>
-          <h3 className="text-charcoal font-medium mb-1">No authenticated accounts</h3>
-          <p className="text-faded text-sm max-w-md mx-auto">
-            Add and authenticate WhatsApp accounts first, then come back to enable warmup.
-          </p>
-        </div>
-      )}
-
-      {/* Account warmup cards grid */}
-      {accounts.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {accounts.map((account) => (
-            <WarmupCard
-              key={account.accountId}
-              account={account}
-              onToggle={toggleWarmup}
-              isToggling={isToggling}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Level progression info panel */}
-      <div className="mt-2">
-        <button
-          onClick={() => setInfoOpen(!infoOpen)}
-          className="flex items-center gap-2 text-sm text-muted hover:text-charcoal transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`w-4 h-4 transition-transform ${infoOpen ? 'rotate-90' : ''}`}
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-          Level progression guide
-        </button>
-
-        {infoOpen && (
-          <div className="bg-white border border-border rounded-xl p-6 shadow-soft mt-3">
-            {/* Timeline */}
-            <div className="flex items-start gap-0 overflow-x-auto pb-2">
-              {levelProgression.map((step) => {
-                const config = levelConfig[step.level as WarmupLevel];
-                return (
-                  <div key={step.level} className="flex items-start min-w-[180px] flex-1">
-                    <div className="flex flex-col items-center">
-                      {/* Circle */}
-                      <div className={`w-10 h-10 rounded-full ${config.bg} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-                        {step.level}
-                      </div>
-                    </div>
-                    <div className="ml-3 pr-4">
-                      <p className={`text-sm font-medium ${config.color}`}>{step.name}</p>
-                      <p className="text-xs text-muted mt-1">{step.messages}</p>
-                      <p className="text-xs text-faded mt-0.5">{step.activities}</p>
-                      <p className="text-xs text-faded mt-0.5">{step.days}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-function WarmupCard({
-  account,
-  onToggle,
-  isToggling,
-}: {
-  account: WarmupStatus;
-  onToggle: (params: { accountId: string; enabled: boolean }) => Promise<unknown>;
-  isToggling: boolean;
-}) {
-  const config = levelConfig[account.level] || levelConfig.L1;
-  const messagesPercent = account.maxMessagesPerDay > 0
-    ? Math.min(100, Math.round((account.messagesSentToday / account.maxMessagesPerDay) * 100))
-    : 0;
-
-  const handleToggle = () => {
-    onToggle({ accountId: account.accountId, enabled: !account.isEnabled });
+  const activeAccounts = allAccounts.filter(a => a.status === 'AUTHENTICATED');
+  
+  const currentConfig = warmupStatuses.find((c: WarmupStatus) => c.accountId === selectedAccountId);
+  
+  const handleToggle = async (enabled: boolean) => {
+    if (!selectedAccountId) return;
+    await toggleWarmup({
+      accountId: selectedAccountId,
+      enabled,
+    });
   };
 
   return (
-    <div className="bg-white border border-border rounded-xl p-5 shadow-soft hover:border-border transition-colors">
-      {/* Top row: label + toggle */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="min-w-0">
-          <h3 className="text-charcoal font-medium text-sm truncate">{account.label}</h3>
-          {account.warmupStartedAt && (
-            <p className="text-faded text-xs mt-0.5">
-              Warming since {new Date(account.warmupStartedAt).toLocaleDateString()}
-            </p>
+    <div className="text-right">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-charcoal">חימום מספרים</h1>
+        <p className="text-sm text-muted mt-1">שפר את המוניטין של החשבון שלך ומנע חסימות באמצעות חימום הדרגתי</p>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Account Selector */}
+        <div className="lg:col-span-1 space-y-4">
+          <h2 className="text-sm font-semibold text-charcoal pr-1">בחר חשבון</h2>
+          <div className="space-y-2">
+            {activeAccounts.length === 0 && !isLoading && (
+              <p className="text-xs text-muted bg-white border border-border p-4 rounded-xl">אין חשבונות מחוברים זמינים לחימום.</p>
+            )}
+            {activeAccounts.map(acc => (
+              <button
+                key={acc.id}
+                onClick={() => setSelectedAccountId(acc.id)}
+                className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                  selectedAccountId === acc.id 
+                    ? 'bg-accent-light border-accent text-accent shadow-sm' 
+                    : 'bg-white border-border text-charcoal hover:border-accent/30'
+                }`}
+              >
+                <div className="flex items-center gap-3 flex-row-reverse">
+                  <div className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-xs font-bold">
+                    {acc.label.charAt(0)}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{acc.label}</p>
+                    <p className="text-[10px] opacity-70" dir="ltr">+{acc.phoneNumber}</p>
+                  </div>
+                </div>
+                {warmupStatuses.find((c: WarmupStatus) => c.accountId === acc.id)?.isEnabled && (
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Warmup Controls */}
+        <div className="lg:col-span-2">
+          {selectedAccountId ? (
+            <div className="bg-white border border-border rounded-2xl p-6 shadow-soft">
+              <div className="flex items-center justify-between mb-8 flex-row-reverse">
+                <div>
+                  <h2 className="text-lg font-bold text-charcoal">הגדרות חימום</h2>
+                  <p className="text-xs text-muted">מצב: {currentConfig?.isEnabled ? 'פעיל' : 'כבוי'}</p>
+                </div>
+                <button
+                  onClick={() => handleToggle(!currentConfig?.isEnabled)}
+                  className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                    currentConfig?.isEnabled 
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100' 
+                      : 'bg-accent text-white hover:bg-accent-hover'
+                  }`}
+                >
+                  {currentConfig?.isEnabled ? 'עצור חימום' : 'הפעל חימום'}
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                <div>
+                  <div className="flex justify-between mb-4 flex-row-reverse">
+                    <label className="text-sm font-semibold text-charcoal">רמת חימום נוכחית</label>
+                    <span className="text-sm font-bold text-accent">{currentConfig?.level || 'L1'}</span>
+                  </div>
+                  <div className="relative h-4 bg-cream rounded-full overflow-hidden border border-border">
+                    <div 
+                      className="absolute inset-y-0 right-0 bg-accent transition-all duration-1000"
+                      style={{ width: `${currentConfig?.progress || 0}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-2 text-[10px] text-faded flex-row-reverse">
+                    <span>מתחיל</span>
+                    <span>מתקדם</span>
+                    <span>מומחה</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-cream/50 rounded-xl border border-border">
+                    <p className="text-[10px] text-muted uppercase font-bold mb-1">הודעות היום</p>
+                    <p className="text-xl font-bold text-charcoal">{currentConfig?.messagesSentToday || 0} / {currentConfig?.maxMessagesPerDay || 50}</p>
+                  </div>
+                  <div className="p-4 bg-cream/50 rounded-xl border border-border">
+                    <p className="text-[10px] text-muted uppercase font-bold mb-1">סה"כ הודעות חימום</p>
+                    <p className="text-xl font-bold text-charcoal">{currentConfig?.totalMessages || 0}</p>
+                  </div>
+                </div>
+
+                <div className="bg-accent-light/30 border border-accent/10 p-4 rounded-xl">
+                  <h3 className="text-sm font-bold text-accent mb-2">איך זה עובד?</h3>
+                  <p className="text-xs text-charcoal leading-relaxed">
+                    מערכת החימום שולחת הודעות אוטומטיות בין החשבונות המחוברים שלך ומשיבה להן.
+                    פעילות זו מדמה שימוש טבעי בוואטסאפ ועוזרת למנוע חסימות של מספרים חדשים או כאלו שלא היו בשימוש זמן רב.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center bg-white border border-border border-dashed rounded-2xl p-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-muted">
+                  <path d="M12 2v10l4.5 4.5" /><circle cx="12" cy="12" r="10" />
+                </svg>
+              </div>
+              <h3 className="text-charcoal font-medium">לא נבחר חשבון</h3>
+              <p className="text-sm text-muted mt-1">בחר חשבון מהרשימה בצד כדי לנהל את הגדרות החימום שלו.</p>
+            </div>
           )}
         </div>
-
-        {/* Toggle switch */}
-        <button
-          onClick={handleToggle}
-          disabled={isToggling}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-            account.isEnabled ? 'bg-accent' : 'bg-gray-300'
-          }`}
-          role="switch"
-          aria-checked={account.isEnabled}
-          title={account.isEnabled ? 'Disable warmup' : 'Enable warmup'}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform ring-0 transition-transform duration-200 ease-in-out mt-0.5 ${
-              account.isEnabled ? 'translate-x-4 ml-0.5' : 'translate-x-0 ml-0.5'
-            }`}
-          />
-        </button>
       </div>
-
-      {/* Level badge */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${config.color} ${config.border} bg-transparent`}>
-          {account.level}
-        </span>
-        <span className="text-xs text-muted">{config.label}</span>
-      </div>
-
-      {/* Overall progress toward next level */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-muted">Level progress</span>
-          <span className="text-xs text-faded">{account.progress}%</span>
-        </div>
-        <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
-          <div
-            className="h-full bg-accent rounded-full transition-all duration-500"
-            style={{ width: `${account.progress}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Messages today */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-muted">Messages today</span>
-          <span className="text-xs text-charcoal">
-            {account.messagesSentToday} / {account.maxMessagesPerDay}
-          </span>
-        </div>
-        <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
-          <div
-            className="h-full bg-accent/70 rounded-full transition-all duration-500"
-            style={{ width: `${messagesPercent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Days at level */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted">Days at level</span>
-        <span className="text-xs text-charcoal">
-          {account.daysAtLevel} / {account.minDaysForLevelUp} days
-        </span>
-      </div>
-
-      {/* Disabled overlay hint */}
-      {!account.isEnabled && (
-        <div className="mt-3 text-xs text-faded flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-          </svg>
-          Warmup paused
-        </div>
-      )}
     </div>
   );
 }

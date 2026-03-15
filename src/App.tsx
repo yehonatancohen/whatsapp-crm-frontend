@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './context/SocketContext';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { PublicLayout } from './components/PublicLayout';
@@ -40,9 +41,10 @@ function App() {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <SocketProvider>
-            <Routes>
+        <ThemeProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <Routes>
               {/* Public pages with header/footer */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<LandingPage />} />
@@ -84,8 +86,9 @@ function App() {
             </Routes>
           </SocketProvider>
         </AuthProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
   );
 }
 

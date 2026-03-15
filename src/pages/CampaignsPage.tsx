@@ -1,783 +1,326 @@
 import { useState } from 'react';
-import {
-  useCampaigns,
-  useCreateCampaign,
-  useDeleteCampaign,
-  useStartCampaign,
-  usePauseCampaign,
-  useResumeCampaign,
-  useCancelCampaign,
-  useCampaignFailures,
-} from '../hooks/useCampaigns';
+import { useAccounts } from '../hooks/useAccounts';
+import { useCampaigns, useCreateCampaign, useCancelCampaign, useDeleteCampaign } from '../hooks/useCampaigns';
 import { useContactLists } from '../hooks/useContacts';
-import { useAccounts, useAccountGroups } from '../hooks/useAccounts';
-import { extractApiError } from '../lib/errorUtils';
-import { FormError } from '../components/shared/FormError';
-import type { Campaign, CampaignStatus, CampaignType, CreateCampaignData } from '../types';
-
-const statusConfig: Record<CampaignStatus, { label: string; bg: string; text: string; pulse?: boolean }> = {
-  DRAFT: { label: 'Draft', bg: 'bg-gray-100', text: 'text-muted' },
-  SCHEDULED: { label: 'Scheduled', bg: 'bg-blue-50', text: 'text-blue-600' },
-  RUNNING: { label: 'Running', bg: 'bg-accent-light', text: 'text-accent', pulse: true },
-  PAUSED: { label: 'Paused', bg: 'bg-amber-50', text: 'text-amber-600' },
-  COMPLETED: { label: 'Completed', bg: 'bg-accent-light', text: 'text-accent' },
-  CANCELLED: { label: 'Cancelled', bg: 'bg-gray-100', text: 'text-muted' },
-  FAILED: { label: 'Failed', bg: 'bg-red-50', text: 'text-red-600' },
-};
+import { api } from '../lib/api';
+import type { WhatsAppGroup } from '../types';
 
 export function CampaignsPage() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const { data: campaigns, isLoading, error } = useCampaigns();
-
-  const deleteMutation = useDeleteCampaign();
-  const startMutation = useStartCampaign();
-  const pauseMutation = usePauseCampaign();
-  const resumeMutation = useResumeCampaign();
-  const cancelMutation = useCancelCampaign();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <svg className="animate-spin w-6 h-6 text-faded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-        <p className="text-red-600 text-sm">{error.message}</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-charcoal">Campaigns</h1>
-          <p className="text-sm text-faded mt-1">
-            {campaigns?.length ? `${campaigns.length} campaign${campaigns.length !== 1 ? 's' : ''}` : 'Create and manage messaging campaigns'}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          New Campaign
-        </button>
-      </div>
-
-      {/* Create Campaign Form */}
-      {showCreateForm && (
-        <CreateCampaignForm onClose={() => setShowCreateForm(false)} />
-      )}
-
-      {/* Empty state */}
-      {(!campaigns || campaigns.length === 0) && !showCreateForm && (
-        <div className="bg-white border border-border rounded-xl p-12 shadow-soft text-center">
-          <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
-              <path d="M22 2L11 13" />
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-            </svg>
-          </div>
-          <h3 className="text-charcoal font-medium mb-1">No campaigns yet</h3>
-          <p className="text-faded text-sm max-w-md mx-auto mb-4">
-            Create your first campaign to start sending messages to your contacts.
-          </p>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Create Campaign
-          </button>
-        </div>
-      )}
-
-      {/* Campaign list */}
-      {campaigns && campaigns.length > 0 && (
-        <div className="flex flex-col gap-4">
-          {campaigns.map((campaign) => (
-            <CampaignCard
-              key={campaign.id}
-              campaign={campaign}
-              onStart={() => startMutation.mutate(campaign.id)}
-              onPause={() => pauseMutation.mutate(campaign.id)}
-              onResume={() => resumeMutation.mutate(campaign.id)}
-              onCancel={() => cancelMutation.mutate(campaign.id)}
-              onDelete={() => deleteMutation.mutate(campaign.id)}
-              isActionPending={
-                startMutation.isPending || pauseMutation.isPending ||
-                resumeMutation.isPending || cancelMutation.isPending ||
-                deleteMutation.isPending
-              }
-            />
-          ))}
-        </div>
-      )}
-    </>
-  );
-}
-
-function StatusBadge({ status }: { status: CampaignStatus }) {
-  const config = statusConfig[status];
-  return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.text}`}>
-      {config.pulse && (
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-        </span>
-      )}
-      {config.label}
-    </span>
-  );
-}
-
-function CampaignCard({
-  campaign,
-  onStart,
-  onPause,
-  onResume,
-  onCancel,
-  onDelete,
-  isActionPending,
-}: {
-  campaign: Campaign;
-  onStart: () => void;
-  onPause: () => void;
-  onResume: () => void;
-  onCancel: () => void;
-  onDelete: () => void;
-  isActionPending: boolean;
-}) {
-  const [showFailures, setShowFailures] = useState(false);
-  const { data: failures, isLoading: failuresLoading } = useCampaignFailures(
-    showFailures ? campaign.id : null,
-  );
-
-  const progressPercent = campaign.totalMessages > 0
-    ? Math.round((campaign.sentCount / campaign.totalMessages) * 100)
-    : 0;
-
-  const showProgress = campaign.status === 'RUNNING' || campaign.status === 'COMPLETED' || campaign.status === 'PAUSED';
-
-  return (
-    <div className="bg-white border border-border rounded-xl p-5 shadow-soft hover:border-border transition-colors">
-      {/* Top row: name + status */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="min-w-0 flex-1 mr-3">
-          <h3 className="text-charcoal font-medium text-sm truncate">{campaign.name}</h3>
-          <p className="text-faded text-xs mt-0.5">
-            Created {new Date(campaign.createdAt).toLocaleDateString()}
-            {campaign.scheduledAt && (
-              <> &middot; Scheduled for {new Date(campaign.scheduledAt).toLocaleString()}</>
-            )}
-          </p>
-        </div>
-        <StatusBadge status={campaign.status} />
-      </div>
-
-      {/* Message template preview */}
-      <p className="text-muted text-sm mb-3 line-clamp-2">
-        {campaign.messageTemplate.length > 80
-          ? campaign.messageTemplate.substring(0, 80) + '...'
-          : campaign.messageTemplate}
-      </p>
-
-      {/* Stats row */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-faded">
-            <path d="M22 2L11 13" />
-            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-          </svg>
-          <span className="text-xs text-muted">
-            Total: <span className="text-charcoal">{campaign.totalMessages}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-accent">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          <span className="text-xs text-muted">
-            Sent: <span className="text-accent">{campaign.sentCount}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-red-500">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-          </svg>
-          <span className="text-xs text-muted">
-            Failed: <span className="text-red-600">{campaign.failedCount}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
-          <span className="text-xs text-faded">
-            {campaign.messagesPerMinute} msg/min &middot; {campaign.dailyLimitPerAccount}/day per account
-          </span>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      {showProgress && (
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-muted">Progress</span>
-            <span className="text-xs text-faded">{progressPercent}%</span>
-          </div>
-          <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
-            <div
-              className="h-full bg-accent rounded-full transition-all duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Failure details */}
-      {campaign.failedCount > 0 && (
-        <div className="mb-3">
-          <button
-            onClick={() => setShowFailures(!showFailures)}
-            className="text-xs text-red-600 hover:text-red-500 transition-colors flex items-center gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-3 h-3 transition-transform ${showFailures ? 'rotate-90' : ''}`}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-            {showFailures ? 'Hide' : 'View'} failure reasons ({campaign.failedCount})
-          </button>
-          {showFailures && (
-            <div className="mt-2 max-h-48 overflow-y-auto bg-white border border-border rounded-lg">
-              {failuresLoading ? (
-                <p className="text-xs text-faded p-3">Loading...</p>
-              ) : failures && failures.length > 0 ? (
-                <div className="divide-y divide-border">
-                  {failures.map((f: any) => (
-                    <div key={f.id} className="px-3 py-2 text-xs">
-                      <span className="text-muted">
-                        {f.contact?.name || f.contact?.phoneNumber || f.groupJid || 'Unknown'}
-                      </span>
-                      <span className="text-red-600/80 ml-2">
-                        {f.errorMessage || 'Unknown error'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-faded p-3">No failure details available</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div className="flex items-center gap-2 pt-1">
-        {campaign.status === 'DRAFT' && (
-          <>
-            <ActionButton onClick={onStart} disabled={isActionPending} variant="accent">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              Start
-            </ActionButton>
-            <ActionButton onClick={onDelete} disabled={isActionPending} variant="red">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <path d="M3 6h18" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-              Delete
-            </ActionButton>
-          </>
-        )}
-        {campaign.status === 'SCHEDULED' && (
-          <>
-            <ActionButton onClick={onCancel} disabled={isActionPending} variant="slate">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              Cancel
-            </ActionButton>
-          </>
-        )}
-        {campaign.status === 'RUNNING' && (
-          <>
-            <ActionButton onClick={onPause} disabled={isActionPending} variant="amber">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
-              </svg>
-              Pause
-            </ActionButton>
-            <ActionButton onClick={onCancel} disabled={isActionPending} variant="red">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              Cancel
-            </ActionButton>
-          </>
-        )}
-        {campaign.status === 'PAUSED' && (
-          <>
-            <ActionButton onClick={onResume} disabled={isActionPending} variant="accent">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              Resume
-            </ActionButton>
-            <ActionButton onClick={onCancel} disabled={isActionPending} variant="red">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              Cancel
-            </ActionButton>
-          </>
-        )}
-        {(campaign.status === 'COMPLETED' || campaign.status === 'FAILED' || campaign.status === 'CANCELLED') && (
-          <ActionButton onClick={onDelete} disabled={isActionPending} variant="red">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-              <path d="M3 6h18" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-            Delete
-          </ActionButton>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ActionButton({
-  onClick,
-  disabled,
-  variant,
-  children,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  variant: 'accent' | 'red' | 'amber' | 'slate';
-  children: React.ReactNode;
-}) {
-  const variantClasses = {
-    accent: 'bg-accent-light text-accent hover:bg-accent-subtle border-accent',
-    red: 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200',
-    amber: 'bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200',
-    slate: 'bg-cream text-charcoal hover:bg-cream-dark border-border',
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]}`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function CreateCampaignForm({ onClose }: { onClose: () => void }) {
-  const createMutation = useCreateCampaign();
-  const { lists: contactLists, loading: listsLoading } = useContactLists();
   const { accounts } = useAccounts();
+  const { lists: contactLists } = useContactLists();
+  const { data: campaigns = [], isLoading: campaignsLoading } = useCampaigns();
+  const createMutation = useCreateCampaign();
+  const cancelMutation = useCancelCampaign();
+  const deleteMutation = useDeleteCampaign();
 
+  const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
-  const [campaignType, setCampaignType] = useState<CampaignType>('DIRECT_MESSAGE');
-  const [messageTemplate, setMessageTemplate] = useState('');
+  const [message, setMessage] = useState('');
+  const [accountId, setAccountId] = useState('');
+  const [recipientType, setRecipientType] = useState<'LIST' | 'GROUP'>('LIST');
   const [contactListId, setContactListId] = useState('');
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [selectedGroupJids, setSelectedGroupJids] = useState<Array<{ jid: string; name: string }>>([]);
-  const [messagesPerMinute, setMessagesPerMinute] = useState(2);
-  const [dailyLimitPerAccount, setDailyLimitPerAccount] = useState(50);
-  const [scheduleEnabled, setScheduleEnabled] = useState(false);
-  const [scheduledAt, setScheduledAt] = useState('');
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formErrorDetails, setFormErrorDetails] = useState<Array<{ field: string; message: string }>>([]);
+  const [groupId, setGroupId] = useState('');
+  const [groups, setGroups] = useState<WhatsAppGroup[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [delayMin, setDelayMin] = useState(30);
+  const [delayMax, setDelayMax] = useState(60);
 
-  const authenticatedAccounts = accounts.filter((a) => a.status === 'AUTHENTICATED');
-  const { data: groups, isLoading: groupsLoading } = useAccountGroups(selectedAccountId);
-
-  const toggleGroup = (jid: string, groupName: string) => {
-    setSelectedGroupJids((prev) =>
-      prev.some((g) => g.jid === jid)
-        ? prev.filter((g) => g.jid !== jid)
-        : [...prev, { jid, name: groupName }],
-    );
+  const fetchGroups = async (id: string) => {
+    setAccountId(id);
+    if (!id) {
+      setGroups([]);
+      return;
+    }
+    setGroupsLoading(true);
+    try {
+      const { data } = await api.get(`/accounts/${id}/groups`);
+      setGroups(data);
+    } catch {
+      setGroups([]);
+    } finally {
+      setGroupsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-    setFormErrorDetails([]);
+    await createMutation.mutateAsync({
+      name,
+      messageTemplate: message,
+      type: recipientType === 'GROUP' ? 'GROUP_MESSAGE' : 'DIRECT_MESSAGE',
+      contactListId: recipientType === 'LIST' ? contactListId : undefined,
+      groupJids: recipientType === 'GROUP' ? [{ jid: groupId }] : undefined,
+      messagesPerMinute: Math.floor(60 / ((delayMin + delayMax) / 2)),
+    });
+    setModalOpen(false);
+    resetForm();
+  };
 
-    if (!name.trim()) {
-      setFormError('Campaign name is required');
-      return;
-    }
-    if (!messageTemplate.trim()) {
-      setFormError('Message template is required');
-      return;
-    }
-    if (campaignType === 'GROUP_MESSAGE' && selectedGroupJids.length === 0) {
-      setFormError('Select at least one group');
-      return;
-    }
+  const resetForm = () => {
+    setName('');
+    setMessage('');
+    setAccountId('');
+    setContactListId('');
+    setGroupId('');
+    setGroups([]);
+  };
 
-    const data: CreateCampaignData = {
-      name: name.trim(),
-      messageTemplate: messageTemplate.trim(),
-      type: campaignType,
-      messagesPerMinute,
-      dailyLimitPerAccount,
-    };
-
-    if (campaignType === 'DIRECT_MESSAGE' && contactListId) {
-      data.contactListId = contactListId;
-    }
-    if (campaignType === 'GROUP_MESSAGE') {
-      data.groupJids = selectedGroupJids;
-    }
-    if (scheduleEnabled && scheduledAt) data.scheduledAt = new Date(scheduledAt).toISOString();
-
-    try {
-      await createMutation.mutateAsync(data);
-      onClose();
-    } catch (err: unknown) {
-      const { message, details } = extractApiError(err);
-      setFormError(message);
-      setFormErrorDetails(details);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+      case 'RUNNING': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'COMPLETED': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+      case 'CANCELLED': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+      case 'FAILED': return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+      default: return 'bg-gray-100 text-gray-700';
     }
   };
 
-  const selectClass = "w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
+  const translateStatus = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'ממתין';
+      case 'RUNNING': return 'בהרצה';
+      case 'COMPLETED': return 'הושלם';
+      case 'CANCELLED': return 'בוטל';
+      case 'FAILED': return 'נכשל';
+      default: return status;
+    }
+  }
 
   return (
-    <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft mb-6">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-charcoal">Create Campaign</h2>
+    <div className="text-right">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-charcoal">קמפיינים</h1>
+          <p className="text-sm text-muted mt-1">שלח הודעות בתפוצה רחבה לאנשי קשר או קבוצות</p>
+        </div>
         <button
-          onClick={onClose}
-          className="text-faded hover:text-charcoal transition-colors"
+          onClick={() => setModalOpen(true)}
+          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
+          קמפיין חדש
         </button>
       </div>
 
-      <FormError error={formError} details={formErrorDetails} className="mb-4" />
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal mb-1.5">Campaign Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., March Promo Blast"
-            className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-          />
+      <div className="bg-white border border-border rounded-xl shadow-soft overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right">
+            <thead>
+              <tr className="bg-cream-dark/50 border-b border-border">
+                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">שם הקמפיין</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">סטטוס</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">התקדמות</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">תאריך יצירה</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">פעולות</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {campaignsLoading ? (
+                <tr><td colSpan={5} className="px-6 py-10 text-center text-muted">טוען קמפיינים...</td></tr>
+              ) : campaigns.length === 0 ? (
+                <tr><td colSpan={5} className="px-6 py-10 text-center text-muted">לא נמצאו קמפיינים</td></tr>
+              ) : (
+                campaigns.map((c) => (
+                  <tr key={c.id} className="hover:bg-cream/30 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-charcoal">{c.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(c.status)}`}>
+                        {translateStatus(c.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 w-24 bg-cream rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-accent transition-all duration-500"
+                            style={{ width: `${(c.sentCount / (c.totalMessages || 1)) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted font-medium" dir="ltr">{c.sentCount}/{c.totalMessages}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-xs text-muted">{new Date(c.createdAt).toLocaleDateString('he-IL')}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-left" dir="ltr">
+                      <div className="flex items-center gap-2 justify-end">
+                        {c.status === 'RUNNING' && (
+                          <button
+                            onClick={() => cancelMutation.mutate(c.id)}
+                            className="text-amber-600 hover:text-amber-700 text-xs font-medium"
+                          >
+                            בטל
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteMutation.mutate(c.id)}
+                          className="text-red-500 hover:text-red-600 p-1"
+                          title="מחק קמפיין"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                            <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-
-        {/* Campaign Type */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal mb-1.5">Campaign Type</label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setCampaignType('DIRECT_MESSAGE')}
-              className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
-                campaignType === 'DIRECT_MESSAGE'
-                  ? 'bg-accent/10 border-accent text-accent'
-                  : 'bg-white border-border text-muted hover:text-charcoal'
-              }`}
-            >
-              Direct Message
-            </button>
-            <button
-              type="button"
-              onClick={() => setCampaignType('GROUP_MESSAGE')}
-              className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
-                campaignType === 'GROUP_MESSAGE'
-                  ? 'bg-accent/10 border-accent text-accent'
-                  : 'bg-white border-border text-muted hover:text-charcoal'
-              }`}
-            >
-              Group Message
-            </button>
-          </div>
-        </div>
-
-        {/* Message template and Preview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <label className="block text-sm font-medium text-charcoal mb-1.5">Message Template</label>
-            <textarea
-              value={messageTemplate}
-              onChange={(e) => setMessageTemplate(e.target.value)}
-              placeholder="Type your message here..."
-              className="w-full flex-1 min-h-[160px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors resize-none"
-            />
-            <p className="text-xs text-faded mt-2">
-              Supports <span className="text-muted font-mono">*bold*</span>, <span className="text-muted font-mono">_italic_</span>, <span className="text-muted font-mono">~strike~</span> and <span className="text-muted font-mono">{'{spintax|opts}'}</span>
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <label className="block text-sm font-medium text-charcoal mb-1.5">WhatsApp Preview</label>
-            <WhatsAppPreview text={messageTemplate} />
-          </div>
-        </div>
-
-        {/* Target: Contact List or Groups */}
-        {campaignType === 'DIRECT_MESSAGE' ? (
-          <div>
-            <label className="block text-sm font-medium text-charcoal mb-1.5">Contact List</label>
-            <select
-              value={contactListId}
-              onChange={(e) => setContactListId(e.target.value)}
-              className={selectClass}
-            >
-              <option value="">Select a contact list...</option>
-              {listsLoading && <option disabled>Loading...</option>}
-              {contactLists.map((list) => (
-                <option key={list.id} value={list.id}>
-                  {list.name} ({list._count.entries} contacts)
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div>
-            <label className="block text-sm font-medium text-charcoal mb-1.5">Select Groups</label>
-            {/* Account selector */}
-            <select
-              value={selectedAccountId || ''}
-              onChange={(e) => { setSelectedAccountId(e.target.value || null); setSelectedGroupJids([]); }}
-              className={`${selectClass} mb-3`}
-            >
-              <option value="">Select an account to load groups...</option>
-              {authenticatedAccounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.label} {acc.phoneNumber ? `(${acc.phoneNumber})` : ''}
-                </option>
-              ))}
-            </select>
-
-            {/* Group list */}
-            {selectedAccountId && groupsLoading && (
-              <p className="text-sm text-faded">Loading groups...</p>
-            )}
-            {selectedAccountId && !groupsLoading && groups && groups.length === 0 && (
-              <p className="text-sm text-faded">No groups found for this account.</p>
-            )}
-            {groups && groups.length > 0 && (
-              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
-                {groups.map((group) => {
-                  const isSelected = selectedGroupJids.some((g) => g.jid === group.id);
-                  return (
-                    <label
-                      key={group.id}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                        isSelected ? 'bg-accent/10' : 'hover:bg-cream'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleGroup(group.id, group.name)}
-                        className="accent-accent"
-                      />
-                      <span className="text-sm text-charcoal">{group.name}</span>
-                      <span className="text-xs text-faded ml-auto">{group.participantsCount} members</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-            {selectedGroupJids.length > 0 && (
-              <p className="text-xs text-accent mt-2">{selectedGroupJids.length} group{selectedGroupJids.length !== 1 ? 's' : ''} selected</p>
-            )}
-          </div>
-        )}
-
-        {/* Messages per minute */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal mb-1.5">
-            Messages per Minute: <span className="text-accent">{messagesPerMinute}</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={messagesPerMinute}
-            onChange={(e) => setMessagesPerMinute(Number(e.target.value))}
-            className="w-full accent-accent"
-          />
-          <div className="flex justify-between text-xs text-faded mt-0.5">
-            <span>1</span>
-            <span>10</span>
-          </div>
-        </div>
-
-        {/* Daily limit per account */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal mb-1.5">Daily Limit per Account</label>
-          <input
-            type="number"
-            min={1}
-            max={200}
-            value={dailyLimitPerAccount}
-            onChange={(e) => setDailyLimitPerAccount(Math.min(200, Math.max(1, Number(e.target.value))))}
-            className="w-full max-w-full sm:max-w-[180px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-          />
-          <p className="text-xs text-faded mt-1">Between 1 and 200 messages per account per day</p>
-        </div>
-
-        {/* Schedule toggle */}
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <button
-              type="button"
-              onClick={() => setScheduleEnabled(!scheduleEnabled)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                scheduleEnabled ? 'bg-accent' : 'bg-gray-300'
-              }`}
-              role="switch"
-              aria-checked={scheduleEnabled}
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform ring-0 transition-transform duration-200 ease-in-out mt-0.5 ${
-                  scheduleEnabled ? 'translate-x-4 ml-0.5' : 'translate-x-0 ml-0.5'
-                }`}
-              />
-            </button>
-            <span className="text-sm font-medium text-charcoal">Schedule for later</span>
-          </div>
-          {scheduleEnabled && (
-            <input
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full max-w-full sm:max-w-[280px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-            />
-          )}
-        </div>
-
-        {/* Submit */}
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={createMutation.isPending}
-            className="flex items-center gap-2 bg-accent hover:bg-accent text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {createMutation.isPending ? (
-              <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            )}
-            Create Campaign
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-sm text-muted hover:text-charcoal px-4 py-2.5 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function WhatsAppPreview({ text }: { text: string }) {
-  const formatText = (input: string) => {
-    if (!input) return null;
-    let html = input
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\n/g, '<br />')
-      .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
-      .replace(/_(.*?)_/g, '<em>$1</em>')
-      .replace(/~(.*?)~/g, '<del>$1</del>')
-      .replace(/```(.*?)```/gs, '<code class="bg-black/20 rounded px-1 font-mono text-xs">$1</code>');
-      
-    // Handle spintax optionally by highlighting it mentally, or just let users see it raw.
-    html = html.replace(/(\{[^{}]+\})/g, '<span class="text-accent-hover opacity-80">$1</span>');
-
-    return <span dangerouslySetInnerHTML={{ __html: html }} />;
-  };
-
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  return (
-    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-border shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
-      {/* Background Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.06] pointer-events-none z-0" 
-        style={{ backgroundImage: 'url("https://static.whatsapp.net/rsrc.php/v3/yl/r/r_QNOpNGJ6t.png")' }}
-      />
-      
-      <div className="flex-1 overflow-y-auto z-10 custom-scrollbar flex flex-col justify-end">
-        {text ? (
-          <div className="relative self-end bg-[#005c4b] text-[#e9edef] text-[14.2px] leading-[19px] px-2 py-1.5 rounded-lg rounded-tr-none max-w-[95%] shadow-sm mt-2">
-            {/* Tail */}
-            <svg viewBox="0 0 8 13" width="8" height="13" className="absolute top-0 -right-[8px] text-[#005c4b]">
-              <path fill="currentColor" d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.026 1.533 2.568z"></path>
-            </svg>
-            
-            <div className="font-sans whitespace-pre-wrap break-words inline-block max-w-full">
-              {formatText(text)}
-              <span className="inline-block w-14 h-3"></span> {/* Spacer for time float */}
-            </div>
-            
-            <div className="absolute bottom-1 right-2 flex items-center justify-end gap-1">
-              <span className="text-[11px] text-[#ffffff99] leading-none">{time}</span>
-              <svg viewBox="0 0 16 11" width="16" height="11">
-                <path fill="#53bdeb" d="M11.8 1.6l-7.7 7.7-3.7-3.7-1.1 1.1 4.8 4.8 8.8-8.8z" />
-                <path fill="#53bdeb" d="M14.9 1.6l-1.1-1.1-3.7 3.7 1.1 1.1z" />
-              </svg>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full opacity-50 text-muted text-sm italic">
-            Message preview
-          </div>
-        )}
       </div>
+
+      {/* Create Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white border border-border rounded-2xl w-full max-w-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto text-right">
+            <div className="flex items-center justify-between mb-6 flex-row-reverse">
+              <h2 className="text-xl font-bold text-charcoal">יצירת קמפיין חדש</h2>
+              <button onClick={() => setModalOpen(false)} className="text-muted hover:text-charcoal transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">שם הקמפיין</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
+                    placeholder="קמפיין חג שמח"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">חשבון שולח</label>
+                  <select
+                    value={accountId}
+                    onChange={(e) => fetchGroups(e.target.value)}
+                    required
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                  >
+                    <option value="">בחר חשבון...</option>
+                    {accounts.filter(a => a.status === 'AUTHENTICATED').map(a => (
+                      <option key={a.id} value={a.id}>{a.label} (+{a.phoneNumber})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1.5">סוג נמענים</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={recipientType === 'LIST'} onChange={() => setRecipientType('LIST')} className="accent-accent" />
+                    <span className="text-sm text-charcoal">רשימת אנשי קשר</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={recipientType === 'GROUP'} onChange={() => setRecipientType('GROUP')} className="accent-accent" />
+                    <span className="text-sm text-charcoal">קבוצת וואטסאפ</span>
+                  </label>
+                </div>
+              </div>
+
+              {recipientType === 'LIST' ? (
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">בחר רשימה</label>
+                  <select
+                    value={contactListId}
+                    onChange={(e) => setContactListId(e.target.value)}
+                    required
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                  >
+                    <option value="">בחר רשימה...</option>
+                    {contactLists.map(l => (
+                      <option key={l.id} value={l.id}>{l.name} ({l._count.entries} אנשי קשר)</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">בחר קבוצה</label>
+                  <select
+                    value={groupId}
+                    onChange={(e) => setGroupId(e.target.value)}
+                    required
+                    disabled={!accountId || groupsLoading}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                  >
+                    <option value="">{groupsLoading ? 'טוען קבוצות...' : 'בחר קבוצה...'}</option>
+                    {groups.map(g => (
+                      <option key={g.id} value={g.id}>{g.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1.5">תוכן ההודעה</label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  rows={5}
+                  className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
+                  placeholder="הקלד את תוכן ההודעה כאן..."
+                />
+                <p className="text-[10px] text-faded mt-1.5">ניתן להשתמש ב- {'{name}'} כדי להוסיף את שם איש הקשר.</p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">השהיה מינימלית (שניות)</label>
+                  <input
+                    type="number"
+                    value={delayMin}
+                    onChange={(e) => setDelayMin(Number(e.target.value))}
+                    min={5}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">השהיה מקסימלית (שניות)</label>
+                  <input
+                    type="number"
+                    value={delayMax}
+                    onChange={(e) => setDelayMax(Number(e.target.value))}
+                    min={delayMin}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending}
+                  className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {createMutation.isPending ? 'יוצר קמפיין...' : 'הפעל קמפיין'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="flex-1 bg-cream hover:bg-cream-dark text-charcoal font-medium py-3 rounded-lg transition-colors"
+                >
+                  ביטול
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

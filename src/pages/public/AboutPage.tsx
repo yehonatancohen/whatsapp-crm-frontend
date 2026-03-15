@@ -1,39 +1,32 @@
 export function AboutPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold text-charcoal mb-6">About שדר</h1>
+    <div className="max-w-3xl mx-auto px-4 py-16 text-right bg-cream transition-colors min-h-screen">
+      <h1 className="text-3xl font-bold text-charcoal mb-6">אודות שדר</h1>
 
       <div className="prose-sm space-y-4 text-muted leading-relaxed">
         <p>
-          שדר is a WhatsApp marketing and CRM platform built for businesses that want to connect
-          with their customers at scale. We provide the tools to manage multiple WhatsApp accounts,
-          run targeted campaigns, and engage in meaningful conversations — all from one dashboard.
+          שדר היא הפלטפורמה המובילה לניהול ושיווק בוואטסאפ עבור עסקים קטנים ובינוניים.
+          המטרה שלנו היא לעזור לעסקים לתקשר טוב יותר עם הלקוחות שלהם, לשפר את אחוזי המסירה ולהגדיל את המכירות באמצעות הכלי החזק ביותר כיום — וואטסאפ.
         </p>
 
-        <h2 className="text-lg font-semibold text-charcoal pt-4">Our Mission</h2>
+        <h2 className="text-xl font-semibold text-charcoal mt-8 mb-4">למה שדר?</h2>
         <p>
-          We believe WhatsApp is the most powerful channel for customer communication, yet most businesses
-          lack the tools to use it effectively. Our mission is to make WhatsApp marketing accessible,
-          safe, and scalable for businesses of all sizes.
+          בניגוד לכלים אחרים, שדר נבנתה תוך מחשבה על פשטות ועוצמה. אנחנו מאפשרים לך לנהל מספר חשבונות במקביל, לחמם מספרים חדשים כדי למנוע חסימות, ולשלוח קמפיינים מתוחכמים המותאמים אישית לכל לקוח.
         </p>
 
-        <h2 className="text-lg font-semibold text-charcoal pt-4">What We Offer</h2>
-        <ul className="list-disc list-inside space-y-2">
-          <li>Multi-account management with QR code authentication</li>
-          <li>Smart campaign engine with rate limiting and throttling</li>
-          <li>Contact management with list segmentation</li>
-          <li>Number warmup to protect your accounts</li>
-          <li>Unified inbox for all your conversations</li>
-          <li>Real-time analytics and activity tracking</li>
-        </ul>
-
-        <h2 className="text-lg font-semibold text-charcoal pt-4">Contact</h2>
+        <h2 className="text-xl font-semibold text-charcoal mt-8 mb-4">הטכנולוגיה שלנו</h2>
         <p>
-          Have questions? Reach out to us at{' '}
-          <a href="mailto:support@parties247.co.il" className="text-accent hover:text-accent-hover">
-            support@parties247.co.il
-          </a>
+          אנחנו משתמשים בטכנולוגיה המתקדמת ביותר כדי להבטיח שהחשבונות שלך יישארו בטוחים. מערכת ה-Warmup הייחודית שלנו מדמה התנהגות אנושית ומסייעת בבניית אמון מול שרתי וואטסאפ, מה שמאפשר לך להגיע ללקוחות שלך ללא חשש מחסימה.
         </p>
+
+        <div className="pt-8 border-t border-border mt-12">
+          <p className="text-sm">
+            יש לך שאלות? צור איתנו קשר בכתובת:{' '}
+            <a href="mailto:support@parties247.co.il" className="text-accent hover:text-accent-hover font-medium">
+              support@parties247.co.il
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

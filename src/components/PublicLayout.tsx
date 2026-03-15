@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/about', label: 'About' },
-  { to: '/help', label: 'Help' },
+  { to: '/', label: 'דף הבית' },
+  { to: '/pricing', label: 'מחירים' },
+  { to: '/about', label: 'אודות' },
+  { to: '/help', label: 'עזרה' },
 ];
 
 export function PublicLayout() {
   const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -34,25 +36,56 @@ export function PublicLayout() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-muted hover:text-charcoal transition-colors"
+              title={theme === 'light' ? 'מצב כהה' : 'מצב בהיר'}
+            >
+              {theme === 'light' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m9.75-9h-2.25m-13.5 0H3m15.357-6.357l-1.591 1.591M6.234 17.766l-1.591 1.591m12.122 1.212l-1.591-1.591M6.234 6.234L4.643 4.643M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+                </svg>
+              )}
+            </button>
             <Link to="/login" className="text-sm text-muted hover:text-charcoal transition-colors">
-              Sign in
+              התחברות
             </Link>
             <Link to="/register" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
-              Get started
+              הרשמה
             </Link>
           </div>
 
           {/* Mobile hamburger */}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-muted p-1">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-              {mobileOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-muted transition-colors"
+            >
+              {theme === 'light' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m9.75-9h-2.25m-13.5 0H3m15.357-6.357l-1.591 1.591M6.234 17.766l-1.591 1.591m12.122 1.212l-1.591-1.591M6.234 6.234L4.643 4.643M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+                </svg>
               )}
-            </svg>
-          </button>
+            </button>
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="text-muted p-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                {mobileOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu */}
@@ -69,8 +102,8 @@ export function PublicLayout() {
               </Link>
             ))}
             <div className="flex gap-3 pt-2">
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="text-sm text-muted">Sign in</Link>
-              <Link to="/register" onClick={() => setMobileOpen(false)} className="text-sm text-accent">Get started</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="text-sm text-muted">התחברות</Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="text-sm text-accent">הרשמה</Link>
             </div>
           </div>
         )}
@@ -89,31 +122,31 @@ export function PublicLayout() {
               <div className="flex items-center gap-2 mb-3">
                 <img src="/logo.png" alt="שדר" className="h-6" />
               </div>
-              <p className="text-xs text-faded">Broadcast messaging & CRM platform for growing businesses.</p>
+              <p className="text-xs text-faded">פלטפורמת הודעות וניהול לקוחות לעסקים בצמיחה.</p>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">Product</h4>
+              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">מוצר</h4>
               <div className="space-y-2">
-                <Link to="/pricing" className="block text-xs text-muted hover:text-charcoal transition-colors">Pricing</Link>
-                <Link to="/help" className="block text-xs text-muted hover:text-charcoal transition-colors">Help & FAQ</Link>
+                <Link to="/pricing" className="block text-xs text-muted hover:text-charcoal transition-colors">מחירים</Link>
+                <Link to="/help" className="block text-xs text-muted hover:text-charcoal transition-colors">עזרה ושאלות נפוצות</Link>
               </div>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">Company</h4>
+              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">חברה</h4>
               <div className="space-y-2">
-                <Link to="/about" className="block text-xs text-muted hover:text-charcoal transition-colors">About</Link>
+                <Link to="/about" className="block text-xs text-muted hover:text-charcoal transition-colors">אודות</Link>
               </div>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">Legal</h4>
+              <h4 className="text-xs font-semibold text-charcoal uppercase mb-3">משפטי</h4>
               <div className="space-y-2">
-                <Link to="/terms" className="block text-xs text-muted hover:text-charcoal transition-colors">Terms of Service</Link>
-                <Link to="/privacy" className="block text-xs text-muted hover:text-charcoal transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="block text-xs text-muted hover:text-charcoal transition-colors">תנאי שימוש</Link>
+                <Link to="/privacy" className="block text-xs text-muted hover:text-charcoal transition-colors">מדיניות פרטיות</Link>
               </div>
             </div>
           </div>
           <div className="border-t border-border pt-6 text-center">
-            <p className="text-xs text-faded">&copy; {new Date().getFullYear()} שדר. All rights reserved.</p>
+            <p className="text-xs text-faded">&copy; {new Date().getFullYear()} שדר. כל הזכויות שמורות.</p>
           </div>
         </div>
       </footer>

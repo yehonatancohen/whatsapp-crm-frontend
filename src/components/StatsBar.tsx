@@ -12,7 +12,7 @@ export function StatsBar({ accounts }: Props) {
 
   const stats = [
     {
-      label: 'Total',
+      label: 'סה"כ',
       value: total,
       color: 'text-charcoal',
       bg: 'bg-white',
@@ -27,10 +27,10 @@ export function StatsBar({ accounts }: Props) {
       ),
     },
     {
-      label: 'Active',
+      label: 'פעילים',
       value: active,
       color: 'text-green-600',
-      bg: 'bg-green-50',
+      bg: 'bg-green-50 dark:bg-green-900/10',
       iconColor: 'text-green-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -40,10 +40,10 @@ export function StatsBar({ accounts }: Props) {
       ),
     },
     {
-      label: 'QR Pending',
+      label: 'ממתין לסריקה',
       value: qrPending,
       color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      bg: 'bg-blue-50 dark:bg-blue-900/10',
       iconColor: 'text-blue-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -55,10 +55,10 @@ export function StatsBar({ accounts }: Props) {
       ),
     },
     {
-      label: 'Disconnected',
+      label: 'מנותקים',
       value: disconnected,
       color: 'text-red-600',
-      bg: 'bg-red-50',
+      bg: 'bg-red-50 dark:bg-red-900/10',
       iconColor: 'text-red-500',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -75,7 +75,7 @@ export function StatsBar({ accounts }: Props) {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className={`${stat.bg} border border-border rounded-xl px-4 py-4 flex items-center gap-4 shadow-sm`}
+          className={`${stat.bg} border border-border rounded-xl px-4 py-4 flex items-center gap-4 shadow-sm flex-row-reverse text-right`}
         >
           <div className={`${stat.iconColor}`}>{stat.icon}</div>
           <div>

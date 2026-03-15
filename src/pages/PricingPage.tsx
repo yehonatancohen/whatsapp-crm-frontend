@@ -1,51 +1,51 @@
 import { useAuth } from '../context/AuthContext';
-import { usePlans, useCheckout, useSubscription } from '../hooks/useSubscription';
+import { usePlans, useCheckout } from '../hooks/useSubscription';
 import { Link } from 'react-router-dom';
 
 const fallbackPlans = [
   {
     tier: 'STARTER',
-    name: 'Starter',
+    name: 'מתחיל',
     priceMonthly: 29,
     priceId: '',
     features: [
-      '2 WhatsApp accounts',
-      '1,000 contacts',
-      '10 campaigns/month',
-      '500 messages/day',
-      'Number warmup',
-      'Chat inbox',
+      '2 חשבונות וואטסאפ',
+      '1,000 אנשי קשר',
+      '10 קמפיינים בחודש',
+      '500 הודעות ביום',
+      'חימום מספרים',
+      'תיבת הודעות',
     ],
   },
   {
     tier: 'PRO',
-    name: 'Pro',
+    name: 'מקצוען',
     priceMonthly: 79,
     priceId: '',
     features: [
-      '5 WhatsApp accounts',
-      '10,000 contacts',
-      '50 campaigns/month',
-      '5,000 messages/day',
-      'Number warmup',
-      'Chat inbox',
-      'Priority support',
+      '5 חשבונות וואטסאפ',
+      '10,000 אנשי קשר',
+      '50 קמפיינים בחודש',
+      '5,000 הודעות ביום',
+      'חימום מספרים',
+      'תיבת הודעות',
+      'תמיכה מועדפת',
     ],
   },
   {
     tier: 'ENTERPRISE',
-    name: 'Enterprise',
+    name: 'ארגוני',
     priceMonthly: 199,
     priceId: '',
     features: [
-      '20 WhatsApp accounts',
-      '100,000 contacts',
-      'Unlimited campaigns',
-      'Unlimited messages',
-      'Number warmup',
-      'Chat inbox',
-      'Priority support',
-      'Custom integrations',
+      '20 חשבונות וואטסאפ',
+      '100,000 אנשי קשר',
+      'קמפיינים ללא הגבלה',
+      'הודעות ללא הגבלה',
+      'חימום מספרים',
+      'תיבת הודעות',
+      'תמיכה מועדפת',
+      'אינטגרציות מותאמות אישית',
     ],
   },
 ];
@@ -53,18 +53,18 @@ const fallbackPlans = [
 export function PricingPage() {
   const { user } = useAuth();
   const { data: plans } = usePlans();
-  const { data: subscription } = useSubscription();
   const checkout = useCheckout();
 
+  const subscription = user?.subscription;
   const displayPlans = plans && plans.length > 0 ? plans : fallbackPlans;
 
   return (
-    <div className="min-h-screen px-4 py-12">
+    <div className="min-h-screen px-4 py-12 bg-cream transition-colors">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-charcoal mb-3">Choose your plan</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-charcoal mb-3">בחר את המסלול שלך</h1>
           <p className="text-muted text-lg max-w-xl mx-auto">
-            Start with a free 7-day trial. No credit card required. Upgrade anytime.
+            התחל עם 7 ימי ניסיון חינם. אין צורך בכרטיס אשראי. שדרג בכל עת.
           </p>
         </div>
 
@@ -85,30 +85,30 @@ export function PricingPage() {
               >
                 {isPopular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    Most Popular
+                    הכי פופולרי
                   </div>
                 )}
 
-                <h2 className="text-lg font-semibold text-charcoal">{plan.name}</h2>
-                <div className="mt-3 mb-5">
+                <h2 className="text-lg font-semibold text-charcoal text-right">{plan.name}</h2>
+                <div className="mt-3 mb-5 text-right" dir="ltr">
                   <span className="text-3xl font-bold text-charcoal">${plan.priceMonthly}</span>
-                  <span className="text-muted text-sm">/month</span>
+                  <span className="text-muted text-sm">/חודש</span>
                 </div>
 
-                <ul className="space-y-2.5 mb-6 flex-1">
+                <ul className="space-y-2.5 mb-6 flex-1 text-right">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-ink">
+                    <li key={f} className="flex items-start gap-2 text-sm text-ink justify-end">
+                      <span className="flex-1">{f}</span>
                       <svg className="w-4 h-4 text-accent mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      {f}
                     </li>
                   ))}
                 </ul>
 
                 {isCurrent ? (
                   <div className="w-full text-center text-sm font-medium py-2.5 rounded-lg border border-accent text-accent">
-                    Current plan
+                    התוכנית הנוכחית שלך
                   </div>
                 ) : (
                   <button
@@ -120,7 +120,7 @@ export function PricingPage() {
                         : 'bg-white hover:bg-cream border border-border text-charcoal'
                     }`}
                   >
-                    {checkout.isPending ? 'Redirecting...' : 'Get started'}
+                    {checkout.isPending ? 'מעביר לתשלום...' : 'התחל עכשיו'}
                   </button>
                 )}
               </div>
@@ -131,8 +131,8 @@ export function PricingPage() {
         {!user && (
           <div className="text-center mt-8">
             <p className="text-muted text-sm">
-              Already have an account?{' '}
-              <Link to="/login" className="text-accent hover:text-accent-hover">Sign in</Link>
+              כבר יש לך חשבון?{' '}
+              <Link to="/login" className="text-accent hover:text-accent-hover">התחבר כאן</Link>
             </p>
           </div>
         )}
@@ -140,7 +140,7 @@ export function PricingPage() {
         {user && (
           <div className="text-center mt-8">
             <Link to="/dashboard" className="text-accent hover:text-accent-hover text-sm">
-              Back to dashboard
+              חזרה ללוח הבקרה
             </Link>
           </div>
         )}

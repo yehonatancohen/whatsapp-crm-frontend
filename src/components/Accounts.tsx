@@ -10,10 +10,10 @@ export function Accounts() {
     return (
         <>
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 text-right">
                 <div>
-                    <h1 className="text-2xl font-semibold text-charcoal">WhatsApp Accounts</h1>
-                    <p className="text-sm text-muted mt-1">Manage and connect your numbers</p>
+                    <h1 className="text-2xl font-semibold text-charcoal">חשבונות וואטסאפ</h1>
+                    <p className="text-sm text-muted mt-1">נהל וחבר את מספרי הטלפון שלך</p>
                 </div>
                 <button
                     onClick={() => setModalOpen(true)}
@@ -23,21 +23,21 @@ export function Accounts() {
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    Add Account
+                    הוסף חשבון
                 </button>
             </div>
 
             {/* Error */}
             {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-6">
-                    <p className="text-red-600 text-sm">Backend error: {error}</p>
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-6 text-right">
+                    <p className="text-red-600 text-sm">שגיאת שרת: {error}</p>
                 </div>
             )}
 
             {/* Loading */}
             {loading && (
                 <div className="flex items-center justify-center py-20">
-                    <svg className="animate-spin w-6 h-6 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin w-6 h-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -69,13 +69,13 @@ export function Accounts() {
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                     </div>
-                    <h3 className="text-ink font-medium mb-1">No accounts yet</h3>
-                    <p className="text-muted text-sm mb-4">Add your first WhatsApp account to get started.</p>
+                    <h3 className="text-charcoal font-medium mb-1">אין חשבונות עדיין</h3>
+                    <p className="text-muted text-sm mb-4">הוסף את חשבון הוואטסאפ הראשון שלך כדי להתחיל.</p>
                     <button
                         onClick={() => setModalOpen(true)}
                         className="text-accent hover:text-accent-hover text-sm font-medium transition-colors"
                     >
-                        + Add Account
+                        + הוסף חשבון
                     </button>
                 </div>
             )}

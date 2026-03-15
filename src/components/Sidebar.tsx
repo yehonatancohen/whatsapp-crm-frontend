@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
   {
-    label: 'Dashboard',
+    label: 'לוח בקרה',
     path: '/dashboard',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -16,7 +17,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Accounts',
+    label: 'חשבונות',
     path: '/accounts',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -28,7 +29,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Warmup',
+    label: 'חימום',
     path: '/warmup',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -38,7 +39,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Contacts',
+    label: 'אנשי קשר',
     path: '/contacts',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -48,7 +49,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Campaigns',
+    label: 'קמפיינים',
     path: '/campaigns',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -57,7 +58,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Chat',
+    label: "צ'אט",
     path: '/chat',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -67,7 +68,7 @@ const navItems = [
     ),
   },
   {
-    label: 'Settings',
+    label: 'הגדרות',
     path: '/settings',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -87,6 +88,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Close on Escape key
   useEffect(() => {
@@ -114,8 +116,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-60 bg-white border-r border-border flex flex-col z-50 transition-transform duration-300 ease-in-out ${
-          open ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed right-0 top-0 h-screen w-60 bg-white border-l border-border flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+          open ? 'translate-x-0' : 'translate-x-full'
         } md:translate-x-0 md:z-30`}
       >
         {/* Logo */}
@@ -125,7 +127,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <button
             onClick={onClose}
             className="text-faded hover:text-ink transition-colors md:hidden"
-            aria-label="Close menu"
+            aria-label="סגור תפריט"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -142,10 +144,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               return (
                 <li key={item.path}>
                   <button
-                    onClick={() => navigate(item.path)}
+                    onClick={() => { navigate(item.path); onClose(); }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-accent-subtle text-accent border-l-2 border-accent'
+                        ? 'bg-accent-subtle text-accent border-r-2 border-accent'
                         : 'text-muted hover:text-charcoal hover:bg-cream'
                     }`}
                   >
@@ -158,37 +160,58 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             {user?.role === 'ADMIN' && (
               <li>
                 <button
-                  onClick={() => navigate('/admin/users')}
+                  onClick={() => { navigate('/admin/users'); onClose(); }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     location.pathname.startsWith('/admin')
-                      ? 'bg-violet-50 text-violet-600 border-l-2 border-violet-500'
+                      ? 'bg-violet-50 text-violet-600 border-r-2 border-violet-500'
                       : 'text-muted hover:text-charcoal hover:bg-cream'
                   }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
-                  Admin
+                  ניהול
                 </button>
               </li>
             )}
           </ul>
         </nav>
 
-        {/* User + Logout */}
+        {/* Theme Toggle + User + Logout */}
         <div className="p-3 border-t border-border">
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 px-3 py-2 mb-2 rounded-lg text-sm font-medium text-muted hover:text-charcoal hover:bg-cream transition-colors"
+          >
+            {theme === 'light' ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+                מצב כהה
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m9.75-9h-2.25m-13.5 0H3m15.357-6.357l-1.591 1.591M6.234 17.766l-1.591 1.591m12.122 1.212l-1.591-1.591M6.234 6.234L4.643 4.643M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+                </svg>
+                מצב בהיר
+              </>
+            )}
+          </button>
+
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-cream-dark flex items-center justify-center text-xs font-medium text-ink">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-charcoal truncate">{user?.name}</p>
-              <p className="text-xs text-faded truncate">{user?.email}</p>
+              <p className="text-xs text-faded truncate" dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
               className="text-faded hover:text-red-500 transition-colors"
-              title="Logout"
+              title="התנתקות"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { extractApiError } from '../lib/errorUtils';
+import { useState } from 'react';
 
 interface Props {
   open: boolean;
@@ -10,106 +9,92 @@ interface Props {
 export function AddAccountModal({ open, onClose, onAdd }: Props) {
   const [label, setLabel] = useState('');
   const [proxy, setProxy] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      setLabel('');
-      setProxy('');
-      setError(null);
-    }
-  }, [open]);
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    if (open) window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [open, onClose]);
 
   if (!open) return null;
 
-  const labelValid = /^[a-zA-Z0-9_-]+$/.test(label.trim());
-
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!label.trim() || !labelValid) return;
-
-    setSubmitting(true);
+    if (!label.trim()) return;
+    setLoading(true);
     setError(null);
     try {
-      await onAdd(label.trim(), proxy.trim() || undefined);
+      await onAdd(label, proxy || undefined);
+      setLabel('');
+      setProxy('');
       onClose();
-    } catch (err: unknown) {
-      const { message } = extractApiError(err);
-      setError(message);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'נכשל בהוספת חשבון');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <form
-        onSubmit={handleSubmit}
-        className="relative bg-white border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
-      >
-        <h2 className="text-lg font-semibold text-charcoal mb-5">Add Account</h2>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white border border-border rounded-2xl w-full max-w-md p-6 shadow-xl text-right">
+        <div className="flex items-center justify-between mb-6 flex-row-reverse">
+          <h2 className="text-xl font-bold text-charcoal">הוספת חשבון וואטסאפ</h2>
+          <button onClick={onClose} className="text-muted hover:text-charcoal transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-muted mb-1.5">Account Label</label>
+            <label className="block text-sm font-medium text-muted mb-1.5">שם החשבון (לדוגמה: שירות לקוחות)</label>
             <input
               type="text"
-              placeholder="e.g. account-1"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
+              required
               autoFocus
-              className={`w-full bg-white border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none transition-colors ${
-                label.trim() && !labelValid
-                  ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                  : 'border-border focus:border-accent focus:ring-1 focus:ring-accent'
-              }`}
+              className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
+              placeholder="הכנס שם לחשבון"
             />
-            {label.trim() && !labelValid && (
-              <p className="text-red-600 text-xs mt-1">Only letters, numbers, hyphens and underscores allowed.</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm text-muted mb-1.5">Proxy URL <span className="text-faded">(optional)</span></label>
+            <label className="block text-sm font-medium text-muted mb-1.5">פרוקסי (אופציונלי)</label>
             <input
               type="text"
-              placeholder="e.g. http://user:pass@host:port"
               value={proxy}
               onChange={(e) => setProxy(e.target.value)}
-              className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+              className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-left"
+              placeholder="http://user:pass@host:port"
+              dir="ltr"
             />
+            <p className="text-[10px] text-faded mt-1.5">השתמש בפרוקסי אם ברצונך לשייך את החשבון למיקום ספציפי.</p>
           </div>
-        </div>
 
-        {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-muted hover:text-charcoal transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting || !label.trim() || !labelValid}
-            className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent disabled:bg-cream disabled:text-faded disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-          >
-            {submitting ? 'Adding...' : 'Add Account'}
-          </button>
-        </div>
-      </form>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading || !label.trim()}
+              className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {loading ? 'יוצר...' : 'צור חשבון'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-cream hover:bg-cream-dark text-charcoal font-medium py-2.5 rounded-lg transition-colors"
+            >
+              ביטול
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

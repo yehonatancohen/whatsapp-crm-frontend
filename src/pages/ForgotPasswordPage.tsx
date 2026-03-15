@@ -6,17 +6,17 @@ import { extractApiError } from '../lib/errorUtils';
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
     try {
       await api.post('/auth/forgot-password', { email });
       setSent(true);
-    } catch (err) {
+    } catch (err: unknown) {
       const { message } = extractApiError(err);
       setError(message);
     } finally {
@@ -25,7 +25,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-cream transition-colors">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center mb-8">
           <Link to="/">
@@ -33,61 +33,55 @@ export function ForgotPasswordPage() {
           </Link>
         </div>
 
-        <div className="bg-white border border-border shadow-soft p-6">
+        <div className="bg-white border border-border shadow-soft p-6 text-right">
           {sent ? (
             <div className="text-center">
-              <div className="w-14 h-14 rounded-full bg-accent-subtle flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-accent">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
+              <div className="w-12 h-12 rounded-full bg-accent-light flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-accent">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h1 className="text-lg font-semibold text-charcoal mb-2">Check your email</h1>
-              <p className="text-sm text-muted mb-6">
-                If an account exists for {email}, we've sent a password reset link.
-              </p>
-              <Link
-                to="/login"
-                className="text-sm text-accent hover:text-accent-hover transition-colors"
-              >
-                Back to sign in
+              <h2 className="text-lg font-semibold text-charcoal mb-2">האימייל נשלח</h2>
+              <p className="text-sm text-muted mb-6">אם קים חשבון עם הכתובת שהזנת, יישלח אליו קישור לאיפוס הסיסמה.</p>
+              <Link to="/login" className="text-accent hover:text-accent-hover text-sm font-medium">
+                חזרה להתחברות
               </Link>
             </div>
           ) : (
             <>
-              <h1 className="text-lg font-semibold text-charcoal mb-2">Reset your password</h1>
-              <p className="text-sm text-muted mb-5">Enter your email and we'll send you a reset link.</p>
+              <h1 className="text-lg font-semibold text-charcoal mb-2">שכחת סיסמה?</h1>
+              <p className="text-sm text-muted mb-6">הכנס את כתובת האימייל שלך ונשלח לך קישור לאיפוס.</p>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-sm text-muted mb-1.5">Email</label>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-muted mb-1.5">אימייל</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    autoFocus
-                    className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-left"
                     placeholder="you@example.com"
+                    dir="ltr"
                   />
                 </div>
 
-                {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+                {error && <p className="text-red-600 text-sm">{error}</p>}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
                 >
-                  {loading ? 'Sending...' : 'Send reset link'}
+                  {loading ? 'שולח...' : 'שלח קישור לאיפוס'}
                 </button>
-              </form>
 
-              <p className="text-sm text-muted text-center mt-4">
-                <Link to="/login" className="text-accent hover:text-accent-hover transition-colors">
-                  Back to sign in
-                </Link>
-              </p>
+                <p className="text-sm text-muted text-center mt-4">
+                  <Link to="/login" university-colors className="text-accent hover:text-accent-hover transition-colors">
+                    חזרה להתחברות
+                  </Link>
+                </p>
+              </form>
             </>
           )}
         </div>
