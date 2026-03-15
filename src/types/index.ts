@@ -85,6 +85,7 @@ export interface CreateCampaignData {
   name: string;
   messageTemplate: string;
   type?: CampaignType;
+  accountIds: string[];
   contactListId?: string;
   groupJids?: Array<{ jid: string; name?: string }>;
   scheduledAt?: string;

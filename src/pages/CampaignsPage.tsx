@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCampaigns, useCreateCampaign, useCancelCampaign, useDeleteCampaign } from '../hooks/useCampaigns';
 import { useContactLists } from '../hooks/useContacts';
@@ -16,40 +16,69 @@ export function CampaignsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [accountId, setAccountId] = useState('');
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [recipientType, setRecipientType] = useState<'LIST' | 'GROUP'>('LIST');
   const [contactListId, setContactListId] = useState('');
-  const [groupId, setGroupId] = useState('');
-  const [groups, setGroups] = useState<WhatsAppGroup[]>([]);
+  const [selectedGroupJids, setSelectedGroupJids] = useState<string[]>([]);
+  
+  const [accountGroups, setAccountGroups] = useState<Record<string, WhatsAppGroup[]>>({});
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [delayMin, setDelayMin] = useState(30);
   const [delayMax, setDelayMax] = useState(60);
 
-  const fetchGroups = async (id: string) => {
-    setAccountId(id);
-    if (!id) {
-      setGroups([]);
-      return;
+  const activeAccounts = accounts.filter(a => a.status === 'AUTHENTICATED');
+
+  // Fetch groups for newly selected accounts
+  useEffect(() => {
+    const fetchNewAccountGroups = async () => {
+      const missing = selectedAccountIds.filter(id => !accountGroups[id]);
+      if (missing.length === 0) return;
+
+      setGroupsLoading(true);
+      try {
+        const results = await Promise.all(
+          missing.map(id => api.get(`/accounts/${id}/groups`).then(r => ({ id, groups: r.data })))
+        );
+        const newGroups = { ...accountGroups };
+        results.forEach(res => { newGroups[res.id] = res.groups; });
+        setAccountGroups(newGroups);
+      } catch (err) {
+        console.error('Failed to fetch groups', err);
+      } finally {
+        setGroupsLoading(false);
+      }
+    };
+
+    if (recipientType === 'GROUP' && selectedAccountIds.length > 0) {
+      fetchNewAccountGroups();
     }
-    setGroupsLoading(true);
-    try {
-      const { data } = await api.get(`/accounts/${id}/groups`);
-      setGroups(data);
-    } catch {
-      setGroups([]);
-    } finally {
-      setGroupsLoading(false);
-    }
-  };
+  }, [selectedAccountIds, recipientType]);
+
+  // Aggregate all unique groups from selected accounts
+  const allAvailableGroups: WhatsAppGroup[] = [];
+  const groupMap = new Map<string, WhatsAppGroup>();
+  
+  selectedAccountIds.forEach(accId => {
+    const groups = accountGroups[accId] || [];
+    groups.forEach(g => {
+      if (!groupMap.has(g.id)) {
+        groupMap.set(g.id, g);
+        allAvailableGroups.push(g);
+      }
+    });
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedAccountIds.length === 0) return;
+
     await createMutation.mutateAsync({
       name,
       messageTemplate: message,
+      accountIds: selectedAccountIds,
       type: recipientType === 'GROUP' ? 'GROUP_MESSAGE' : 'DIRECT_MESSAGE',
       contactListId: recipientType === 'LIST' ? contactListId : undefined,
-      groupJids: recipientType === 'GROUP' ? [{ jid: groupId }] : undefined,
+      groupJids: recipientType === 'GROUP' ? selectedGroupJids.map(jid => ({ jid })) : undefined,
       messagesPerMinute: Math.floor(60 / ((delayMin + delayMax) / 2)),
     });
     setModalOpen(false);
@@ -59,10 +88,25 @@ export function CampaignsPage() {
   const resetForm = () => {
     setName('');
     setMessage('');
-    setAccountId('');
+    setSelectedAccountIds([]);
     setContactListId('');
-    setGroupId('');
-    setGroups([]);
+    setSelectedGroupJids([]);
+  };
+
+  const toggleAccountId = (id: string) => {
+    setSelectedAccountIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleGroupJid = (jid: string) => {
+    setSelectedGroupJids(prev => 
+      prev.includes(jid) ? prev.filter(j => j !== jid) : [...prev, jid]
+    );
+  };
+
+  const checkAccountInGroup = (accId: string, groupJid: string) => {
+    return (accountGroups[accId] || []).some(g => g.id === groupJid);
   };
 
   const getStatusColor = (status: string) => {
@@ -92,7 +136,7 @@ export function CampaignsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-charcoal">קמפיינים</h1>
-          <p className="text-sm text-muted mt-1">שלח הודעות בתפוצה רחבה לאנשי קשר או קבוצות</p>
+          <p className="text-sm text-muted mt-1">שלח הודעות בתפוצה רחבה - חלוקת עבודה בין מספר חשבונות</p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
@@ -190,32 +234,34 @@ export function CampaignsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-1.5">שם הקמפיין</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
-                    placeholder="קמפיין חג שמח"
-                  />
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1.5">שם הקמפיין</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
+                  placeholder="קמפיין חג שמח"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted mb-2">חשבונות שולחים (העבודה תתחלק ביניהם)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-cream border border-border rounded-lg">
+                  {activeAccounts.map(a => (
+                    <label key={a.id} className="flex items-center gap-2 p-2 hover:bg-white rounded transition-colors cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedAccountIds.includes(a.id)}
+                        onChange={() => toggleAccountId(a.id)}
+                        className="accent-accent"
+                      />
+                      <span className="text-sm text-charcoal">{a.label} (+{a.phoneNumber})</span>
+                    </label>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-1.5">חשבון שולח</label>
-                  <select
-                    value={accountId}
-                    onChange={(e) => fetchGroups(e.target.value)}
-                    required
-                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
-                  >
-                    <option value="">בחר חשבון...</option>
-                    {accounts.filter(a => a.status === 'AUTHENTICATED').map(a => (
-                      <option key={a.id} value={a.id}>{a.label} (+{a.phoneNumber})</option>
-                    ))}
-                  </select>
-                </div>
+                {selectedAccountIds.length === 0 && <p className="text-[10px] text-red-500 mt-1">חובה לבחור לפחות חשבון אחד</p>}
               </div>
 
               <div>
@@ -227,7 +273,7 @@ export function CampaignsPage() {
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" checked={recipientType === 'GROUP'} onChange={() => setRecipientType('GROUP')} className="accent-accent" />
-                    <span className="text-sm text-charcoal">קבוצת וואטסאפ</span>
+                    <span className="text-sm text-charcoal">קבוצות וואטסאפ</span>
                   </label>
                 </div>
               </div>
@@ -249,19 +295,43 @@ export function CampaignsPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-muted mb-1.5">בחר קבוצה</label>
-                  <select
-                    value={groupId}
-                    onChange={(e) => setGroupId(e.target.value)}
-                    required
-                    disabled={!accountId || groupsLoading}
-                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
-                  >
-                    <option value="">{groupsLoading ? 'טוען קבוצות...' : 'בחר קבוצה...'}</option>
-                    {groups.map(g => (
-                      <option key={g.id} value={g.id}>{g.name}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium text-muted mb-2">בחר קבוצות</label>
+                  {selectedAccountIds.length === 0 ? (
+                    <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100">בחר חשבונות שולחים תחילה כדי לראות את הקבוצות שלהם</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 bg-cream border border-border rounded-lg">
+                      {groupsLoading ? <p className="text-xs text-muted p-2 text-center">טוען קבוצות...</p> : 
+                       allAvailableGroups.length === 0 ? <p className="text-xs text-muted p-2 text-center">לא נמצאו קבוצות בחשבונות שנבחרו</p> :
+                       allAvailableGroups.map(g => (
+                        <div key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={selectedGroupJids.includes(g.id)}
+                              onChange={() => toggleGroupJid(g.id)}
+                              className="accent-accent"
+                            />
+                            <span className="text-sm font-medium text-charcoal">{g.name}</span>
+                          </label>
+                          {/* Check which accounts are NOT in this group */}
+                          {selectedGroupJids.includes(g.id) && (
+                            <div className="mt-1 flex flex-wrap gap-1 pr-6">
+                              {selectedAccountIds.map(accId => {
+                                const inGroup = checkAccountInGroup(accId, g.id);
+                                if (inGroup) return null;
+                                const acc = activeAccounts.find(a => a.id === accId);
+                                return (
+                                  <span key={accId} className="text-[9px] bg-red-50 text-red-600 px-1 rounded border border-red-100">
+                                    {acc?.label} לא חבר בקבוצה
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -304,7 +374,7 @@ export function CampaignsPage() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  disabled={createMutation.isPending}
+                  disabled={createMutation.isPending || selectedAccountIds.length === 0}
                   className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
                 >
                   {createMutation.isPending ? 'יוצר קמפיין...' : 'הפעל קמפיין'}

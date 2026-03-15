@@ -51,7 +51,7 @@ export function ContactsPage() {
 
   const columns = [
     { header: 'שם', accessor: (c: any) => c.name || 'ללא שם', className: 'font-medium' },
-    { header: 'מספר טלפון', accessor: (c: any) => <span dir="ltr">+{c.phoneNumber}</span> },
+    { header: 'מספר טלפון', accessor: (c: any) => <span dir="ltr">{c.phoneNumber.startsWith('+') ? c.phoneNumber : `+${c.phoneNumber}`}</span> },
     { header: 'תגיות', accessor: (c: any) => (
       <div className="flex flex-wrap gap-1">
         {c.tags.map((t: string) => (

@@ -78,7 +78,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
             </div>
           )}
           {account.phoneNumber && (
-            <p className="text-muted text-xs mt-0.5" dir="ltr">+{account.phoneNumber}</p>
+            <p className="text-muted text-xs mt-0.5" dir="ltr">{account.phoneNumber.startsWith('+') ? account.phoneNumber : `+${account.phoneNumber}`}</p>
           )}
           <div className="flex items-center gap-2 mt-1.5 justify-end">
             <span className={`text-xs font-medium ${status.color}`}>{status.label}</span>

@@ -53,7 +53,7 @@ export function WarmupPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{acc.label}</p>
-                    <p className="text-[10px] opacity-70" dir="ltr">+{acc.phoneNumber}</p>
+                    <p className="text-[10px] opacity-70" dir="ltr">{acc.phoneNumber.startsWith('+') ? acc.phoneNumber : `+${acc.phoneNumber}`}</p>
                   </div>
                 </div>
                 {warmupStatuses.find((c: WarmupStatus) => c.accountId === acc.id)?.isEnabled && (
