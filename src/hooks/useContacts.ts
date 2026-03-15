@@ -112,10 +112,19 @@ export function useContactLists() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactLists'] }),
   });
 
+  const addContactsToList = useMutation({
+    mutationFn: async ({ listId, contactIds }: { listId: string; contactIds: string[] }) => {
+      const { data } = await api.post(`/contacts/lists/${listId}/contacts`, { contactIds });
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactLists'] }),
+  });
+
   return {
     lists: query.data || [],
     loading: query.isLoading,
     createList: createMutation.mutateAsync,
     deleteList: deleteMutation.mutateAsync,
+    addContactsToList: addContactsToList.mutateAsync,
   };
 }
