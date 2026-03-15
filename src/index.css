@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Rubik', 'Heebo', sans-serif;
   --font-logo: 'Gloria Hallelujah', cursive;
 
-  /* Brand colors */
+  /* Base palette defaults */
   --color-cream: #F4F4F0;
   --color-cream-dark: #EAEAE4;
   --color-charcoal: #111111;
@@ -13,6 +13,7 @@
   --color-faded: #AAAAAA;
   --color-border: #E0DED8;
   --color-border-strong: #111111;
+  --color-white: #ffffff;
 
   /* Accent — Tangerine/Signal Orange */
   --color-accent: #FF5722;
@@ -21,22 +22,7 @@
   --color-accent-subtle: #FFECE4;
   
   --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-
-  /* Dark mode overrides */
-  --color-cream: #121212; /* Dark background */
-  --color-cream-dark: #1e1e1e;
-  --color-charcoal: #f5f5f5;
-  --color-ink: #e0e0e0;
-  --color-muted: #a0a0a0;
-  --color-faded: #707070;
-  --color-border: #2a2a2a;
-  --color-border-strong: #f5f5f5;
 }
-
-/* 
-  Tailwind 4 @theme blocks are compiled into CSS variables.
-  We can use standard CSS media queries or selectors to override them.
-*/
 
 @layer base {
   :root {
@@ -52,23 +38,29 @@
   }
 
   .dark {
-    --color-cream: #0a0a0a;
-    --color-cream-dark: #141414;
-    --color-charcoal: #f0f0f0;
-    --color-ink: #d0d0d0;
-    --color-muted: #888888;
-    --color-faded: #555555;
-    --color-border: #222222;
-    --color-border-strong: #ffffff;
-    --color-white: #111111;
+    /* Improved dark theme with softer blacks and higher accessibility contrast */
+    --color-cream: #121212;      /* Main background */
+    --color-cream-dark: #1a1a1a; /* Secondary background / Sidebar */
+    --color-white: #1e1e1e;      /* Card backgrounds */
+    
+    --color-charcoal: #f5f5f5;   /* Primary text */
+    --color-ink: #e0e0e0;        /* Body text */
+    --color-muted: #a0a0a0;      /* Secondary text */
+    --color-faded: #707070;      /* Disabled/Placeholder */
+    
+    --color-border: #2d2d2d;     /* Subtle borders */
+    --color-border-strong: #404040;
+    
+    --color-accent-light: rgba(255, 87, 34, 0.15);
+    --color-accent-subtle: rgba(255, 87, 34, 0.08);
   }
 
   body {
-    @apply bg-cream text-charcoal antialiased transition-colors duration-200;
+    @apply bg-cream text-charcoal antialiased transition-colors duration-200 font-sans;
   }
 }
 
-/* Scrollbar for light theme */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -89,4 +81,9 @@
 }
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #666;
+}
+
+/* Ensure better visibility for inputs in dark mode */
+.dark input, .dark textarea, .dark select {
+  @apply bg-cream-dark border-border;
 }

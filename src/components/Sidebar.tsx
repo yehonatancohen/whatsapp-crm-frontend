@@ -116,12 +116,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed right-0 top-0 h-screen w-60 bg-white border-l border-border flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 h-screen w-60 bg-cream-dark border-l border-border flex flex-col z-50 transition-transform duration-300 ease-in-out ${
           open ? 'translate-x-0' : 'translate-x-full'
         } md:translate-x-0 md:z-30`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-border">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-border bg-white">
           <img src="/logo.png" alt="שדר" className="h-8" />
           {/* Close button -- mobile only */}
           <button
@@ -206,7 +206,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-charcoal truncate">{user?.name}</p>
-              <p className="text-xs text-faded truncate" dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</p>
+              <p className="text-xs text-muted truncate text-right" dir="ltr">{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
