@@ -67,7 +67,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
               <h3 className="text-charcoal font-medium text-sm truncate">{account.label}</h3>
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-muted hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity"
+                className="text-muted hover:text-accent md:opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Rename account"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
@@ -92,7 +92,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
         </div>
         <button
           onClick={() => onRemove(account.id)}
-          className="text-muted hover:text-red-500 transition-colors md:opacity-0 md:group-hover:opacity-100"
+          className="text-muted hover:text-red-500 transition-colors md:opacity-0 group-hover:opacity-100"
           title="Remove account"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
