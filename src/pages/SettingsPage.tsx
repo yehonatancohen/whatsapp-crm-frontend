@@ -67,24 +67,24 @@ export function SettingsPage() {
     }
   };
 
-  const inputClass = "w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
+  const inputClass = "w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
 
   return (
     <>
       <h1 className="text-2xl font-semibold text-charcoal mb-6">Settings</h1>
 
       {/* Profile Section */}
-      <div className="bg-white border border-charcoal rounded-xl p-4 sm:p-6 shadow-soft mb-6">
+      <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft mb-6">
         <h2 className="text-sm font-semibold text-charcoal mb-4">Profile</h2>
         {profileMsg && (
-          <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${profileMsg.type === 'success' ? 'bg-accent/10 border border-emerald-500/20 text-accent' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+          <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${profileMsg.type === 'success' ? 'bg-accent-light border border-accent text-accent' : 'bg-red-50 border border-red-200 text-red-600'}`}>
             {profileMsg.text}
           </div>
         )}
         <form onSubmit={handleProfileUpdate} className="space-y-4 max-w-md">
           <div>
             <label className="block text-sm font-medium text-muted mb-1.5">Email</label>
-            <input type="email" value={user?.email || ''} disabled className="w-full bg-white border border-charcoal text-faded rounded-lg px-3.5 py-2.5 text-sm cursor-not-allowed" />
+            <input type="email" value={user?.email || ''} disabled className="w-full bg-white border border-border text-faded rounded-lg px-3.5 py-2.5 text-sm cursor-not-allowed" />
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-1.5">Name</label>
@@ -97,7 +97,7 @@ export function SettingsPage() {
       </div>
 
       {/* Subscription & Billing Section */}
-      <div className="bg-white border border-charcoal rounded-xl p-4 sm:p-6 shadow-soft mb-6">
+      <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft mb-6">
         <h2 className="text-sm font-semibold text-charcoal mb-4">Subscription & Billing</h2>
         {subLoading ? (
           <p className="text-sm text-faded">Loading...</p>
@@ -107,10 +107,10 @@ export function SettingsPage() {
               <span className="text-sm text-muted">Plan:</span>
               <span className="text-sm font-medium text-charcoal">{subscription.planTier}</span>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                subscription.status === 'ACTIVE' ? 'bg-accent/10 text-accent' :
-                subscription.status === 'TRIALING' ? 'bg-blue-500/10 text-blue-400' :
-                subscription.status === 'PAST_DUE' ? 'bg-amber-500/10 text-amber-400' :
-                'bg-red-500/10 text-red-400'
+                subscription.status === 'ACTIVE' ? 'bg-accent-light text-accent' :
+                subscription.status === 'TRIALING' ? 'bg-blue-50 text-blue-600' :
+                subscription.status === 'PAST_DUE' ? 'bg-amber-50 text-amber-600' :
+                'bg-red-50 text-red-600'
               }`}>
                 {subscription.status === 'TRIALING' ? 'Trial' : subscription.status}
               </span>
@@ -121,7 +121,7 @@ export function SettingsPage() {
               </p>
             )}
             {subscription.cancelAtPeriodEnd && (
-              <p className="text-sm text-amber-400">Your subscription will cancel at the end of the current period.</p>
+              <p className="text-sm text-amber-600">Your subscription will cancel at the end of the current period.</p>
             )}
             <div className="flex gap-3 pt-1">
               <button
@@ -155,10 +155,10 @@ export function SettingsPage() {
       </div>
 
       {/* Change Password Section */}
-      <div className="bg-white border border-charcoal rounded-xl p-4 sm:p-6 shadow-soft">
+      <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft">
         <h2 className="text-sm font-semibold text-charcoal mb-4">Change Password</h2>
         {passwordMsg && (
-          <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${passwordMsg.type === 'success' ? 'bg-accent/10 border border-emerald-500/20 text-accent' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+          <div className={`rounded-lg px-4 py-3 mb-4 text-sm ${passwordMsg.type === 'success' ? 'bg-accent-light border border-accent text-accent' : 'bg-red-50 border border-red-200 text-red-600'}`}>
             {passwordMsg.text}
           </div>
         )}

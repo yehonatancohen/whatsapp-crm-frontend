@@ -17,7 +17,7 @@ export function Dashboard() {
       </div>
 
       {/* Activity Timeline */}
-      <div className="bg-white border border-charcoal rounded-xl p-5 shadow-soft">
+      <div className="bg-white border border-border rounded-xl p-5 shadow-soft">
         <h2 className="text-sm font-semibold text-charcoal mb-4">Recent Activity</h2>
 
         {activityLoading && (
@@ -51,10 +51,10 @@ export function Dashboard() {
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-    accent: { bg: 'bg-accent-light', text: 'text-accent', border: 'border-charcoal' },
-    blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-charcoal' },
-    amber: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-charcoal' },
-    violet: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-charcoal' },
+    accent: { bg: 'bg-accent-light', text: 'text-accent', border: 'border-border' },
+    blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-border' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-border' },
+    violet: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-border' },
   };
 
   const c = colorMap[color];

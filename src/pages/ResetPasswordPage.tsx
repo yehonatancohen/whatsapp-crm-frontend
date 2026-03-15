@@ -58,7 +58,7 @@ export function ResetPasswordPage() {
           <span className="font-logo text-charcoal text-xl">שדר</span>
         </div>
 
-        <div className="bg-white border border-charcoal shadow-soft p-6">
+        <div className="bg-white border border-border shadow-soft p-6">
           {success ? (
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
@@ -90,7 +90,7 @@ export function ResetPasswordPage() {
                       required
                       autoFocus
                       minLength={8}
-                      className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                      className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                       placeholder="Min 8 characters"
                     />
                   </div>
@@ -102,7 +102,7 @@ export function ResetPasswordPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                      className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                       placeholder="Repeat password"
                     />
                   </div>

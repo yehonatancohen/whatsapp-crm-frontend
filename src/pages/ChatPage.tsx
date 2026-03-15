@@ -4,7 +4,6 @@ import {
   useChatMessages,
   useSendMessage,
   type Conversation,
-  type ChatMessage,
 } from '../hooks/useChat';
 
 function formatTime(ts: number) {
@@ -114,7 +113,7 @@ export function ChatPage() {
                     onClick={() => handleSelect(chat)}
                     className={`flex items-start gap-3 p-3 text-left transition-colors border-b border-[#222d34] hover:bg-[#202c33] ${isSelected ? 'bg-[#2a3942]' : ''}`}
                   >
-                    <div className="w-12 h-12 rounded-full bg-slate-600 flex-shrink-0 flex items-center justify-center text-white/70">
+                    <div className="w-12 h-12 rounded-full bg-cream-dark flex-shrink-0 flex items-center justify-center text-white/70">
                       {chat.isGroup ? (
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                       ) : (
@@ -139,7 +138,7 @@ export function ChatPage() {
                         )}
                       </div>
                       <div className="mt-1 flex items-baseline justify-between">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-emerald-500/20">{chat.accountLabel}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-light text-accent border border-accent">{chat.accountLabel}</span>
                         {chat.unreadCount > 0 && (
                           <span className="bg-[#00a884] text-white text-xs px-2 py-0.5 rounded-full">{chat.unreadCount}</span>
                         )}
@@ -166,7 +165,7 @@ export function ChatPage() {
               <button onClick={() => setShowList(true)} className="text-gray-400 hover:text-gray-200 md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="15 18 9 12 15 6" /></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-white/80 shrink-0">
+              <div className="w-10 h-10 rounded-full bg-cream-dark flex items-center justify-center text-white/80 shrink-0">
                 {selectedChat.isGroup ? (
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                 ) : (
@@ -209,7 +208,7 @@ export function ChatPage() {
                             </span>
                           )}
                           {msg.author && !msg.fromMe && showTail && (
-                            <p className="text-xs font-medium text-emerald-600 mb-0.5">{msg.author}</p>
+                            <p className="text-xs font-medium text-accent mb-0.5">{msg.author}</p>
                           )}
                           {msg.type === 'chat' ? (
                             <div className="break-words whitespace-pre-wrap">{msg.body}</div>
@@ -271,7 +270,7 @@ export function ChatPage() {
         ) : (
           /* Empty state */
           <div className="flex-1 flex items-center justify-center flex-col gap-4 z-10">
-            <div className="w-24 h-24 rounded-full bg-emerald-900/20 flex items-center justify-center mb-2">
+            <div className="w-24 h-24 rounded-full bg-accent-light flex items-center justify-center mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 text-accent/30"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
             </div>
             <h1 className="text-xl text-gray-700 font-medium px-6 text-center bg-white/70 backdrop-blur py-1 rounded-md shadow-sm">WhatsApp CRM Inbox</h1>

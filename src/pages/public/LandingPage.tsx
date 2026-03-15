@@ -73,10 +73,10 @@ export function LandingPage() {
       <section className="px-4 pb-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-charcoal text-center mb-10">Everything you need</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {features.map((f) => (
-              <div key={f.title} className="bg-white border-2 border-charcoal shadow-soft">
-                <div className="w-10 h-10 rounded-lg bg-accent-light flex items-center justify-center mb-3">
+              <div key={f.title} className="flex flex-col items-center text-center sm:items-start sm:text-start">
+                <div className="w-10 h-10 rounded-lg bg-accent-light flex items-center justify-center mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
                     {f.icon}
                   </svg>
@@ -91,7 +91,7 @@ export function LandingPage() {
 
       {/* CTA */}
       <section className="px-4 pb-20">
-        <div className="max-w-3xl mx-auto bg-white border-2 border-charcoal shadow-soft">
+        <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-charcoal mb-3">Ready to get started?</h2>
           <p className="text-muted mb-6">Join thousands of businesses using <span className="font-logo">שדר</span> to grow on WhatsApp.</p>
           <Link to="/register" className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-lg transition-colors">

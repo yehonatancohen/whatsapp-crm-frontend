@@ -3,11 +3,11 @@ import { useWarmupOverview, useToggleWarmup } from '../hooks/useWarmup';
 import type { WarmupLevel, WarmupStatus } from '../types';
 
 const levelConfig: Record<WarmupLevel, { color: string; bg: string; border: string; label: string }> = {
-  L1: { color: 'text-charcoal', bg: 'bg-slate-600', border: 'border-slate-500', label: 'Starter' },
-  L2: { color: 'text-blue-400', bg: 'bg-blue-500', border: 'border-blue-400', label: 'Warming' },
-  L3: { color: 'text-amber-400', bg: 'bg-amber-500', border: 'border-amber-400', label: 'Active' },
-  L4: { color: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-400', label: 'Trusted' },
-  L5: { color: 'text-accent', bg: 'bg-accent', border: 'border-emerald-400', label: 'Fully Warmed' },
+  L1: { color: 'text-charcoal', bg: 'bg-gray-400', border: 'border-gray-400', label: 'Starter' },
+  L2: { color: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-400', label: 'Warming' },
+  L3: { color: 'text-amber-600', bg: 'bg-amber-500', border: 'border-amber-400', label: 'Active' },
+  L4: { color: 'text-purple-600', bg: 'bg-purple-500', border: 'border-purple-400', label: 'Trusted' },
+  L5: { color: 'text-accent', bg: 'bg-accent', border: 'border-accent', label: 'Fully Warmed' },
 };
 
 const levelProgression = [
@@ -36,8 +36,8 @@ export function WarmupPage() {
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-        <p className="text-red-400 text-sm">{error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <p className="text-red-600 text-sm">{error}</p>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function WarmupPage() {
 
       {/* Empty state */}
       {accounts.length === 0 && (
-        <div className="bg-white border border-charcoal rounded-xl p-12 shadow-soft text-center">
+        <div className="bg-white border border-border rounded-xl p-12 shadow-soft text-center">
           <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
               <path d="M12 2v10l4.5 4.5" />
@@ -106,7 +106,7 @@ export function WarmupPage() {
         </button>
 
         {infoOpen && (
-          <div className="bg-white border border-charcoal rounded-xl p-6 shadow-soft mt-3">
+          <div className="bg-white border border-border rounded-xl p-6 shadow-soft mt-3">
             {/* Timeline */}
             <div className="flex items-start gap-0 overflow-x-auto pb-2">
               {levelProgression.map((step) => {
@@ -155,7 +155,7 @@ function WarmupCard({
   };
 
   return (
-    <div className="bg-white border border-charcoal rounded-xl p-5 shadow-soft hover:border-slate-600/50 transition-colors">
+    <div className="bg-white border border-border rounded-xl p-5 shadow-soft hover:border-border transition-colors">
       {/* Top row: label + toggle */}
       <div className="flex items-start justify-between mb-3">
         <div className="min-w-0">
@@ -172,7 +172,7 @@ function WarmupCard({
           onClick={handleToggle}
           disabled={isToggling}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-            account.isEnabled ? 'bg-accent' : 'bg-slate-600'
+            account.isEnabled ? 'bg-accent' : 'bg-gray-300'
           }`}
           role="switch"
           aria-checked={account.isEnabled}

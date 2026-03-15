@@ -52,10 +52,10 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <form
         onSubmit={handleSubmit}
-        className="relative bg-white border border-charcoal rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
+        className="relative bg-white border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
       >
         <h2 className="text-lg font-semibold text-charcoal mb-5">Add Account</h2>
 
@@ -68,14 +68,14 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               autoFocus
-              className={`w-full bg-white border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none transition-colors ${
+              className={`w-full bg-white border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none transition-colors ${
                 label.trim() && !labelValid
                   ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                  : 'border-charcoal focus:border-accent focus:ring-1 focus:ring-accent'
+                  : 'border-border focus:border-accent focus:ring-1 focus:ring-accent'
               }`}
             />
             {label.trim() && !labelValid && (
-              <p className="text-red-400 text-xs mt-1">Only letters, numbers, hyphens and underscores allowed.</p>
+              <p className="text-red-600 text-xs mt-1">Only letters, numbers, hyphens and underscores allowed.</p>
             )}
           </div>
 
@@ -86,12 +86,12 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
               placeholder="e.g. http://user:pass@host:port"
               value={proxy}
               onChange={(e) => setProxy(e.target.value)}
-              className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+              className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
             />
           </div>
         </div>
 
-        {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+        {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
 
         <div className="flex justify-end gap-3 mt-6">
           <button

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function VerifyEmailPendingPage() {
@@ -33,7 +32,7 @@ export function VerifyEmailPendingPage() {
           <span className="font-logo text-charcoal text-xl">שדר</span>
         </div>
 
-        <div className="bg-white border border-charcoal shadow-soft p-6 text-center">
+        <div className="bg-white border border-border shadow-soft p-6 text-center">
           <div className="w-14 h-14 rounded-full bg-accent-subtle flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-accent">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -62,7 +61,7 @@ export function VerifyEmailPendingPage() {
           <button
             onClick={handleResend}
             disabled={loading || sent}
-            className="w-full bg-white border border-charcoal hover:bg-cream disabled:opacity-50 text-charcoal text-sm font-medium py-2.5 rounded-lg transition-colors mb-3"
+            className="w-full bg-white border border-border hover:bg-cream disabled:opacity-50 text-charcoal text-sm font-medium py-2.5 rounded-lg transition-colors mb-3"
           >
             {loading ? 'Sending...' : sent ? 'Email sent' : 'Resend verification email'}
           </button>

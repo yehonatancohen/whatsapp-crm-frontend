@@ -102,7 +102,7 @@ function Accordion({ item }: { item: FaqItem }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-charcoal last:border-0">
+    <div className="border-b border-border last:border-0">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between py-3.5 text-left"
@@ -126,13 +126,13 @@ export function HelpPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-16">
       <h1 className="text-3xl font-bold text-charcoal mb-2">Help & FAQ</h1>
-      <p className="text-muted mb-10">Find answers to common questions about using parties247.</p>
+      <p className="text-muted mb-10">Find answers to common questions about using שדר.</p>
 
       <div className="space-y-8">
         {faqSections.map((section) => (
           <div key={section.title}>
             <h2 className="text-lg font-semibold text-charcoal mb-3">{section.title}</h2>
-            <div className="bg-white border border-charcoal rounded-xl px-5">
+            <div className="bg-white border border-border rounded-xl px-5">
               {section.items.map((item) => (
                 <Accordion key={item.q} item={item} />
               ))}
@@ -141,7 +141,7 @@ export function HelpPage() {
         ))}
       </div>
 
-      <div className="mt-12 bg-white border border-charcoal rounded-xl p-6 shadow-soft text-center">
+      <div className="mt-12 bg-white border border-border rounded-xl p-6 shadow-soft text-center">
         <h3 className="text-sm font-semibold text-charcoal mb-2">Still have questions?</h3>
         <p className="text-sm text-muted mb-4">We're here to help.</p>
         <a

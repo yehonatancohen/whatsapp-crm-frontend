@@ -46,13 +46,13 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-white border border-charcoal rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl">
+      <div className="relative bg-white border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl">
         <h2 className="text-lg font-semibold text-charcoal mb-5">Import Contacts</h2>
 
         {!result ? (
           <>
             <div
-              className="border-2 border-dashed border-charcoal rounded-xl p-8 text-center cursor-pointer hover:border-slate-600 transition-colors"
+              className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-accent transition-colors"
               onClick={() => inputRef.current?.click()}
             >
               <input
@@ -79,7 +79,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
                 placeholder="e.g., March Leads"
-                className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
               />
               <p className="text-faded text-xs mt-1">
                 Imported contacts will be added to this list. Leave empty to skip list creation.
@@ -102,7 +102,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
               <button
                 onClick={handleImport}
                 disabled={!file || isImporting}
-                className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent disabled:bg-cream disabled:text-faded text-white rounded-lg transition-colors"
+                className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-lg transition-colors"
               >
                 {isImporting ? 'Importing...' : 'Import'}
               </button>
@@ -128,7 +128,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
                 <span className="text-red-400">{result.errors}</span>
               </div>
               {result.listName && (
-                <div className="flex justify-between pt-1 border-t border-charcoal">
+                <div className="flex justify-between pt-1 border-t border-border">
                   <span className="text-muted">Added to list</span>
                   <span className="text-accent">{result.listName}</span>
                 </div>
@@ -139,7 +139,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
             {result.errorDetails && result.errorDetails.length > 0 && (
               <div className="mt-4">
                 <p className="text-xs font-medium text-red-400 mb-2">Error details:</p>
-                <div className="max-h-40 overflow-y-auto bg-white border border-red-500/20 rounded-lg divide-y divide-slate-800">
+                <div className="max-h-40 overflow-y-auto bg-white border border-red-500/20 rounded-lg divide-y divide-border">
                   {result.errorDetails.map((d: any, i: number) => (
                     <div key={i} className="px-3 py-2 text-xs">
                       <span className="text-faded">Row {d.row}</span>
@@ -153,7 +153,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
             <div className="flex justify-end mt-5">
               <button
                 onClick={handleClose}
-                className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent text-white rounded-lg transition-colors"
+                className="px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors"
               >
                 Done
               </button>

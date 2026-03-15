@@ -21,7 +21,7 @@ export function AccountCard({ account, onRemove }: Props) {
   };
 
   return (
-    <div className="bg-white border border-charcoal rounded-xl p-5 hover:border-charcoal shadow-soft">
+    <div className="bg-white border border-border rounded-xl p-5 hover:border-border shadow-soft">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>

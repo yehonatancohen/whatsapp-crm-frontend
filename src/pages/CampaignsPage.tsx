@@ -16,13 +16,13 @@ import { FormError } from '../components/shared/FormError';
 import type { Campaign, CampaignStatus, CampaignType, CreateCampaignData } from '../types';
 
 const statusConfig: Record<CampaignStatus, { label: string; bg: string; text: string; pulse?: boolean }> = {
-  DRAFT: { label: 'Draft', bg: 'bg-slate-600/30', text: 'text-muted' },
-  SCHEDULED: { label: 'Scheduled', bg: 'bg-blue-500/20', text: 'text-blue-400' },
-  RUNNING: { label: 'Running', bg: 'bg-accent/20', text: 'text-accent', pulse: true },
-  PAUSED: { label: 'Paused', bg: 'bg-amber-500/20', text: 'text-amber-400' },
-  COMPLETED: { label: 'Completed', bg: 'bg-accent/20', text: 'text-accent' },
-  CANCELLED: { label: 'Cancelled', bg: 'bg-slate-600/30', text: 'text-muted' },
-  FAILED: { label: 'Failed', bg: 'bg-red-500/20', text: 'text-red-400' },
+  DRAFT: { label: 'Draft', bg: 'bg-gray-100', text: 'text-muted' },
+  SCHEDULED: { label: 'Scheduled', bg: 'bg-blue-50', text: 'text-blue-600' },
+  RUNNING: { label: 'Running', bg: 'bg-accent-light', text: 'text-accent', pulse: true },
+  PAUSED: { label: 'Paused', bg: 'bg-amber-50', text: 'text-amber-600' },
+  COMPLETED: { label: 'Completed', bg: 'bg-accent-light', text: 'text-accent' },
+  CANCELLED: { label: 'Cancelled', bg: 'bg-gray-100', text: 'text-muted' },
+  FAILED: { label: 'Failed', bg: 'bg-red-50', text: 'text-red-600' },
 };
 
 export function CampaignsPage() {
@@ -48,8 +48,8 @@ export function CampaignsPage() {
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-        <p className="text-red-400 text-sm">{error.message}</p>
+      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <p className="text-red-600 text-sm">{error.message}</p>
       </div>
     );
   }
@@ -83,7 +83,7 @@ export function CampaignsPage() {
 
       {/* Empty state */}
       {(!campaigns || campaigns.length === 0) && !showCreateForm && (
-        <div className="bg-white border border-charcoal rounded-xl p-12 shadow-soft text-center">
+        <div className="bg-white border border-border rounded-xl p-12 shadow-soft text-center">
           <div className="w-14 h-14 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-faded">
               <path d="M22 2L11 13" />
@@ -176,7 +176,7 @@ function CampaignCard({
   const showProgress = campaign.status === 'RUNNING' || campaign.status === 'COMPLETED' || campaign.status === 'PAUSED';
 
   return (
-    <div className="bg-white border border-charcoal rounded-xl p-5 shadow-soft hover:border-slate-600/50 transition-colors">
+    <div className="bg-white border border-border rounded-xl p-5 shadow-soft hover:border-border transition-colors">
       {/* Top row: name + status */}
       <div className="flex items-start justify-between mb-3">
         <div className="min-w-0 flex-1 mr-3">
@@ -224,7 +224,7 @@ function CampaignCard({
             <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
           <span className="text-xs text-muted">
-            Failed: <span className="text-red-400">{campaign.failedCount}</span>
+            Failed: <span className="text-red-600">{campaign.failedCount}</span>
           </span>
         </div>
         <div className="flex items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
@@ -255,7 +255,7 @@ function CampaignCard({
         <div className="mb-3">
           <button
             onClick={() => setShowFailures(!showFailures)}
-            className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+            className="text-xs text-red-600 hover:text-red-500 transition-colors flex items-center gap-1"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-3 h-3 transition-transform ${showFailures ? 'rotate-90' : ''}`}>
               <polyline points="9 18 15 12 9 6" />
@@ -263,17 +263,17 @@ function CampaignCard({
             {showFailures ? 'Hide' : 'View'} failure reasons ({campaign.failedCount})
           </button>
           {showFailures && (
-            <div className="mt-2 max-h-48 overflow-y-auto bg-white border border-charcoal rounded-lg">
+            <div className="mt-2 max-h-48 overflow-y-auto bg-white border border-border rounded-lg">
               {failuresLoading ? (
                 <p className="text-xs text-faded p-3">Loading...</p>
               ) : failures && failures.length > 0 ? (
-                <div className="divide-y divide-slate-800">
+                <div className="divide-y divide-border">
                   {failures.map((f: any) => (
                     <div key={f.id} className="px-3 py-2 text-xs">
                       <span className="text-muted">
                         {f.contact?.name || f.contact?.phoneNumber || f.groupJid || 'Unknown'}
                       </span>
-                      <span className="text-red-400/80 ml-2">
+                      <span className="text-red-600/80 ml-2">
                         {f.errorMessage || 'Unknown error'}
                       </span>
                     </div>
@@ -291,7 +291,7 @@ function CampaignCard({
       <div className="flex items-center gap-2 pt-1">
         {campaign.status === 'DRAFT' && (
           <>
-            <ActionButton onClick={onStart} disabled={isActionPending} variant="emerald">
+            <ActionButton onClick={onStart} disabled={isActionPending} variant="accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
@@ -340,7 +340,7 @@ function CampaignCard({
         )}
         {campaign.status === 'PAUSED' && (
           <>
-            <ActionButton onClick={onResume} disabled={isActionPending} variant="emerald">
+            <ActionButton onClick={onResume} disabled={isActionPending} variant="accent">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
@@ -379,14 +379,14 @@ function ActionButton({
 }: {
   onClick: () => void;
   disabled?: boolean;
-  variant: 'emerald' | 'red' | 'amber' | 'slate';
+  variant: 'accent' | 'red' | 'amber' | 'slate';
   children: React.ReactNode;
 }) {
   const variantClasses = {
-    emerald: 'bg-accent/10 text-accent hover:bg-accent/20 border-emerald-500/20',
-    red: 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20',
-    amber: 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20',
-    slate: 'bg-cream text-charcoal hover:bg-cream border-slate-600/50',
+    accent: 'bg-accent-light text-accent hover:bg-accent-subtle border-accent',
+    red: 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200',
+    amber: 'bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200',
+    slate: 'bg-cream text-charcoal hover:bg-cream-dark border-border',
   };
 
   return (
@@ -473,10 +473,10 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const selectClass = "w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
+  const selectClass = "w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
 
   return (
-    <div className="bg-white border border-charcoal rounded-xl p-4 sm:p-6 shadow-soft mb-6">
+    <div className="bg-white border border-border rounded-xl p-4 sm:p-6 shadow-soft mb-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-semibold text-charcoal">Create Campaign</h2>
         <button
@@ -501,7 +501,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., March Promo Blast"
-            className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+            className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
         </div>
 
@@ -514,8 +514,8 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               onClick={() => setCampaignType('DIRECT_MESSAGE')}
               className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
                 campaignType === 'DIRECT_MESSAGE'
-                  ? 'bg-accent/10 border-emerald-500/30 text-accent'
-                  : 'bg-white border-charcoal text-muted hover:text-charcoal'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'bg-white border-border text-muted hover:text-charcoal'
               }`}
             >
               Direct Message
@@ -525,8 +525,8 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               onClick={() => setCampaignType('GROUP_MESSAGE')}
               className={`flex-1 text-sm font-medium px-4 py-2.5 rounded-lg border transition-colors ${
                 campaignType === 'GROUP_MESSAGE'
-                  ? 'bg-accent/10 border-emerald-500/30 text-accent'
-                  : 'bg-white border-charcoal text-muted hover:text-charcoal'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'bg-white border-border text-muted hover:text-charcoal'
               }`}
             >
               Group Message
@@ -542,7 +542,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
               placeholder="Type your message here..."
-              className="w-full flex-1 min-h-[160px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors resize-none"
+              className="w-full flex-1 min-h-[160px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors resize-none"
             />
             <p className="text-xs text-faded mt-2">
               Supports <span className="text-muted font-mono">*bold*</span>, <span className="text-muted font-mono">_italic_</span>, <span className="text-muted font-mono">~strike~</span> and <span className="text-muted font-mono">{'{spintax|opts}'}</span>
@@ -597,7 +597,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               <p className="text-sm text-faded">No groups found for this account.</p>
             )}
             {groups && groups.length > 0 && (
-              <div className="max-h-48 overflow-y-auto space-y-1 border border-charcoal rounded-lg p-2">
+              <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
                 {groups.map((group) => {
                   const isSelected = selectedGroupJids.some((g) => g.jid === group.id);
                   return (
@@ -611,7 +611,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleGroup(group.id, group.name)}
-                        className="accent-emerald-500"
+                        className="accent-accent"
                       />
                       <span className="text-sm text-charcoal">{group.name}</span>
                       <span className="text-xs text-faded ml-auto">{group.participantsCount} members</span>
@@ -637,7 +637,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
             max={10}
             value={messagesPerMinute}
             onChange={(e) => setMessagesPerMinute(Number(e.target.value))}
-            className="w-full accent-emerald-500"
+            className="w-full accent-accent"
           />
           <div className="flex justify-between text-xs text-faded mt-0.5">
             <span>1</span>
@@ -654,7 +654,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
             max={200}
             value={dailyLimitPerAccount}
             onChange={(e) => setDailyLimitPerAccount(Math.min(200, Math.max(1, Number(e.target.value))))}
-            className="w-full max-w-full sm:max-w-[180px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+            className="w-full max-w-full sm:max-w-[180px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
           <p className="text-xs text-faded mt-1">Between 1 and 200 messages per account per day</p>
         </div>
@@ -666,7 +666,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => setScheduleEnabled(!scheduleEnabled)}
               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                scheduleEnabled ? 'bg-accent' : 'bg-slate-600'
+                scheduleEnabled ? 'bg-accent' : 'bg-gray-300'
               }`}
               role="switch"
               aria-checked={scheduleEnabled}
@@ -684,7 +684,7 @@ function CreateCampaignForm({ onClose }: { onClose: () => void }) {
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full max-w-full sm:max-w-[280px] bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors [color-scheme:dark]"
+              className="w-full max-w-full sm:max-w-[280px] bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
             />
           )}
         </div>
@@ -736,7 +736,7 @@ function WhatsAppPreview({ text }: { text: string }) {
       .replace(/```(.*?)```/gs, '<code class="bg-black/20 rounded px-1 font-mono text-xs">$1</code>');
       
     // Handle spintax optionally by highlighting it mentally, or just let users see it raw.
-    html = html.replace(/(\{[^{}]+\})/g, '<span class="text-emerald-300 opacity-80">$1</span>');
+    html = html.replace(/(\{[^{}]+\})/g, '<span class="text-accent-hover opacity-80">$1</span>');
 
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
   };
@@ -744,7 +744,7 @@ function WhatsAppPreview({ text }: { text: string }) {
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-charcoal shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
+    <div className="w-full flex-1 min-h-[160px] bg-[#0b141a] rounded-lg border border-border shadow-inner relative overflow-hidden flex flex-col p-4 z-0">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-[0.06] pointer-events-none z-0" 

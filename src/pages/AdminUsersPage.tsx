@@ -5,7 +5,7 @@ import type { AdminUser } from '../types';
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
-    <div className="bg-white border border-charcoal rounded-xl p-4 shadow-soft">
+    <div className="bg-white border border-border rounded-xl p-4 shadow-soft">
       <p className="text-xs text-muted mb-1">{label}</p>
       <p className="text-2xl font-bold text-charcoal">{value}</p>
       {sub && <p className="text-xs text-faded mt-1">{sub}</p>}
@@ -31,7 +31,7 @@ function OverviewTab() {
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-white border border-charcoal rounded-xl p-4 shadow-soft">
+        <div className="bg-white border border-border rounded-xl p-4 shadow-soft">
           <h3 className="text-sm font-semibold text-charcoal mb-3">Subscriptions by Status</h3>
           {Object.keys(data.subsByStatus).length === 0 ? (
             <p className="text-sm text-faded">No subscriptions yet</p>
@@ -40,10 +40,10 @@ function OverviewTab() {
               {Object.entries(data.subsByStatus).map(([status, count]) => (
                 <div key={status} className="flex items-center justify-between">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    status === 'ACTIVE' ? 'bg-accent/10 text-accent' :
-                    status === 'TRIALING' ? 'bg-blue-500/10 text-blue-400' :
-                    status === 'PAST_DUE' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-red-500/10 text-red-400'
+                    status === 'ACTIVE' ? 'bg-accent-light text-accent' :
+                    status === 'TRIALING' ? 'bg-blue-50 text-blue-600' :
+                    status === 'PAST_DUE' ? 'bg-amber-50 text-amber-600' :
+                    'bg-red-50 text-red-600'
                   }`}>{status}</span>
                   <span className="text-sm font-medium text-charcoal">{count}</span>
                 </div>
@@ -52,7 +52,7 @@ function OverviewTab() {
           )}
         </div>
 
-        <div className="bg-white border border-charcoal rounded-xl p-4 shadow-soft">
+        <div className="bg-white border border-border rounded-xl p-4 shadow-soft">
           <h3 className="text-sm font-semibold text-charcoal mb-3">Subscriptions by Plan</h3>
           {Object.keys(data.subsByTier).length === 0 ? (
             <p className="text-sm text-faded">No subscriptions yet</p>
@@ -91,7 +91,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
   }
 
   if (error) {
-    return <p className="text-red-400 text-sm">{error.message}</p>;
+    return <p className="text-red-600 text-sm">{error.message}</p>;
   }
 
   const filtered = (users || []).filter(
@@ -125,14 +125,14 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
           placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-sm bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors placeholder-slate-500"
+          className="w-full max-w-sm bg-white border border-border text-charcoal rounded-lg px-3.5 py-2 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors placeholder-faded"
         />
       </div>
 
-      <div className="bg-white border border-charcoal rounded-xl overflow-x-auto">
+      <div className="bg-white border border-border rounded-xl overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
           <thead>
-            <tr className="border-b border-charcoal">
+            <tr className="border-b border-border">
               <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase">User</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase">Role</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-muted uppercase">Plan</th>
@@ -143,16 +143,16 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
           </thead>
           <tbody>
             {filtered.map((u) => (
-              <tr key={u.id} className="border-b border-charcoal/30 last:border-0 hover:bg-cream/20">
+              <tr key={u.id} className="border-b border-border last:border-0 hover:bg-cream/20">
                 <td className="px-5 py-3">
                   <p className="text-charcoal font-medium">{u.name}</p>
                   <p className="text-xs text-faded">{u.email}</p>
                   {!u.emailVerified && (
-                    <span className="text-[10px] text-amber-400">Unverified</span>
+                    <span className="text-[10px] text-amber-600">Unverified</span>
                   )}
                 </td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${u.role === 'ADMIN' ? 'bg-violet-500/20 text-violet-400' : 'bg-slate-600/30 text-muted'}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${u.role === 'ADMIN' ? 'bg-violet-50 text-violet-600' : 'bg-gray-100 text-muted'}`}>
                     {u.role}
                   </span>
                 </td>
@@ -162,9 +162,9 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                       <span className="text-xs text-charcoal">{u.subscription.planTier}</span>
                       <span className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${
                         u.subscription.status === 'ACTIVE' ? 'bg-accent/10 text-accent' :
-                        u.subscription.status === 'TRIALING' ? 'bg-blue-500/10 text-blue-400' :
-                        u.subscription.status === 'PAST_DUE' ? 'bg-amber-500/10 text-amber-400' :
-                        'bg-red-500/10 text-red-400'
+                        u.subscription.status === 'TRIALING' ? 'bg-blue-50 text-blue-600' :
+                        u.subscription.status === 'PAST_DUE' ? 'bg-amber-50 text-amber-600' :
+                        'bg-red-50 text-red-600'
                       }`}>{u.subscription.status}</span>
                     </div>
                   ) : (
@@ -173,7 +173,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                 </td>
                 <td className="px-5 py-3 text-muted">{u._count.accounts}</td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs font-medium ${u.isActive ? 'text-accent' : 'text-red-400'}`}>
+                  <span className={`text-xs font-medium ${u.isActive ? 'text-accent' : 'text-red-600'}`}>
                     {u.isActive ? 'Active' : 'Disabled'}
                   </span>
                 </td>
@@ -183,10 +183,10 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                       <button onClick={() => toggleRole(u)} disabled={updateMutation.isPending} className="text-xs text-muted hover:text-charcoal transition-colors disabled:opacity-50">
                         {u.role === 'ADMIN' ? 'Demote' : 'Promote'}
                       </button>
-                      <button onClick={() => toggleActive(u)} disabled={updateMutation.isPending} className={`text-xs transition-colors disabled:opacity-50 ${u.isActive ? 'text-red-400 hover:text-red-300' : 'text-accent hover:text-accent-hover'}`}>
+                      <button onClick={() => toggleActive(u)} disabled={updateMutation.isPending} className={`text-xs transition-colors disabled:opacity-50 ${u.isActive ? 'text-red-600 hover:text-red-500' : 'text-accent hover:text-accent-hover'}`}>
                         {u.isActive ? 'Disable' : 'Enable'}
                       </button>
-                      <button onClick={() => handleDelete(u.id)} disabled={deleteMutation.isPending} className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50">
+                      <button onClick={() => handleDelete(u.id)} disabled={deleteMutation.isPending} className="text-xs text-red-600 hover:text-red-500 transition-colors disabled:opacity-50">
                         {confirmDelete === u.id ? 'Confirm?' : 'Delete'}
                       </button>
                     </div>
@@ -207,8 +207,8 @@ export function AdminUsersPage() {
 
   if (currentUser?.role !== 'ADMIN') {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-        <p className="text-red-400 text-sm">Admin access required.</p>
+      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <p className="text-red-600 text-sm">Admin access required.</p>
       </div>
     );
   }
@@ -217,7 +217,7 @@ export function AdminUsersPage() {
     <>
       <h1 className="text-2xl font-semibold text-charcoal mb-6">Admin Dashboard</h1>
 
-      <div className="flex gap-1 mb-6 bg-white border border-charcoal rounded-lg p-1 shadow-soft w-fit">
+      <div className="flex gap-1 mb-6 bg-white border border-border rounded-lg p-1 shadow-soft w-fit">
         <button
           onClick={() => setTab('overview')}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${tab === 'overview' ? 'bg-cream text-charcoal' : 'text-muted hover:text-charcoal'}`}

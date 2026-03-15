@@ -1,11 +1,11 @@
 export function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold text-charcoal mb-6">About parties247</h1>
+      <h1 className="text-3xl font-bold text-charcoal mb-6">About שדר</h1>
 
       <div className="prose-sm space-y-4 text-muted leading-relaxed">
         <p>
-          parties247 is a WhatsApp marketing and CRM platform built for businesses that want to connect
+          שדר is a WhatsApp marketing and CRM platform built for businesses that want to connect
           with their customers at scale. We provide the tools to manage multiple WhatsApp accounts,
           run targeted campaigns, and engage in meaningful conversations — all from one dashboard.
         </p>

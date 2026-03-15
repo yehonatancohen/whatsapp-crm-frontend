@@ -7,12 +7,12 @@ export function TermsPage() {
       <div className="space-y-6 text-sm text-muted leading-relaxed">
         <section>
           <h2 className="text-base font-semibold text-charcoal mb-2">1. Acceptance of Terms</h2>
-          <p>By accessing or using parties247 ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, you may not use the Service.</p>
+          <p>By accessing or using שדר ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, you may not use the Service.</p>
         </section>
 
         <section>
           <h2 className="text-base font-semibold text-charcoal mb-2">2. Description of Service</h2>
-          <p>parties247 provides a WhatsApp marketing and CRM platform that allows users to manage WhatsApp accounts, send messages, manage contacts, and run campaigns. The Service is provided "as is" and may be updated from time to time.</p>
+          <p>שדר provides a WhatsApp marketing and CRM platform that allows users to manage WhatsApp accounts, send messages, manage contacts, and run campaigns. The Service is provided "as is" and may be updated from time to time.</p>
         </section>
 
         <section>

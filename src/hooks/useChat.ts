@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect } from 'react';
 import { api } from '../lib/api';
 import { useSocket } from '../context/SocketContext';
 

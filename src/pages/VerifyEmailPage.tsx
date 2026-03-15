@@ -41,7 +41,7 @@ export function VerifyEmailPage() {
           <span className="font-logo text-charcoal text-xl">שדר</span>
         </div>
 
-        <div className="bg-white border border-charcoal shadow-soft p-6 text-center">
+        <div className="bg-white border border-border shadow-soft p-6 text-center">
           {status === 'loading' ? (
             <>
               <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -76,7 +76,7 @@ export function VerifyEmailPage() {
               <p className="text-sm text-muted mb-6">{message}</p>
               <Link
                 to="/verify-email-pending"
-                className="inline-block w-full bg-white border border-charcoal hover:bg-cream text-charcoal text-sm font-medium py-2.5 rounded-lg transition-colors"
+                className="inline-block w-full bg-white border border-border hover:bg-cream text-charcoal text-sm font-medium py-2.5 rounded-lg transition-colors"
               >
                 Request new verification link
               </Link>

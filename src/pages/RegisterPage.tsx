@@ -44,7 +44,7 @@ export function RegisterPage() {
           <span className="font-logo text-charcoal text-xl">שדר</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-charcoal shadow-soft p-6">
+        <form onSubmit={handleSubmit} className="bg-white border border-border shadow-soft p-6">
           <h1 className="text-lg font-semibold text-charcoal mb-5">Create account</h1>
 
           <div className="space-y-4">
@@ -56,7 +56,7 @@ export function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 autoFocus
-                className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                 placeholder="Your name"
               />
             </div>
@@ -67,7 +67,7 @@ export function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -79,7 +79,7 @@ export function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-faded outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                 placeholder="Min 8 characters"
               />
             </div>

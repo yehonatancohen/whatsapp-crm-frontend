@@ -121,7 +121,7 @@ export function ContactsPage() {
 
       {/* New List Form */}
       {showNewList && (
-        <div className="bg-white border border-charcoal rounded-xl p-4 shadow-soft mb-4">
+        <div className="bg-white border border-border rounded-xl p-4 shadow-soft mb-4">
           <form onSubmit={handleCreateList} className="flex items-end gap-3">
             <div className="flex-1">
               <label className="block text-sm text-muted mb-1.5">List Name</label>
@@ -131,7 +131,7 @@ export function ContactsPage() {
                 onChange={(e) => setNewListName(e.target.value)}
                 placeholder="e.g., VIP Customers"
                 autoFocus
-                className="w-full bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                className="w-full bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
               />
             </div>
             <button
@@ -161,7 +161,7 @@ export function ContactsPage() {
             {lists.map((list) => (
               <div
                 key={list.id}
-                className="flex items-center gap-2 bg-white border border-charcoal rounded-lg px-3 py-2 group"
+                className="flex items-center gap-2 bg-white border border-border rounded-lg px-3 py-2 group"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-faded">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -195,11 +195,11 @@ export function ContactsPage() {
             setPage(1);
           }}
           placeholder="Search by phone or name..."
-          className="w-full max-w-sm bg-white border border-charcoal text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+          className="w-full max-w-sm bg-white border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm placeholder-slate-500 outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
         />
       </div>
 
-      <div className="bg-white border border-charcoal rounded-xl">
+      <div className="bg-white border border-border rounded-xl">
         <DataTable columns={columns} data={contacts} keyField="id" loading={loading} emptyMessage="No contacts yet. Import a CSV to get started." />
       </div>
 
@@ -213,14 +213,14 @@ export function ContactsPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 text-xs bg-white border border-charcoal rounded-lg text-charcoal hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 text-xs bg-white border border-border rounded-lg text-charcoal hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= pagination.totalPages}
-              className="px-3 py-1.5 text-xs bg-white border border-charcoal rounded-lg text-charcoal hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 text-xs bg-white border border-border rounded-lg text-charcoal hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
