@@ -115,6 +115,48 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
   return { messages, loading: isLoading, error: error?.message };
 }
 
+export interface GroupInfo {
+  name: string;
+  description: string;
+  participantCount: number;
+  participants: Array<{ id: string; isAdmin: boolean; isSuperAdmin: boolean }>;
+  iAmAdmin: boolean;
+  canAnyoneAdd: boolean;
+}
+
+export interface AddParticipantResult {
+  success: boolean;
+  message: string;
+  inviteSent: boolean;
+}
+
+export function useGroupInfo(accountId: string | null, chatId: string | null) {
+  const { data, isLoading, error, refetch } = useQuery<GroupInfo>({
+    queryKey: ['chat', 'group-info', accountId, chatId],
+    queryFn: async () => {
+      const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId!)}/group-info`);
+      return data;
+    },
+    enabled: !!accountId && !!chatId,
+  });
+
+  return { groupInfo: data, loading: isLoading, error: error?.message, refetch };
+}
+
+export function useAddParticipants() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, phoneNumbers }: { accountId: string; chatId: string; phoneNumbers: string[] }) => {
+      const { data } = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/add-participants`, { phoneNumbers });
+      return data.results as Record<string, AddParticipantResult>;
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });
+    },
+  });
+}
+
 export function useSendMessage() {
   const queryClient = useQueryClient();
 
