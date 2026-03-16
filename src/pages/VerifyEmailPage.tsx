@@ -15,7 +15,7 @@ export function VerifyEmailPage() {
       return;
     }
 
-    api.post('/auth/verify-email', { token })
+    api.get(`/auth/verify-email?token=${token}`)
       .then(() => {
         setStatus('success');
         updateUser({ emailVerified: true });
