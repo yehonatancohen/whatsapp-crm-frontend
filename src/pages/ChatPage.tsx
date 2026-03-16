@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   useConversations,
   useChatMessages,
@@ -22,23 +22,14 @@ function extractUrls(text: string): string[] {
 }
 
 function LinkPreview({ url }: { url: string }) {
-  const [meta, setMeta] = useState<{ title?: string; description?: string; image?: string } | null>(null);
-  const [failed, setFailed] = useState(false);
+  let hostname: string;
+  try { hostname = new URL(url).hostname; } catch { return null; }
 
-  useEffect(() => {
-    let cancelled = false;
-    // Try to get OG tags via a simple proxy approach
-    // For now we just show a clean link card without fetching OG (requires backend proxy)
-    setMeta({ title: new URL(url).hostname });
-    return () => { cancelled = true; };
-  }, [url]);
-
-  if (failed || !meta) return null;
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-1.5 rounded-lg border border-border/50 overflow-hidden hover:border-accent/30 transition-colors bg-white/10">
       <div className="px-3 py-2">
-        <p className="text-xs font-medium truncate opacity-90">{meta.title}</p>
+        <p className="text-xs font-medium truncate opacity-90">{hostname}</p>
         <p className="text-[10px] opacity-60 truncate" dir="ltr">{url}</p>
       </div>
     </a>
