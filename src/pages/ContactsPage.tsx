@@ -11,7 +11,7 @@ export function ContactsPage() {
   const [search, setSearch] = useState('');
 
   const { lists, loading: listsLoading, deleteList, addContactsToList } = useContactLists();
-  const { contacts, loading: contactsLoading, importContacts, isImporting, deleteContact, pagination } = useContacts(page, search);
+  const { contacts, loading: contactsLoading, importContacts, isImporting, deleteContact, updateContact, pagination } = useContacts(page, search);
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -50,8 +50,32 @@ export function ContactsPage() {
     }
   };
 
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+
+  const handleRename = async (id: string) => {
+    if (!editName.trim()) { setEditingContactId(null); return; }
+    await updateContact({ id, name: editName.trim() });
+    setEditingContactId(null);
+  };
+
   const columns = [
-    { header: 'שם', accessor: (c: any) => c.name || 'ללא שם', className: 'font-medium' },
+    { header: 'שם', accessor: (c: any) => editingContactId === c.id ? (
+      <form onSubmit={(e) => { e.preventDefault(); handleRename(c.id); }} className="flex items-center gap-1">
+        <input
+          type="text"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          autoFocus
+          onBlur={() => handleRename(c.id)}
+          className="bg-cream border border-border text-charcoal rounded px-2 py-0.5 text-sm outline-none focus:border-accent w-32"
+        />
+      </form>
+    ) : (
+      <button onClick={() => { setEditingContactId(c.id); setEditName(c.name || ''); }} className="font-medium hover:text-accent transition-colors text-right" title="לחץ לשינוי שם">
+        {c.name || 'ללא שם'}
+      </button>
+    ), className: 'font-medium' },
     { header: 'מספר טלפון', accessor: (c: any) => <span dir="ltr">{c.phoneNumber.startsWith('+') ? c.phoneNumber : `+${c.phoneNumber}`}</span> },
     { header: 'תגיות', accessor: (c: any) => (
       <div className="flex flex-wrap gap-1">
@@ -311,10 +335,34 @@ function ContactListsView({
 
 function ListDetailView({ listId, onBack }: { listId: string; onBack: () => void }) {
   const { list, loading, removeContacts, isRemoving } = useContactListDetail(listId);
+  const { contacts: allContacts, loading: contactsLoading, updateContact } = useContacts(1, '', []);
+  const { addContactsToList } = useContactLists();
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [addSearch, setAddSearch] = useState('');
 
   const handleRemove = async (contactId: string) => {
     if (!confirm('להסיר את איש הקשר מהרשימה?')) return;
     await removeContacts({ listId, contactIds: [contactId] });
+  };
+
+  const handleRename = async (contactId: string) => {
+    if (!editName.trim()) { setEditingId(null); return; }
+    await updateContact({ id: contactId, name: editName.trim() });
+    setEditingId(null);
+  };
+
+  // Contacts not already in the list
+  const existingIds = new Set(list?.entries?.map(e => e.contact.id) || []);
+  const availableContacts = allContacts.filter(c => !existingIds.has(c.id));
+  const filteredAvailable = addSearch
+    ? availableContacts.filter(c => (c.name || '').includes(addSearch) || c.phoneNumber.includes(addSearch))
+    : availableContacts;
+
+  const handleAddToList = async (contactId: string) => {
+    await addContactsToList({ listId, contactIds: [contactId] });
   };
 
   return (
@@ -332,8 +380,60 @@ function ListDetailView({ listId, onBack }: { listId: string; onBack: () => void
       <div className="bg-white border border-border rounded-xl shadow-soft overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="text-lg font-semibold text-charcoal">{list?.name || 'טוען...'}</h3>
-          <span className="text-xs text-muted">{list?.entries?.length || 0} אנשי קשר</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted">{list?.entries?.length || 0} אנשי קשר</span>
+            <button
+              onClick={() => setShowAddPanel(!showAddPanel)}
+              className="flex items-center gap-1.5 text-xs font-medium bg-accent text-white px-3 py-1.5 rounded-lg hover:bg-accent-hover transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              הוסף איש קשר
+            </button>
+          </div>
         </div>
+
+        {/* Add contacts panel */}
+        {showAddPanel && (
+          <div className="p-4 border-b border-border bg-cream/30">
+            <input
+              type="text"
+              value={addSearch}
+              onChange={(e) => setAddSearch(e.target.value)}
+              placeholder="חפש איש קשר להוספה..."
+              className="w-full bg-white border border-border text-charcoal rounded-lg px-3 py-2 text-sm outline-none focus:border-accent mb-3 text-right"
+              autoFocus
+            />
+            {contactsLoading ? (
+              <div className="text-center py-4 text-muted text-sm">טוען...</div>
+            ) : filteredAvailable.length === 0 ? (
+              <div className="text-center py-4 text-muted text-sm">אין אנשי קשר זמינים להוספה</div>
+            ) : (
+              <div className="max-h-48 overflow-y-auto divide-y divide-border rounded-lg border border-border bg-white">
+                {filteredAvailable.slice(0, 20).map(c => (
+                  <div key={c.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-cream/50 transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-full bg-cream flex items-center justify-center text-[10px] font-bold text-muted">
+                        {(c.name || c.phoneNumber).charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-charcoal">{c.name || 'ללא שם'}</p>
+                        <p className="text-[11px] text-muted" dir="ltr">{c.phoneNumber.startsWith('+') ? c.phoneNumber : `+${c.phoneNumber}`}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleAddToList(c.id)}
+                      className="text-accent hover:text-accent-hover text-xs font-medium transition-colors"
+                    >
+                      הוסף
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -350,7 +450,26 @@ function ListDetailView({ listId, onBack }: { listId: string; onBack: () => void
                     {(entry.contact.name || entry.contact.phoneNumber).charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-charcoal">{entry.contact.name || 'ללא שם'}</p>
+                    {editingId === entry.contact.id ? (
+                      <form onSubmit={(e) => { e.preventDefault(); handleRename(entry.contact.id); }} className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          autoFocus
+                          onBlur={() => handleRename(entry.contact.id)}
+                          className="bg-cream border border-border text-charcoal rounded px-2 py-0.5 text-sm outline-none focus:border-accent w-32"
+                        />
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => { setEditingId(entry.contact.id); setEditName(entry.contact.name || ''); }}
+                        className="text-sm font-medium text-charcoal hover:text-accent transition-colors text-right"
+                        title="לחץ לשינוי שם"
+                      >
+                        {entry.contact.name || 'ללא שם'}
+                      </button>
+                    )}
                     <p className="text-xs text-muted" dir="ltr">
                       {entry.contact.phoneNumber.startsWith('+') ? entry.contact.phoneNumber : `+${entry.contact.phoneNumber}`}
                     </p>

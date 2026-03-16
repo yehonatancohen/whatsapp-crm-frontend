@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { to: '/', label: 'דף הבית' },
@@ -11,8 +12,15 @@ const navLinks = [
 
 export function PublicLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -52,12 +60,25 @@ export function PublicLayout() {
                 </svg>
               )}
             </button>
-            <Link to="/login" className="text-sm text-muted hover:text-charcoal transition-colors">
-              התחברות
-            </Link>
-            <Link to="/register" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
-              הרשמה
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
+                  לוח בקרה
+                </Link>
+                <button onClick={handleLogout} className="text-sm text-muted hover:text-charcoal transition-colors">
+                  התנתקות
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm text-muted hover:text-charcoal transition-colors">
+                  התחברות
+                </Link>
+                <Link to="/register" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
+                  הרשמה
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -102,8 +123,17 @@ export function PublicLayout() {
               </Link>
             ))}
             <div className="flex gap-3 pt-2">
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="text-sm text-muted">התחברות</Link>
-              <Link to="/register" onClick={() => setMobileOpen(false)} className="text-sm text-accent">הרשמה</Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="text-sm text-accent">לוח בקרה</Link>
+                  <button onClick={() => { setMobileOpen(false); handleLogout(); }} className="text-sm text-muted">התנתקות</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="text-sm text-muted">התחברות</Link>
+                  <Link to="/register" onClick={() => setMobileOpen(false)} className="text-sm text-accent">הרשמה</Link>
+                </>
+              )}
             </div>
           </div>
         )}

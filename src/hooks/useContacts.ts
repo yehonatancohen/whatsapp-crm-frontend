@@ -74,12 +74,21 @@ export function useContacts(page = 1, search?: string, tags?: string[]) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: string; name?: string; tags?: string[] }) => {
+      const { data: result } = await api.patch(`/contacts/${id}`, data);
+      return result;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
+  });
+
   return {
     contacts: query.data?.contacts || [],
     pagination: query.data?.pagination,
     loading: query.isLoading,
     error: query.error?.message || null,
     createContact: createMutation.mutateAsync,
+    updateContact: updateMutation.mutateAsync,
     deleteContact: deleteMutation.mutateAsync,
     importContacts: importMutation.mutateAsync,
     isImporting: importMutation.isPending,

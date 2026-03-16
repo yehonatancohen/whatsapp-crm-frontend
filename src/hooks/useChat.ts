@@ -26,6 +26,7 @@ export interface ChatMessage {
   type: string;
   ack?: number;
   author?: string;
+  hasMedia?: boolean;
 }
 
 export interface IncomingChatMessage {

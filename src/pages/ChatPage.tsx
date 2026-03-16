@@ -1,11 +1,123 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   useConversations,
   useChatMessages,
   useSendMessage,
   type Conversation,
+  type ChatMessage,
 } from '../hooks/useChat';
 import { useTheme } from '../context/ThemeContext';
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api').replace(/\/api\/?$/, '');
+
+function getMediaUrl(accountId: string, chatId: string, messageId: string) {
+  const token = localStorage.getItem('accessToken');
+  return `${API_BASE}/api/chat/${accountId}/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}/media?token=${token}`;
+}
+
+const URL_REGEX = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
+
+function extractUrls(text: string): string[] {
+  return text?.match(URL_REGEX) || [];
+}
+
+function LinkPreview({ url }: { url: string }) {
+  const [meta, setMeta] = useState<{ title?: string; description?: string; image?: string } | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Try to get OG tags via a simple proxy approach
+    // For now we just show a clean link card without fetching OG (requires backend proxy)
+    setMeta({ title: new URL(url).hostname });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  if (failed || !meta) return null;
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-1.5 rounded-lg border border-border/50 overflow-hidden hover:border-accent/30 transition-colors bg-white/10">
+      <div className="px-3 py-2">
+        <p className="text-xs font-medium truncate opacity-90">{meta.title}</p>
+        <p className="text-[10px] opacity-60 truncate" dir="ltr">{url}</p>
+      </div>
+    </a>
+  );
+}
+
+function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: string; chatId: string }) {
+  const mediaUrl = getMediaUrl(accountId, chatId, msg.id);
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <div className="text-xs italic opacity-70 py-1" dir="auto">
+        {msg.type === 'image' ? '📷 תמונה' :
+         msg.type === 'video' ? '🎥 וידאו' :
+         msg.type === 'sticker' ? '🏷️ סטיקר' :
+         msg.body || `[${msg.type}]`}
+      </div>
+    );
+  }
+
+  if (msg.type === 'image' || msg.type === 'sticker') {
+    return (
+      <div className={`${msg.type === 'sticker' ? 'max-w-[160px]' : 'max-w-[280px]'}`}>
+        <img
+          src={mediaUrl}
+          alt={msg.body || 'תמונה'}
+          className="rounded-md max-w-full"
+          loading="lazy"
+          onError={() => setError(true)}
+        />
+        {msg.body && msg.type !== 'sticker' && (
+          <p className="text-sm mt-1 break-words whitespace-pre-wrap" dir="auto">{msg.body}</p>
+        )}
+      </div>
+    );
+  }
+
+  if (msg.type === 'video') {
+    return (
+      <div className="max-w-[280px]">
+        <video
+          src={mediaUrl}
+          controls
+          preload="metadata"
+          className="rounded-md max-w-full"
+          onError={() => setError(true)}
+        />
+        {msg.body && (
+          <p className="text-sm mt-1 break-words whitespace-pre-wrap" dir="auto">{msg.body}</p>
+        )}
+      </div>
+    );
+  }
+
+  if (msg.type === 'audio' || msg.type === 'ptt') {
+    return (
+      <audio src={mediaUrl} controls preload="metadata" className="max-w-[240px]" onError={() => setError(true)} />
+    );
+  }
+
+  if (msg.type === 'document') {
+    return (
+      <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 py-1 hover:opacity-80">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+        </svg>
+        <span className="text-sm underline">{msg.body || 'מסמך'}</span>
+      </a>
+    );
+  }
+
+  // Fallback
+  return (
+    <div className="text-xs italic opacity-70 py-1" dir="auto">
+      {msg.body || `[${msg.type}]`}
+    </div>
+  );
+}
 
 function formatTime(ts: number) {
   return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -135,7 +247,7 @@ export function ChatPage() {
                             {chat.lastMessage.fromMe && (
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-muted flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
                             )}
-                            <p className="text-sm text-muted truncate">{chat.lastMessage.body}</p>
+                            <p className="text-sm text-muted truncate" dir="auto">{chat.lastMessage.body}</p>
                           </>
                         )}
                       </div>
@@ -204,10 +316,17 @@ export function ChatPage() {
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{msg.author}</p>
                           )}
                           
-                          {msg.type === 'chat' ? (
-                            <div className="break-words whitespace-pre-wrap">{msg.body}</div>
+                          {msg.hasMedia && ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ? (
+                            <MediaBubble msg={msg} accountId={selectedChat.accountId} chatId={selectedChat.chatId} />
+                          ) : msg.type === 'chat' ? (
+                            <>
+                              <div className="break-words whitespace-pre-wrap" dir="auto">{msg.body}</div>
+                              {extractUrls(msg.body).slice(0, 1).map(url => (
+                                <LinkPreview key={url} url={url} />
+                              ))}
+                            </>
                           ) : (
-                            <div className={`break-words whitespace-pre-wrap italic ${msg.fromMe ? 'text-white/70' : 'text-muted'}`}>
+                            <div className={`break-words whitespace-pre-wrap italic ${msg.fromMe ? 'text-white/70' : 'text-muted'}`} dir="auto">
                               {msg.type === 'image' ? '📷 תמונה' :
                                msg.type === 'video' ? '🎥 וידאו' :
                                msg.type === 'audio' || msg.type === 'ptt' ? '🎵 אודיו' :
@@ -243,6 +362,7 @@ export function ChatPage() {
                 ref={inputRef}
                 type="text"
                 className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-4 py-2.5 outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 text-sm"
+                dir="auto"
                 placeholder="הקלד הודעה"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
