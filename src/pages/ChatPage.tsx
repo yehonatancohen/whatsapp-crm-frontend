@@ -9,6 +9,7 @@ import {
   type ChatMessage,
   type AddParticipantResult,
 } from '../hooks/useChat';
+import { useAccounts } from '../hooks/useAccounts';
 import { useTheme } from '../context/ThemeContext';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api').replace(/\/api\/?$/, '');
@@ -129,16 +130,53 @@ function formatDate(ts: number) {
 
 function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId: string; onClose: () => void }) {
   const { groupInfo, loading } = useGroupInfo(accountId, chatId);
+  const { accounts } = useAccounts();
   const addMutation = useAddParticipants();
   const [phoneInput, setPhoneInput] = useState('');
   const [results, setResults] = useState<Record<string, AddParticipantResult> | null>(null);
   const [showWarning, setShowWarning] = useState(false);
+  const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set());
+  const [showManualInput, setShowManualInput] = useState(false);
 
   const canAdd = groupInfo?.iAmAdmin || groupInfo?.canAnyoneAdd;
 
-  async function handleAdd() {
+  // Authenticated accounts not already in the group
+  const participantNumbers = new Set(
+    (groupInfo?.participants || []).map((p) => p.id.replace('@c.us', '')),
+  );
+  const availableAccounts = accounts.filter(
+    (a) => a.status === 'AUTHENTICATED' && a.phoneNumber && !participantNumbers.has(a.phoneNumber),
+  );
+
+  function toggleAccount(id: string) {
+    setSelectedAccountIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleAddAccounts() {
+    const phones = accounts
+      .filter((a) => selectedAccountIds.has(a.id) && a.phoneNumber)
+      .map((a) => a.phoneNumber!);
+    if (phones.length === 0) return;
+    if (phones.length > 5) {
+      alert('ניתן להוסיף עד 5 משתתפים בכל פעם');
+      return;
+    }
+    try {
+      const res = await addMutation.mutateAsync({ accountId, chatId, phoneNumbers: phones });
+      setResults(res);
+      setSelectedAccountIds(new Set());
+    } catch {
+      // error handled by mutation
+    }
+  }
+
+  async function handleAddManual() {
     if (!phoneInput.trim()) return;
-    // Parse comma/newline-separated phone numbers
     const numbers = phoneInput.split(/[,\n]+/).map(n => n.trim()).filter(Boolean);
     if (numbers.length === 0) return;
     if (numbers.length > 5) {
@@ -149,7 +187,6 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
       const res = await addMutation.mutateAsync({ accountId, chatId, phoneNumbers: numbers });
       setResults(res);
       setPhoneInput('');
-      setShowWarning(false);
     } catch {
       // error handled by mutation
     }
@@ -220,33 +257,106 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                   </div>
                 </div>
 
-                <textarea
-                  value={phoneInput}
-                  onChange={(e) => setPhoneInput(e.target.value)}
-                  placeholder="הזן מספרי טלפון (מופרדים בפסיק או שורה חדשה)&#10;דוגמה: 972501234567, 972509876543"
-                  dir="ltr"
-                  className="w-full bg-white text-charcoal rounded-lg px-3 py-2 text-sm border border-border outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 resize-none h-20"
-                />
-                <div className="flex items-center gap-2 mt-2">
+                {/* Select from accounts */}
+                {availableAccounts.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs text-muted mb-1.5 text-right">בחר מהחשבונות שלך:</p>
+                    <div className="space-y-1.5">
+                      {availableAccounts.map((a) => (
+                        <label
+                          key={a.id}
+                          className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-colors ${
+                            selectedAccountIds.has(a.id)
+                              ? 'border-accent bg-accent/5'
+                              : 'border-border hover:bg-cream/80'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedAccountIds.has(a.id)}
+                            onChange={() => toggleAccount(a.id)}
+                            className="accent-accent w-3.5 h-3.5 shrink-0"
+                          />
+                          <div className="w-7 h-7 rounded-full bg-cream-dark border border-border flex items-center justify-center text-muted shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                          </div>
+                          <div className="flex-1 min-w-0 text-right">
+                            <span className="text-sm text-charcoal block truncate">{a.label}</span>
+                            <span className="text-[11px] text-muted font-mono" dir="ltr">{a.phoneNumber}</span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    {selectedAccountIds.size > 0 && (
+                      <button
+                        onClick={handleAddAccounts}
+                        disabled={addMutation.isPending}
+                        className="w-full mt-2 text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {addMutation.isPending ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            מוסיף...
+                          </span>
+                        ) : `הוסף ${selectedAccountIds.size} חשבונות`}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {availableAccounts.length === 0 && !showManualInput && (
+                  <p className="text-xs text-muted text-center mb-2">כל החשבונות שלך כבר בקבוצה</p>
+                )}
+
+                {/* Manual phone input (collapsible) */}
+                {!showManualInput ? (
                   <button
-                    onClick={handleAdd}
-                    disabled={!phoneInput.trim() || addMutation.isPending}
-                    className="flex-1 text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                    onClick={() => setShowManualInput(true)}
+                    className="w-full text-xs text-muted hover:text-charcoal py-1.5 transition-colors flex items-center justify-center gap-1"
                   >
-                    {addMutation.isPending ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        מוסיף...
-                      </span>
-                    ) : 'הוסף'}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                    הזן מספר טלפון ידנית
                   </button>
-                  <button
-                    onClick={() => { setShowWarning(false); setResults(null); }}
-                    className="text-sm text-muted hover:text-charcoal py-2 px-3 transition-colors"
-                  >
-                    ביטול
-                  </button>
-                </div>
+                ) : (
+                  <div className="border-t border-border pt-3 mt-1">
+                    <p className="text-xs text-muted mb-1.5 text-right">הזנה ידנית:</p>
+                    <textarea
+                      value={phoneInput}
+                      onChange={(e) => setPhoneInput(e.target.value)}
+                      placeholder="הזן מספרי טלפון (מופרדים בפסיק או שורה חדשה)&#10;דוגמה: 972501234567, 972509876543"
+                      dir="ltr"
+                      className="w-full bg-white text-charcoal rounded-lg px-3 py-2 text-sm border border-border outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 resize-none h-20"
+                    />
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={handleAddManual}
+                        disabled={!phoneInput.trim() || addMutation.isPending}
+                        className="flex-1 text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {addMutation.isPending ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            מוסיף...
+                          </span>
+                        ) : 'הוסף'}
+                      </button>
+                      <button
+                        onClick={() => setShowManualInput(false)}
+                        className="text-sm text-muted hover:text-charcoal py-2 px-3 transition-colors"
+                      >
+                        ביטול
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cancel all */}
+                <button
+                  onClick={() => { setShowWarning(false); setResults(null); setSelectedAccountIds(new Set()); setShowManualInput(false); }}
+                  className="w-full text-xs text-muted hover:text-charcoal py-1.5 mt-1 transition-colors"
+                >
+                  ביטול
+                </button>
               </>
             )}
 
