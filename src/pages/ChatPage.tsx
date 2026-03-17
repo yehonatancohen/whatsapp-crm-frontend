@@ -61,7 +61,7 @@ function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: 
 
   if (msg.type === 'image' || msg.type === 'sticker') {
     return (
-      <div className={`${msg.type === 'sticker' ? 'max-w-[120px] sm:max-w-[160px]' : 'max-w-[200px] sm:max-w-[280px]'}`}>
+      <div className={`${msg.type === 'sticker' ? 'max-w-[120px] sm:max-w-[160px]' : 'max-w-full'}`}>
         <img
           src={mediaUrl}
           alt={msg.body || 'תמונה'}
@@ -78,7 +78,7 @@ function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: 
 
   if (msg.type === 'video') {
     return (
-      <div className="max-w-[200px] sm:max-w-[280px]">
+      <div className="max-w-full">
         <video
           src={mediaUrl}
           controls
@@ -95,7 +95,7 @@ function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: 
 
   if (msg.type === 'audio' || msg.type === 'ptt') {
     return (
-      <audio src={mediaUrl} controls preload="metadata" className="max-w-[240px]" onError={() => setError(true)} />
+      <audio src={mediaUrl} controls preload="metadata" className="max-w-full" onError={() => setError(true)} />
     );
   }
 
@@ -699,7 +699,7 @@ export function ChatPage() {
                     // Other messages (!fromMe) → left side → justify-end
                     return (
                       <div key={msg.id} className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''}`}>
-                        <div className={`relative max-w-[85%] sm:max-w-[75%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && msg.author && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{msg.author}</p>
