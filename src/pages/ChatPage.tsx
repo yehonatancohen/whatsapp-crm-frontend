@@ -61,7 +61,7 @@ function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: 
 
   if (msg.type === 'image' || msg.type === 'sticker') {
     return (
-      <div className={`${msg.type === 'sticker' ? 'max-w-[160px]' : 'max-w-[280px]'}`}>
+      <div className={`${msg.type === 'sticker' ? 'max-w-[120px] sm:max-w-[160px]' : 'max-w-[200px] sm:max-w-[280px]'}`}>
         <img
           src={mediaUrl}
           alt={msg.body || 'תמונה'}
@@ -78,7 +78,7 @@ function MediaBubble({ msg, accountId, chatId }: { msg: ChatMessage; accountId: 
 
   if (msg.type === 'video') {
     return (
-      <div className="max-w-[280px]">
+      <div className="max-w-[200px] sm:max-w-[280px]">
         <video
           src={mediaUrl}
           controls
@@ -565,7 +565,7 @@ export function ChatPage() {
   const sortedMsgs = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 bg-cream overflow-hidden md:rounded-xl shadow-lg border border-border">
+    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 bg-cream overflow-hidden md:rounded-xl shadow-lg border border-border">
       {/* Sidebar: Chat List */}
       <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-80 lg:w-96 border-l border-border bg-white flex-shrink-0`}>
         <div className="p-3 bg-cream-dark border-b border-border">
@@ -699,7 +699,7 @@ export function ChatPage() {
                     // Other messages (!fromMe) → left side → justify-end
                     return (
                       <div key={msg.id} className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''}`}>
-                        <div className={`relative max-w-[75%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                        <div className={`relative max-w-[85%] sm:max-w-[75%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && msg.author && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{msg.author}</p>

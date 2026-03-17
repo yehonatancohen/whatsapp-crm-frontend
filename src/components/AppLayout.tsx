@@ -12,8 +12,7 @@ export function AppLayout() {
 
       <div className="flex-1 flex flex-col md:pr-60">
         {/* Mobile Header */}
-        <header className="h-16 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
-          <Logo className="h-7" />
+        <header className="h-14 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 text-muted hover:text-charcoal transition-colors"
@@ -24,6 +23,7 @@ export function AppLayout() {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
+          <Logo className="h-7" />
         </header>
 
         <main className="flex-1 p-4 md:p-8">

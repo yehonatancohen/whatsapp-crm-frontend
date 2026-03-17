@@ -252,11 +252,11 @@ export function CampaignsPage() {
           <table className="w-full text-right">
             <thead>
               <tr className="bg-cream-dark/50 border-b border-border">
-                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">שם הקמפיין</th>
-                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">סטטוס</th>
-                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">התקדמות</th>
-                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">תאריך יצירה</th>
-                <th className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider">פעולות</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider">שם הקמפיין</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider">סטטוס</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider hidden sm:table-cell">התקדמות</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider hidden md:table-cell">תאריך יצירה</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider">פעולות</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -267,18 +267,20 @@ export function CampaignsPage() {
               ) : (
                 campaigns.map((c) => (
                   <tr key={c.id} className="hover:bg-cream/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
                       <div className="text-sm font-medium text-charcoal">{c.name}</div>
                       <div className="text-[10px] text-muted mt-0.5">
                         {c.dailyLimitPerAccount && `${c.dailyLimitPerAccount} הודעות/יום/חשבון`}
                       </div>
+                      {/* Show progress inline on mobile */}
+                      <div className="sm:hidden text-[10px] text-muted mt-1" dir="ltr">{c.sentCount}/{c.totalMessages}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(c.status)}`}>
                         {translateStatus(c.status)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden sm:table-cell">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-1.5 w-24 bg-cream rounded-full overflow-hidden">
                           <div
@@ -292,10 +294,10 @@ export function CampaignsPage() {
                         <p className="text-[10px] text-red-500 mt-0.5">{c.failedCount} נכשלו</p>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden md:table-cell">
                       <div className="text-xs text-muted">{new Date(c.createdAt).toLocaleDateString('he-IL')}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {renderActions(c)}
                       </div>
@@ -311,9 +313,9 @@ export function CampaignsPage() {
       {/* Create Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white border border-border rounded-2xl w-full max-w-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto text-right">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-charcoal">יצירת קמפיין חדש</h2>
+          <div className="bg-white border border-border rounded-2xl w-full max-w-2xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto text-right">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-charcoal">יצירת קמפיין חדש</h2>
               <button onClick={() => setModalOpen(false)} className="text-muted hover:text-charcoal transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />

@@ -51,7 +51,7 @@ export function DataTable<T extends { id: string | number }>({
               {columns.map((col, i) => (
                 <th
                   key={i}
-                  className={`px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider ${col.className || ''}`}
+                  className={`px-3 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted uppercase tracking-wider ${col.className || ''}`}
                 >
                   {col.header}
                 </th>
@@ -92,7 +92,7 @@ export function DataTable<T extends { id: string | number }>({
                     </td>
                   )}
                   {columns.map((col, i) => (
-                    <td key={i} className={`px-6 py-4 whitespace-nowrap text-sm text-charcoal ${col.className || ''}`}>
+                    <td key={i} className={`px-3 sm:px-6 py-3 sm:py-4 text-sm text-charcoal ${col.className || ''}`}>
                       {typeof col.accessor === 'function' ? col.accessor(item) : (item[col.accessor] as ReactNode)}
                     </td>
                   ))}

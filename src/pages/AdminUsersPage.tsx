@@ -62,13 +62,13 @@ export function AdminUsersPage() {
           <table className="w-full text-right">
             <thead>
               <tr className="bg-cream-dark/50 border-b border-border text-xs font-semibold text-muted uppercase tracking-wider">
-                <th className="px-6 py-4">משתמש</th>
-                <th className="px-6 py-4">סטטוס</th>
-                <th className="px-6 py-4">מנוי</th>
-                <th className="px-6 py-4 text-center">חשבונות</th>
-                <th className="px-6 py-4 text-center">קמפיינים</th>
-                <th className="px-6 py-4">תאריך הצטרפות</th>
-                <th className="px-6 py-4">פעולות</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4">משתמש</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4">סטטוס</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">מנוי</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-center hidden md:table-cell">חשבונות</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-center hidden md:table-cell">קמפיינים</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">תאריך הצטרפות</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4">פעולות</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -79,11 +79,11 @@ export function AdminUsersPage() {
               ) : (
                 users.map((u) => (
                   <tr key={u.id} className="text-sm hover:bg-cream/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
                       <div className="font-medium text-charcoal">{u.name}</div>
                       <div className="text-xs text-faded" dir="ltr" style={{ textAlign: 'right' }}>{u.email}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                         u.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                       }`}>
@@ -95,21 +95,21 @@ export function AdminUsersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden sm:table-cell">
                       <div className="text-charcoal font-medium">{u.subscription?.planTier || 'ללא מנוי'}</div>
                       <div className="text-[10px] text-faded uppercase">{u.subscription?.status || '-'}</div>
                     </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">{u._count.accounts}</td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">{u._count.campaigns}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap hidden md:table-cell">{u._count.accounts}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap hidden md:table-cell">{u._count.campaigns}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs text-muted hidden lg:table-cell">
                       {new Date(u.createdAt).toLocaleDateString('he-IL')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <button
                         onClick={() => toggleStatusMutation.mutate({ userId: u.id, isActive: !u.isActive })}
                         className={`text-xs font-semibold px-3 py-1 rounded border transition-colors ${
-                          u.isActive 
-                            ? 'text-red-600 border-red-200 hover:bg-red-50' 
+                          u.isActive
+                            ? 'text-red-600 border-red-200 hover:bg-red-50'
                             : 'text-green-600 border-green-200 hover:bg-green-50'
                         }`}
                       >

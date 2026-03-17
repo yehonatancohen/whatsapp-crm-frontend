@@ -137,6 +137,69 @@ export interface ActivityLogEntry {
   account: { id: string; label: string } | null;
 }
 
+// ─── Group Promotions ────────────────────────────────────────────
+export type PromotionSendStatus = 'PENDING' | 'SENDING' | 'SENT' | 'FAILED';
+
+export interface GroupPromotion {
+  id: string;
+  name: string;
+  isActive: boolean;
+  sendTimes: string[];
+  daysOfWeek: number[];
+  timezone: string;
+  accountIds: string[];
+  dailyLimitPerAccount: number;
+  messagesPerMinute: number;
+  lastSentAt: string | null;
+  totalSendCount: number;
+  createdAt: string;
+  updatedAt: string;
+  messages: GroupPromotionMessage[];
+  groups: GroupPromotionGroup[];
+}
+
+export interface GroupPromotionMessage {
+  id: string;
+  content: string;
+  mediaUrl: string | null;
+  isActive: boolean;
+  promotionId: string;
+  createdAt: string;
+}
+
+export interface GroupPromotionGroup {
+  id: string;
+  groupJid: string;
+  groupName: string | null;
+  promotionId: string;
+}
+
+export interface GroupPromotionLog {
+  id: string;
+  status: PromotionSendStatus;
+  resolvedText: string | null;
+  errorMessage: string | null;
+  sentAt: string | null;
+  groupJid: string;
+  groupName: string | null;
+  accountId: string | null;
+  messageId: string | null;
+  promotionId: string;
+  createdAt: string;
+}
+
+export interface CreatePromotionData {
+  name: string;
+  sendTimes: string[];
+  daysOfWeek?: number[];
+  timezone?: string;
+  accountIds: string[];
+  dailyLimitPerAccount?: number;
+  messagesPerMinute?: number;
+  groups: Array<{ jid: string; name?: string }>;
+  messages: Array<{ content: string; mediaUrl?: string }>;
+}
+
 // ─── Dashboard Stats ─────────────────────────────────────────────
 export interface DashboardStats {
   totalAccounts: number;
