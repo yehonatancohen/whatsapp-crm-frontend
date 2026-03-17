@@ -18,6 +18,7 @@ import { ContactsPage } from './pages/ContactsPage';
 import { WarmupPage } from './pages/WarmupPage';
 import { CampaignsPage } from './pages/CampaignsPage';
 import { PromotionsPage } from './pages/PromotionsPage';
+import { GroupCollectionsPage } from './pages/GroupCollectionsPage';
 import { ChatPage } from './pages/ChatPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
@@ -77,6 +78,7 @@ function App() {
                 <Route path="/warmup" element={<WarmupPage />} />
                 <Route path="/contacts" element={<ContactsPage />} />
                 <Route path="/campaigns" element={<CampaignsPage />} />
+                <Route path="/group-collections" element={<GroupCollectionsPage />} />
                 <Route path="/promotions" element={<PromotionsPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

@@ -10,6 +10,7 @@ import {
   useDeleteCampaign,
 } from '../hooks/useCampaigns';
 import { useContactLists } from '../hooks/useContacts';
+import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
 import { api } from '../lib/api';
 import type { WhatsAppGroup, Campaign } from '../types';
 
@@ -31,6 +32,10 @@ export function CampaignsPage() {
   const [recipientType, setRecipientType] = useState<'LIST' | 'GROUP'>('LIST');
   const [contactListId, setContactListId] = useState('');
   const [selectedGroupJids, setSelectedGroupJids] = useState<string[]>([]);
+  const [selectedCollectionId, setSelectedCollectionId] = useState('');
+
+  const { collections: groupCollections } = useGroupCollections();
+  const { collection: selectedCollection } = useGroupCollectionDetail(selectedCollectionId || null);
 
   const [accountGroups, setAccountGroups] = useState<Record<string, WhatsAppGroup[]>>({});
   const [groupsLoading, setGroupsLoading] = useState(false);
@@ -65,6 +70,13 @@ export function CampaignsPage() {
       fetchNewAccountGroups();
     }
   }, [selectedAccountIds, recipientType]);
+
+  // Load groups from selected collection
+  useEffect(() => {
+    if (selectedCollection?.entries) {
+      setSelectedGroupJids(selectedCollection.entries.map(e => e.groupJid));
+    }
+  }, [selectedCollection]);
 
   // Aggregate all unique groups from selected accounts
   const allAvailableGroups: WhatsAppGroup[] = [];
@@ -104,6 +116,7 @@ export function CampaignsPage() {
     setSelectedAccountIds([]);
     setContactListId('');
     setSelectedGroupJids([]);
+    setSelectedCollectionId('');
     setDailyLimit(50);
   };
 
@@ -392,6 +405,21 @@ export function CampaignsPage() {
               ) : (
                 <div>
                   <label className="block text-sm font-medium text-muted mb-2">בחר קבוצות</label>
+                  {/* Collection picker */}
+                  {groupCollections.length > 0 && (
+                    <div className="mb-3">
+                      <select
+                        value={selectedCollectionId}
+                        onChange={(e) => setSelectedCollectionId(e.target.value)}
+                        className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                      >
+                        <option value="">טען מאוסף שמור...</option>
+                        {groupCollections.map(c => (
+                          <option key={c.id} value={c.id}>{c.name} ({c._count.entries} קבוצות)</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   {selectedAccountIds.length === 0 ? (
                     <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100">בחר חשבונות שולחים תחילה כדי לראות את הקבוצות שלהם</p>
                   ) : (

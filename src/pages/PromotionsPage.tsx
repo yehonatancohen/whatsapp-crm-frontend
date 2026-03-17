@@ -9,6 +9,7 @@ import {
   usePromotion,
   usePromotionLogs,
 } from '../hooks/usePromotions';
+import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
 import { api } from '../lib/api';
 import type { WhatsAppGroup, GroupPromotion, GroupPromotionLog } from '../types';
 
@@ -136,11 +137,15 @@ export function PromotionsPage() {
   const [name, setName] = useState('');
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [selectedGroupJids, setSelectedGroupJids] = useState<string[]>([]);
+  const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [sendTimes, setSendTimes] = useState<string[]>(['09:00']);
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
   const [messagePool, setMessagePool] = useState<Array<{ content: string }>>([{ content: '' }]);
   const [dailyLimit, setDailyLimit] = useState(50);
   const [messagesPerMinute, setMessagesPerMinute] = useState(2);
+
+  const { collections: groupCollections } = useGroupCollections();
+  const { collection: selectedCollection } = useGroupCollectionDetail(selectedCollectionId || null);
 
   const [accountGroups, setAccountGroups] = useState<Record<string, WhatsAppGroup[]>>({});
   const [groupsLoading, setGroupsLoading] = useState(false);
@@ -167,6 +172,13 @@ export function PromotionsPage() {
     if (selectedAccountIds.length > 0) fetchNewAccountGroups();
   }, [selectedAccountIds]);
 
+  // Load groups from selected collection
+  useEffect(() => {
+    if (selectedCollection?.entries) {
+      setSelectedGroupJids(selectedCollection.entries.map(e => e.groupJid));
+    }
+  }, [selectedCollection]);
+
   // Aggregate unique groups
   const allGroups = useMemo(() => {
     const map = new Map<string, WhatsAppGroup>();
@@ -182,6 +194,7 @@ export function PromotionsPage() {
     setName('');
     setSelectedAccountIds([]);
     setSelectedGroupJids([]);
+    setSelectedCollectionId('');
     setSendTimes(['09:00']);
     setDaysOfWeek([]);
     setMessagePool([{ content: '' }]);
@@ -381,6 +394,21 @@ export function PromotionsPage() {
               {/* Groups */}
               <div>
                 <label className="block text-sm font-medium text-muted mb-2">קבוצות יעד</label>
+                {/* Collection picker */}
+                {groupCollections.length > 0 && (
+                  <div className="mb-3">
+                    <select
+                      value={selectedCollectionId}
+                      onChange={(e) => setSelectedCollectionId(e.target.value)}
+                      className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors"
+                    >
+                      <option value="">טען מאוסף שמור...</option>
+                      {groupCollections.map(c => (
+                        <option key={c.id} value={c.id}>{c.name} ({c._count.entries} קבוצות)</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {selectedAccountIds.length === 0 ? (
                   <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 p-3 rounded-lg border border-amber-100 dark:border-amber-800">בחר חשבונות שולחים תחילה</p>
                 ) : (

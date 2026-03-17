@@ -100,6 +100,19 @@ export interface AccountProfile {
   profilePicUrl: string | null;
 }
 
+// ─── Group Collections ──────────────────────────────────────────
+export interface GroupCollection {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  _count: { entries: number };
+}
+
+export interface GroupCollectionWithEntries extends GroupCollection {
+  entries: Array<{ id: string; groupJid: string; groupName: string | null }>;
+}
+
 // ─── Groups ──────────────────────────────────────────────────────
 export interface WhatsAppGroup {
   id: string;
