@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { AccountResponse, WhatsAppGroup } from '../types';
+import type { AccountResponse, AccountProfile, WhatsAppGroup } from '../types';
 
 export function useAccounts() {
   const queryClient = useQueryClient();
@@ -70,5 +70,57 @@ export function useAccountGroups(accountId: string | null) {
     queryKey: ['account-groups', accountId],
     queryFn: () => api.get(`/accounts/${accountId}/groups`).then((r) => r.data),
     enabled: !!accountId,
+  });
+}
+
+export function useAccountProfile(accountId: string | null) {
+  return useQuery<AccountProfile>({
+    queryKey: ['account-profile', accountId],
+    queryFn: () => api.get(`/accounts/${accountId}/profile`).then((r) => r.data),
+    enabled: !!accountId,
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, displayName, status }: { id: string; displayName?: string; status?: string }) => {
+      const { data } = await api.post(`/accounts/${id}/profile`, { displayName, status });
+      return data;
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['account-profile', vars.id] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+}
+
+export function useUpdateProfilePicture() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, file }: { id: string; file: File }) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      const { data } = await api.post(`/accounts/${id}/profile-picture`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return data;
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['account-profile', vars.id] });
+    },
+  });
+}
+
+export function useDeleteProfilePicture() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/accounts/${id}/profile-picture`);
+      return data;
+    },
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: ['account-profile', id] });
+    },
   });
 }

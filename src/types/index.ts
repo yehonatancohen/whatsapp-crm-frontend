@@ -93,6 +93,13 @@ export interface CreateCampaignData {
   dailyLimitPerAccount?: number;
 }
 
+// ─── Account Profile ─────────────────────────────────────────────
+export interface AccountProfile {
+  displayName: string | null;
+  phoneNumber: string | null;
+  profilePicUrl: string | null;
+}
+
 // ─── Groups ──────────────────────────────────────────────────────
 export interface WhatsAppGroup {
   id: string;
