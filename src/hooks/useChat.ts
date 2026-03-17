@@ -115,6 +115,12 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
   return { messages, loading: isLoading, error: error?.message };
 }
 
+export interface GroupSettings {
+  messagesAdminsOnly: boolean;
+  infoAdminsOnly: boolean;
+  addMembersAdminsOnly: boolean;
+}
+
 export interface GroupInfo {
   name: string;
   description: string;
@@ -122,6 +128,7 @@ export interface GroupInfo {
   participants: Array<{ id: string; isAdmin: boolean; isSuperAdmin: boolean }>;
   iAmAdmin: boolean;
   canAnyoneAdd: boolean;
+  settings: GroupSettings;
 }
 
 export interface AddParticipantResult {
@@ -150,6 +157,59 @@ export function useAddParticipants() {
     mutationFn: async ({ accountId, chatId, phoneNumbers }: { accountId: string; chatId: string; phoneNumbers: string[] }) => {
       const { data } = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/add-participants`, { phoneNumbers });
       return data.results as Record<string, AddParticipantResult>;
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });
+    },
+  });
+}
+
+export function usePromoteParticipants() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, participantIds }: { accountId: string; chatId: string; participantIds: string[] }) => {
+      await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/promote`, { participantIds });
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });
+    },
+  });
+}
+
+export function useDemoteParticipants() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, participantIds }: { accountId: string; chatId: string; participantIds: string[] }) => {
+      await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/demote`, { participantIds });
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });
+    },
+  });
+}
+
+export function useRemoveParticipants() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, participantIds }: { accountId: string; chatId: string; participantIds: string[] }) => {
+      await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/remove-participants`, { participantIds });
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });
+    },
+  });
+}
+
+export function useUpdateGroupSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, ...settings }: {
+      accountId: string; chatId: string;
+      subject?: string; description?: string;
+      messagesAdminsOnly?: boolean; infoAdminsOnly?: boolean; addMembersAdminsOnly?: boolean;
+    }) => {
+      const { data } = await api.patch(`/chat/${accountId}/${encodeURIComponent(chatId)}/group-settings`, settings);
+      return data;
     },
     onSuccess: (_data, { accountId, chatId }) => {
       queryClient.invalidateQueries({ queryKey: ['chat', 'group-info', accountId, chatId] });

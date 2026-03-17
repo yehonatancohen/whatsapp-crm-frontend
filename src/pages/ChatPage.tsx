@@ -5,6 +5,10 @@ import {
   useSendMessage,
   useGroupInfo,
   useAddParticipants,
+  usePromoteParticipants,
+  useDemoteParticipants,
+  useRemoveParticipants,
+  useUpdateGroupSettings,
   type Conversation,
   type ChatMessage,
   type AddParticipantResult,
@@ -129,14 +133,19 @@ function formatDate(ts: number) {
 }
 
 function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId: string; onClose: () => void }) {
-  const { groupInfo, loading } = useGroupInfo(accountId, chatId);
+  const { groupInfo, loading, refetch } = useGroupInfo(accountId, chatId);
   const { accounts } = useAccounts();
   const addMutation = useAddParticipants();
+  const promoteMutation = usePromoteParticipants();
+  const demoteMutation = useDemoteParticipants();
+  const removeMutation = useRemoveParticipants();
+  const settingsMutation = useUpdateGroupSettings();
   const [phoneInput, setPhoneInput] = useState('');
   const [results, setResults] = useState<Record<string, AddParticipantResult> | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set());
   const [showManualInput, setShowManualInput] = useState(false);
+  const [actionMenu, setActionMenu] = useState<string | null>(null);
 
   const canAdd = groupInfo?.iAmAdmin || groupInfo?.canAnyoneAdd;
 
@@ -380,23 +389,107 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
           </div>
         )}
 
+        {/* Group Settings (admin only) */}
+        {groupInfo.iAmAdmin && groupInfo.settings && (
+          <div className="border border-border rounded-lg p-3 bg-cream/50">
+            <h4 className="text-sm font-medium text-charcoal mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+              הגדרות קבוצה
+            </h4>
+            <div className="space-y-2">
+              {[
+                { key: 'messagesAdminsOnly' as const, label: 'רק מנהלים שולחים הודעות', value: groupInfo.settings.messagesAdminsOnly },
+                { key: 'infoAdminsOnly' as const, label: 'רק מנהלים עורכים פרטי קבוצה', value: groupInfo.settings.infoAdminsOnly },
+                { key: 'addMembersAdminsOnly' as const, label: 'רק מנהלים מוסיפים משתתפים', value: groupInfo.settings.addMembersAdminsOnly },
+              ].map((s) => (
+                <label key={s.key} className="flex items-center justify-between gap-2 text-xs cursor-pointer">
+                  <span className="text-charcoal">{s.label}</span>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await settingsMutation.mutateAsync({ accountId, chatId, [s.key]: !s.value });
+                        refetch();
+                      } catch { /* handled */ }
+                    }}
+                    disabled={settingsMutation.isPending}
+                    className={`relative w-9 h-5 rounded-full transition-colors ${s.value ? 'bg-accent' : 'bg-gray-300'}`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${s.value ? 'left-[1.125rem]' : 'left-0.5'}`} />
+                  </button>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Participants List */}
         <div>
           <h4 className="text-sm font-medium text-charcoal mb-2">משתתפים ({groupInfo.participantCount})</h4>
           <div className="space-y-1">
             {groupInfo.participants.map((p) => (
-              <div key={p.id} className="flex items-center justify-between text-sm py-1.5 px-2 rounded hover:bg-cream/50">
+              <div key={p.id} className="relative flex items-center justify-between text-sm py-1.5 px-2 rounded hover:bg-cream/50">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-cream-dark border border-border flex items-center justify-center text-muted">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
                   <span className="text-charcoal font-mono text-xs" dir="ltr">{p.id.replace('@c.us', '')}</span>
                 </div>
-                {(p.isAdmin || p.isSuperAdmin) && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-light text-accent border border-accent/20">
-                    {p.isSuperAdmin ? 'יוצר' : 'מנהל'}
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {(p.isAdmin || p.isSuperAdmin) && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-light text-accent border border-accent/20">
+                      {p.isSuperAdmin ? 'יוצר' : 'מנהל'}
+                    </span>
+                  )}
+                  {/* Admin actions menu */}
+                  {groupInfo.iAmAdmin && !p.isSuperAdmin && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setActionMenu(actionMenu === p.id ? null : p.id)}
+                        className="text-muted hover:text-charcoal p-0.5 rounded"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                      </button>
+                      {actionMenu === p.id && (
+                        <div className="absolute left-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg z-10 py-1 min-w-[140px]">
+                          {p.isAdmin ? (
+                            <button
+                              onClick={async () => {
+                                try { await demoteMutation.mutateAsync({ accountId, chatId, participantIds: [p.id] }); refetch(); } catch { /* handled */ }
+                                setActionMenu(null);
+                              }}
+                              disabled={demoteMutation.isPending}
+                              className="w-full text-right text-xs px-3 py-1.5 hover:bg-cream/80 text-charcoal"
+                            >
+                              הסר מנהל
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                try { await promoteMutation.mutateAsync({ accountId, chatId, participantIds: [p.id] }); refetch(); } catch { /* handled */ }
+                                setActionMenu(null);
+                              }}
+                              disabled={promoteMutation.isPending}
+                              className="w-full text-right text-xs px-3 py-1.5 hover:bg-cream/80 text-charcoal"
+                            >
+                              הפוך למנהל
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`להסיר את ${p.id.replace('@c.us', '')} מהקבוצה?`)) return;
+                              try { await removeMutation.mutateAsync({ accountId, chatId, participantIds: [p.id] }); refetch(); } catch { /* handled */ }
+                              setActionMenu(null);
+                            }}
+                            disabled={removeMutation.isPending}
+                            className="w-full text-right text-xs px-3 py-1.5 hover:bg-red-50 text-red-600"
+                          >
+                            הסר מהקבוצה
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
