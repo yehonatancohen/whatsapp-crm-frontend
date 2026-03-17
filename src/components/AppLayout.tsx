@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { Logo } from './Logo';
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,7 +13,7 @@ export function AppLayout() {
       <div className="flex-1 flex flex-col md:pr-60">
         {/* Mobile Header */}
         <header className="h-16 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
-          <img src="/logo.png" alt="שדר" className="h-7" />
+          <Logo className="h-7" />
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 text-muted hover:text-charcoal transition-colors"

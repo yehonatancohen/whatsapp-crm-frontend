@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Logo } from '../components/Logo';
 
 export function VerifyEmailPendingPage() {
   const { user, resendVerification, logout } = useAuth();
@@ -22,7 +23,7 @@ export function VerifyEmailPendingPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-cream transition-colors">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center mb-8">
-          <img src="/logo.png" alt="שדר" className="h-10" />
+          <Logo className="h-10" />
         </div>
 
         <div className="bg-white border border-border shadow-soft p-6 text-center">

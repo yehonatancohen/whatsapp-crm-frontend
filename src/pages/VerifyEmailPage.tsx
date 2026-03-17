@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { Logo } from '../components/Logo';
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
@@ -28,7 +29,7 @@ export function VerifyEmailPage() {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center mb-8">
           <Link to="/">
-            <img src="/logo.png" alt="שדר" className="h-10" />
+            <Logo className="h-10" />
           </Link>
         </div>
 

@@ -428,11 +428,14 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
           <div className="space-y-1">
             {groupInfo.participants.map((p) => (
               <div key={p.id} className="relative flex items-center justify-between text-sm py-1.5 px-2 rounded hover:bg-cream/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-cream-dark border border-border flex items-center justify-center text-muted">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-cream-dark border border-border flex items-center justify-center text-muted shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
-                  <span className="text-charcoal font-mono text-xs" dir="ltr">{p.id.replace('@c.us', '')}</span>
+                  <div className="min-w-0">
+                    {p.name && <span className="text-charcoal text-xs block truncate">{p.name}</span>}
+                    <span className="text-muted font-mono text-[11px]" dir="ltr">{p.id.replace('@c.us', '')}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {(p.isAdmin || p.isSuperAdmin) && (

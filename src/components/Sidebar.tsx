@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { Logo } from './Logo';
 
 const navItems = [
   {
@@ -122,7 +123,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-border bg-white">
-          <img src="/logo.png" alt="שדר" className="h-8" />
+          <Logo className="h-8" />
           {/* Close button -- mobile only */}
           <button
             onClick={onClose}

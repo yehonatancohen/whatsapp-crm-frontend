@@ -125,7 +125,7 @@ export interface GroupInfo {
   name: string;
   description: string;
   participantCount: number;
-  participants: Array<{ id: string; isAdmin: boolean; isSuperAdmin: boolean }>;
+  participants: Array<{ id: string; name?: string; isAdmin: boolean; isSuperAdmin: boolean }>;
   iAmAdmin: boolean;
   canAnyoneAdd: boolean;
   settings: GroupSettings;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { Logo } from './Logo';
 
 const navLinks = [
   { to: '/', label: 'דף הבית' },
@@ -28,7 +29,7 @@ export function PublicLayout() {
       <header className="bg-white border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="שדר" className="h-8" />
+            <Logo className="h-8" />
           </Link>
 
           {/* Desktop nav */}
@@ -150,7 +151,7 @@ export function PublicLayout() {
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <img src="/logo.png" alt="שדר" className="h-6" />
+                <Logo className="h-6" />
               </div>
               <p className="text-xs text-faded">פלטפורמת הודעות וניהול לקוחות לעסקים בצמיחה.</p>
             </div>

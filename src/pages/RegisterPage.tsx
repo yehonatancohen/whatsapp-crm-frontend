@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { extractApiError } from '../lib/errorUtils';
 import { FormError } from '../components/shared/FormError';
+import { Logo } from '../components/Logo';
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -56,7 +57,7 @@ export function RegisterPage() {
         {/* Logo */}
         <div className="flex items-center justify-center mb-8">
           <Link to="/">
-            <img src="/logo.png" alt="שדר" className="h-10" />
+            <Logo className="h-10" />
           </Link>
         </div>
 

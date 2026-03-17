@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { extractApiError } from '../lib/errorUtils';
+import { Logo } from '../components/Logo';
 import { FormError } from '../components/shared/FormError';
 
 export function LoginPage() {
@@ -55,7 +56,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="flex items-center justify-center mb-8">
           <Link to="/">
-            <img src="/logo.png" alt="שדר" className="h-10" />
+            <Logo className="h-10" />
           </Link>
         </div>
 

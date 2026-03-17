@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { extractApiError } from '../lib/errorUtils';
+import { Logo } from '../components/Logo';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -29,7 +30,7 @@ export function ForgotPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center mb-8">
           <Link to="/">
-            <img src="/logo.png" alt="שדר" className="h-10" />
+            <Logo className="h-10" />
           </Link>
         </div>
 
