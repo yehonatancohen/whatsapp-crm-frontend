@@ -108,21 +108,17 @@ export function PricingPage() {
                   <div className="w-full text-center text-sm font-medium py-2.5 rounded-lg border border-accent text-accent">
                     התוכנית הנוכחית שלך
                   </div>
-                ) : isEnterprise ? (
-                  <a
-                    href="mailto:support@shadar.co.il"
-                    className="w-full text-center text-sm font-medium py-2.5 rounded-lg transition-colors bg-white hover:bg-cream border border-border text-charcoal block"
-                  >
-                    צרו קשר
-                  </a>
                 ) : (
-                  <button
-                    onClick={() => plan.priceId && checkout.mutate(plan.priceId)}
-                    disabled={checkout.isPending || !plan.priceId}
-                    className="w-full text-sm font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 bg-accent hover:bg-accent-hover text-white"
+                  <a
+                    href={`mailto:support@shadar.co.il?subject=${encodeURIComponent(`שדרוג לתוכנית ${plan.name}`)}`}
+                    className={`w-full text-center text-sm font-medium py-2.5 rounded-lg transition-colors block ${
+                      isPro
+                        ? 'bg-accent hover:bg-accent-hover text-white'
+                        : 'bg-white hover:bg-cream border border-border text-charcoal'
+                    }`}
                   >
-                    {checkout.isPending ? 'מעביר לתשלום...' : 'התחל עכשיו'}
-                  </button>
+                    {isPro ? 'צרו קשר לרכישה' : 'צרו קשר'}
+                  </a>
                 )}
               </div>
             );

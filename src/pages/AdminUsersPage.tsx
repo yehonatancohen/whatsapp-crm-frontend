@@ -10,7 +10,7 @@ export function AdminUsersPage() {
   const { data: overview, isLoading: overviewLoading } = useQuery<AdminOverview>({
     queryKey: ['admin', 'overview'],
     queryFn: async () => {
-      const { data } = await api.get('/admin/overview');
+      const { data } = await api.get('/users/stats/overview');
       return data;
     },
   });
@@ -18,14 +18,14 @@ export function AdminUsersPage() {
   const { data: users = [], isLoading: usersLoading } = useQuery<AdminUser[]>({
     queryKey: ['admin', 'users', search],
     queryFn: async () => {
-      const { data } = await api.get(`/admin/users${search ? `?search=${search}` : ''}`);
+      const { data } = await api.get(`/users${search ? `?search=${search}` : ''}`);
       return data;
     },
   });
 
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      await api.patch(`/admin/users/${userId}`, { isActive });
+      await api.patch(`/users/${userId}`, { isActive });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
   });
