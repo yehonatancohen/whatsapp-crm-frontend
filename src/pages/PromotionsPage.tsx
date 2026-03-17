@@ -241,9 +241,10 @@ export function PromotionsPage() {
                     <button
                       onClick={() => toggleMutation.mutate(p.id)}
                       disabled={toggleMutation.isPending}
+                      dir="ltr"
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${p.isActive ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                     >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${p.isActive ? 'translate-x-1.5' : 'translate-x-6'}`} />
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${p.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
                   </td>
                   <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs text-muted hidden sm:table-cell" dir="ltr">
