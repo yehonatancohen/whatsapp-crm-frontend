@@ -42,6 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await api.get('/auth/me');
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
+
+      // If the JWT has a stale role, refresh it so API calls reflect the latest permissions
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshTokenVal = localStorage.getItem('refreshToken');
+      if (accessToken && refreshTokenVal) {
+        try {
+          const parts = accessToken.split('.');
+          if (parts.length === 3) {
+            const jwtPayload = JSON.parse(atob(parts[1]));
+            if (jwtPayload.role !== data.role) {
+              const { data: tokenData } = await api.post('/auth/refresh', { refreshToken: refreshTokenVal });
+              localStorage.setItem('accessToken', tokenData.accessToken);
+              localStorage.setItem('refreshToken', tokenData.refreshToken);
+            }
+          }
+        } catch {
+          // Non-critical: JWT decode or refresh failed, continue with existing token
+        }
+      }
     } catch (err) {
       console.error('Failed to refresh user:', err);
     }
