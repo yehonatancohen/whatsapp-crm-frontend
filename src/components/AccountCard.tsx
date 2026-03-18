@@ -128,8 +128,8 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
         {/* QR Code */}
         {account.status === 'QR_READY' && account.qrCode && (
           <div className="flex justify-center">
-            <div className="bg-white rounded-lg p-3 inline-block mt-1 border border-border">
-              <QRCodeSVG value={account.qrCode} size={180} />
+            <div className="bg-white dark:bg-white rounded-lg p-4 inline-block mt-1 border border-border">
+              <QRCodeSVG value={account.qrCode} size={180} bgColor="#ffffff" fgColor="#000000" />
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { useAuth } from '../context/AuthContext';
-import { usePlans, useCheckout } from '../hooks/useSubscription';
+import { usePlans } from '../hooks/useSubscription';
 import { Link } from 'react-router-dom';
 
 const fallbackPlans = [
@@ -39,7 +39,6 @@ const fallbackPlans = [
 export function PricingPage() {
   const { user } = useAuth();
   const { data: plans } = usePlans();
-  const checkout = useCheckout();
 
   const subscription = user?.subscription;
   // Filter plans to only show PRO and ENTERPRISE
