@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { extractApiError } from '../lib/errorUtils';
 import type { AccountResponse, AccountProfile, WhatsAppGroup } from '../types';
 
 export function useAccounts() {
@@ -58,7 +59,7 @@ export function useAccounts() {
   return {
     accounts,
     loading,
-    error: queryError?.message || null,
+    error: queryError ? extractApiError(queryError).message : null,
     addAccount,
     removeAccount,
     renameAccount,
