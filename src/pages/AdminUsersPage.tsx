@@ -30,6 +30,16 @@ export function AdminUsersPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
   });
 
+  const changePlanMutation = useMutation({
+    mutationFn: async ({ userId, planTier }: { userId: string; planTier: string }) => {
+      await api.patch(`/users/${userId}`, { planTier });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+    },
+  });
+
   return (
     <div className="text-right">
       <h1 className="text-2xl font-semibold text-charcoal mb-6">ניהול משתמשים</h1>
@@ -96,8 +106,23 @@ export function AdminUsersPage() {
                       )}
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden sm:table-cell">
-                      <div className="text-charcoal font-medium">{u.subscription?.planTier || 'ללא מנוי'}</div>
-                      <div className="text-[10px] text-faded uppercase">{u.subscription?.status || '-'}</div>
+                      {u.subscription ? (
+                        <>
+                          <select
+                            value={u.subscription.planTier}
+                            onChange={(e) => changePlanMutation.mutate({ userId: u.id, planTier: e.target.value })}
+                            disabled={changePlanMutation.isPending}
+                            className="bg-cream border border-border text-charcoal text-xs font-medium rounded-lg px-2 py-1 outline-none focus:border-accent transition-colors cursor-pointer"
+                          >
+                            <option value="STARTER">Starter</option>
+                            <option value="PRO">Pro</option>
+                            <option value="ENTERPRISE">Enterprise</option>
+                          </select>
+                          <div className="text-[10px] text-faded uppercase mt-0.5">{u.subscription.status}</div>
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted">ללא מנוי</span>
+                      )}
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap hidden md:table-cell">{u._count.accounts}</td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap hidden md:table-cell">{u._count.campaigns}</td>

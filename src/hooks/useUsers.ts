@@ -19,9 +19,12 @@ export function useAdminOverview() {
 export function useUpdateUser() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { role?: string; isActive?: boolean } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { role?: string; isActive?: boolean; planTier?: string } }) =>
       api.patch(`/users/${id}`, data).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] });
+      qc.invalidateQueries({ queryKey: ['admin'] });
+    },
   });
 }
 
