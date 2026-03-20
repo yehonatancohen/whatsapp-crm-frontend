@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import type { AdminUser, AdminOverview } from '../types';
 
 export function AdminUsersPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [search, setSearch] = useState('');
 
   const { data: overview, isLoading: overviewLoading } = useQuery<AdminOverview>({
@@ -37,6 +41,34 @@ export function AdminUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+    },
+  });
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await api.patch(`/users/${userId}`, { emailVerified: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+    },
+  });
+
+  const impersonateMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data } = await api.post(`/users/${userId}/impersonate`);
+      return data;
+    },
+    onSuccess: async (data) => {
+      // Store the new tokens and user
+      localStorage.setItem('accessToken', data.tokens.accessToken);
+      localStorage.setItem('refreshToken', data.tokens.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Refresh the context and navigate to dashboard
+      await refreshUser();
+      navigate('/');
+      window.location.reload(); // Hard reload to ensure all states are cleared
     },
   });
 
@@ -100,9 +132,14 @@ export function AdminUsersPage() {
                         {u.isActive ? 'פעיל' : 'חסום'}
                       </span>
                       {!u.emailVerified && (
-                        <span className="mr-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-50 text-amber-600">
-                          לא מאומת
-                        </span>
+                        <button
+                          onClick={() => verifyEmailMutation.mutate(u.id)}
+                          disabled={verifyEmailMutation.isPending}
+                          title="לחץ לאימות אימייל"
+                          className="mr-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors cursor-pointer"
+                        >
+                          לא מאומת ✓
+                        </button>
                       )}
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden sm:table-cell">
@@ -130,16 +167,26 @@ export function AdminUsersPage() {
                       {new Date(u.createdAt).toLocaleDateString('he-IL')}
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleStatusMutation.mutate({ userId: u.id, isActive: !u.isActive })}
-                        className={`text-xs font-semibold px-3 py-1 rounded border transition-colors ${
-                          u.isActive
-                            ? 'text-red-600 border-red-200 hover:bg-red-50'
-                            : 'text-green-600 border-green-200 hover:bg-green-50'
-                        }`}
-                      >
-                        {u.isActive ? 'חסום' : 'בטל חסימה'}
-                      </button>
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => impersonateMutation.mutate(u.id)}
+                          disabled={impersonateMutation.isPending || !u.isActive}
+                          title="התחבר כמשתמש זה"
+                          className="text-xs font-semibold px-3 py-1 rounded border border-accent/20 text-accent hover:bg-accent/5 transition-colors disabled:opacity-50"
+                        >
+                          {impersonateMutation.isPending ? 'מתחבר...' : 'התחבר כ...'}
+                        </button>
+                        <button
+                          onClick={() => toggleStatusMutation.mutate({ userId: u.id, isActive: !u.isActive })}
+                          className={`text-xs font-semibold px-3 py-1 rounded border transition-colors ${
+                            u.isActive
+                              ? 'text-red-600 border-red-200 hover:bg-red-50'
+                              : 'text-green-600 border-green-200 hover:bg-green-50'
+                          }`}
+                        >
+                          {u.isActive ? 'חסום' : 'בטל חסימה'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
