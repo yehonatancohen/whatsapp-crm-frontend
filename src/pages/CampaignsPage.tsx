@@ -13,6 +13,7 @@ import { useContactLists } from '../hooks/useContacts';
 import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
 import { api } from '../lib/api';
 import type { WhatsAppGroup, Campaign } from '../types';
+import { WhatsAppPreview } from '../components/WhatsAppPreview';
 
 export function CampaignsPage() {
   const { accounts } = useAccounts();
@@ -33,6 +34,7 @@ export function CampaignsPage() {
   const [contactListId, setContactListId] = useState('');
   const [selectedGroupJids, setSelectedGroupJids] = useState<string[]>([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
+  const [scheduledAt, setScheduledAt] = useState('');
 
   const { collections: groupCollections } = useGroupCollections();
   const { collection: selectedCollection } = useGroupCollectionDetail(selectedCollectionId || null);
@@ -103,6 +105,7 @@ export function CampaignsPage() {
       type: recipientType === 'GROUP' ? 'GROUP_MESSAGE' : 'DIRECT_MESSAGE',
       contactListId: recipientType === 'LIST' ? contactListId : undefined,
       groupJids: recipientType === 'GROUP' ? selectedGroupJids.map(jid => ({ jid })) : undefined,
+      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
       messagesPerMinute: Math.floor(60 / ((delayMin + delayMax) / 2)),
       dailyLimitPerAccount: dailyLimit,
     });
@@ -117,6 +120,7 @@ export function CampaignsPage() {
     setContactListId('');
     setSelectedGroupJids([]);
     setSelectedCollectionId('');
+    setScheduledAt('');
     setDailyLimit(50);
   };
 
@@ -468,7 +472,27 @@ export function CampaignsPage() {
                   className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-right"
                   placeholder="הקלד את תוכן ההודעה כאן..."
                 />
-                <p className="text-[10px] text-faded mt-1.5">ניתן להשתמש ב- {'{name}'} כדי להוסיף את שם איש הקשר.</p>
+                <p className="text-[10px] text-faded mt-1.5 mb-3">ניתן להשתמש ב- {'{name}'} וב- {'{אופציה1|אופציה2}'} לגיוון.</p>
+                {/* WhatsApp Preview */}
+                {message.trim() && (
+                  <div className="p-2 bg-[#e5ddd5] dark:bg-[#0b141a] rounded-lg">
+                    <p className="text-[9px] text-muted mb-1 text-center">תצוגה מקדימה</p>
+                    <WhatsAppPreview text={message} />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1.5">תזמון שליחה (אופציונלי)</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors text-right"
+                  />
+                  <p className="text-[10px] text-faded mt-1">השאר ריק כדי לשמור כטיוטה ולהפעיל ידנית</p>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-3 gap-4">
