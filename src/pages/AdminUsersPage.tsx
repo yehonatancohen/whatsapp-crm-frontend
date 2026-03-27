@@ -54,6 +54,16 @@ export function AdminUsersPage() {
     },
   });
 
+  const stopTrialMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await api.patch(`/users/${userId}`, { subscriptionStatus: 'ACTIVE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+    },
+  });
+
   const impersonateMutation = useMutation({
     mutationFn: async (userId: string) => {
       const { data } = await api.post(`/users/${userId}/impersonate`);
@@ -156,6 +166,16 @@ export function AdminUsersPage() {
                             <option value="ENTERPRISE">Enterprise</option>
                           </select>
                           <div className="text-[10px] text-faded uppercase mt-0.5">{u.subscription.status}</div>
+                          {u.subscription.status === 'TRIALING' && (
+                            <button
+                              onClick={() => stopTrialMutation.mutate(u.id)}
+                              disabled={stopTrialMutation.isPending}
+                              title="סיים תקופת ניסיון"
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors mt-0.5 block"
+                            >
+                              {stopTrialMutation.isPending ? 'סוגר...' : 'סיים ניסיון'}
+                            </button>
+                          )}
                         </>
                       ) : (
                         <span className="text-xs text-muted">ללא מנוי</span>
