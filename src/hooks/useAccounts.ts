@@ -66,6 +66,25 @@ export function useAccounts() {
   };
 }
 
+export function useReconnectAccount() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.post(`/accounts/${id}/reconnect`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+
+  return {
+    reconnect: mutation.mutateAsync,
+    isReconnecting: mutation.isPending,
+  };
+}
+
 export function useAccountGroups(accountId: string | null) {
   return useQuery<WhatsAppGroup[]>({
     queryKey: ['account-groups', accountId],

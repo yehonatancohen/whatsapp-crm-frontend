@@ -1,6 +1,7 @@
 export type AccountStatus = 'INITIALIZING' | 'QR_READY' | 'AUTHENTICATED' | 'DISCONNECTED';
 
 export type WarmupLevel = 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+export type WarmupIntensity = 'GHOST' | 'LOW' | 'NORMAL' | 'HIGH';
 
 export interface AccountResponse {
   id: string;
@@ -25,6 +26,7 @@ export interface WarmupStatus {
   accountId: string;
   label: string;
   level: WarmupLevel;
+  intensity: WarmupIntensity;
   isEnabled: boolean;
   messagesSentToday: number;
   maxMessagesPerDay: number;

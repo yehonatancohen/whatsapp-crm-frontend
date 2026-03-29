@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { WarmupOverview, WarmupStatus, WarmupLogEntry } from '../types';
+import type { WarmupOverview, WarmupStatus, WarmupLogEntry, WarmupIntensity } from '../types';
 
 export function useWarmupOverview() {
   const query = useQuery<WarmupOverview>({
@@ -72,5 +72,44 @@ export function useToggleWarmup() {
   return {
     toggleWarmup: mutation.mutateAsync,
     isToggling: mutation.isPending,
+  };
+}
+
+export function useSetWarmupIntensity() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async ({ accountId, intensity }: { accountId: string; intensity: WarmupIntensity }) => {
+      const { data } = await api.post(`/warmup/${accountId}/intensity`, { intensity });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warmup'] });
+    },
+  });
+
+  return {
+    setIntensity: mutation.mutateAsync,
+    isSettingIntensity: mutation.isPending,
+  };
+}
+
+export function useBanRecovery() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (accountId: string) => {
+      const { data } = await api.post(`/warmup/${accountId}/ban-recovery`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warmup'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+
+  return {
+    startBanRecovery: mutation.mutateAsync,
+    isBanRecovering: mutation.isPending,
   };
 }
