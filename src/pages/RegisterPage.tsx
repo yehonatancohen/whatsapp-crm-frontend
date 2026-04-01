@@ -16,6 +16,7 @@ export function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<Array<{ field: string; message: string }>>([]);
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -106,17 +107,26 @@ export function RegisterPage() {
 
           <FormError error={error} details={errorDetails} className="mt-3" />
 
-          {/* WhatsApp disclaimer */}
-          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 text-right leading-relaxed">
-            <strong>⚠️ הצהרת אחריות:</strong> כלי זה משתמש בווטסאפ בדרכים העלולות להפר את תנאי השירות שלהם. השימוש הוא על אחריותך בלבד. אנו ממליצים להתחיל עם מספרים משניים.{' '}
-            <Link to="/terms" className="underline hover:text-amber-900" target="_blank">תנאי שימוש</Link>
-            {' · '}
-            <Link to="/privacy" className="underline hover:text-amber-900" target="_blank">מדיניות פרטיות</Link>
-          </div>
+          {/* Terms agreement checkbox */}
+          <label className="flex items-center gap-2 mt-4 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="w-4 h-4 accent-accent flex-shrink-0"
+            />
+            <span className="text-xs text-muted leading-relaxed text-right">
+              קראתי ואני מסכים/ה ל
+              <Link to="/terms" className="text-accent hover:text-accent-hover underline mx-1" target="_blank">תנאי השימוש</Link>
+              ול
+              <Link to="/privacy" className="text-accent hover:text-accent-hover underline mx-1" target="_blank">מדיניות הפרטיות</Link>
+              , כולל הצהרת האחריות בנוגע לוואטסאפ
+            </span>
+          </label>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !agreedToTerms}
             className="w-full mt-4 bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
           >
             {loading ? 'יוצר חשבון...' : 'הרשמה'}
