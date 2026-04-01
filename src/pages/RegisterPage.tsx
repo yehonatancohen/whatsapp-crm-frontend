@@ -106,10 +106,18 @@ export function RegisterPage() {
 
           <FormError error={error} details={errorDetails} className="mt-3" />
 
+          {/* WhatsApp disclaimer */}
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 text-right leading-relaxed">
+            <strong>⚠️ הצהרת אחריות:</strong> כלי זה משתמש בווטסאפ בדרכים העלולות להפר את תנאי השירות שלהם. השימוש הוא על אחריותך בלבד. אנו ממליצים להתחיל עם מספרים משניים.{' '}
+            <Link to="/terms" className="underline hover:text-amber-900" target="_blank">תנאי שימוש</Link>
+            {' · '}
+            <Link to="/privacy" className="underline hover:text-amber-900" target="_blank">מדיניות פרטיות</Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-5 bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="w-full mt-4 bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
           >
             {loading ? 'יוצר חשבון...' : 'הרשמה'}
           </button>

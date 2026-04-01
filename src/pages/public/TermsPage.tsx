@@ -28,8 +28,20 @@ export function TermsPage() {
           <p>שדר לא תהיה אחראית לכל נזק ישיר, עקיף או תוצאתי הנובע מהשימוש בשירות, לרבות חסימת חשבונות וואטסאפ על ידי WhatsApp Inc.</p>
         </section>
 
+        <section>
+          <h2 className="text-xl font-semibold text-charcoal mb-3">6. הצהרת אחריות בנוגע לוואטסאפ</h2>
+          <p className="font-semibold text-charcoal mb-2">⚠️ קרא בעיון לפני השימוש:</p>
+          <p>כלי זה משתמש בוואטסאפ בדרכים העלולות להפר את תנאי השירות של WhatsApp Inc. שדר אינה קשורה ל-WhatsApp ואינה שותפה רשמית שלה. השימוש בשירות הוא על אחריותך הבלעדית.</p>
+          <ul className="mt-3 space-y-2 list-disc list-inside marker:text-amber-500">
+            <li>אנו ממליצים בחום להתחיל עם מספרי טלפון משניים ולא עם מספרך הראשי.</li>
+            <li>חסימת חשבון וואטסאפ על ידי WhatsApp Inc. אינה מזכה בהחזר כספי.</li>
+            <li>אינך רשאי להשתמש בשירות לשליחת ספאם, הודעות לא רצויות, פישינג או כל פעילות בלתי חוקית אחרת.</li>
+            <li>שדר שומרת לעצמה את הזכות להשעות חשבון שעושה שימוש לרעה בשירות.</li>
+          </ul>
+        </section>
+
         <div className="pt-8 border-t border-border">
-          <p className="text-xs">עודכן לאחרונה: 15 במרץ, 2026</p>
+          <p className="text-xs">עודכן לאחרונה: 1 באפריל, 2026</p>
         </div>
       </div>
     </div>
