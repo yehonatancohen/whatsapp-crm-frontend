@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const parts = accessToken.split('.');
           if (parts.length === 3) {
             const jwtPayload = JSON.parse(atob(parts[1]));
-            if (jwtPayload.role !== data.role) {
+            if (jwtPayload.role !== data.role || jwtPayload.emailVerified !== data.emailVerified) {
               const { data: tokenData } = await api.post('/auth/refresh', { refreshToken: refreshTokenVal });
               localStorage.setItem('accessToken', tokenData.accessToken);
               localStorage.setItem('refreshToken', tokenData.refreshToken);

@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
 
 export function VerifyEmailPendingPage() {
   const { user, resendVerification, logout } = useAuth();
+  const navigate = useNavigate();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Redirect to home if email gets verified (e.g. admin verified it remotely)
+  useEffect(() => {
+    if (user?.emailVerified) {
+      navigate('/', { replace: true });
+    }
+  }, [user?.emailVerified, navigate]);
 
   const handleResend = async () => {
     setLoading(true);

@@ -8,6 +8,7 @@ import {
   useResumeCampaign,
   useCancelCampaign,
   useDeleteCampaign,
+  useRestartCampaign,
 } from '../hooks/useCampaigns';
 import { useContactLists } from '../hooks/useContacts';
 import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
@@ -25,6 +26,7 @@ export function CampaignsPage() {
   const resumeMutation = useResumeCampaign();
   const cancelMutation = useCancelCampaign();
   const deleteMutation = useDeleteCampaign();
+  const restartMutation = useRestartCampaign();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
@@ -250,6 +252,20 @@ export function CampaignsPage() {
       );
     }
 
+    if (['COMPLETED', 'CANCELLED', 'FAILED'].includes(c.status)) {
+      actions.push(
+        <button
+          key="restart"
+          onClick={() => restartMutation.mutate(c.id)}
+          disabled={restartMutation.isPending}
+          className="text-blue-600 hover:text-blue-700 text-xs font-medium disabled:opacity-50"
+          title="הפעל מחדש"
+        >
+          הפעל מחדש
+        </button>
+      );
+    }
+
     if (['DRAFT', 'COMPLETED', 'CANCELLED', 'FAILED'].includes(c.status)) {
       actions.push(
         <button
@@ -470,8 +486,8 @@ export function CampaignsPage() {
                         const adminAccounts = getAdminAccountsForGroup(g.id);
                         const hasAdmin = adminAccounts.length > 0;
                         return (
-                          <div key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors">
-                            <label className="flex items-center gap-2 cursor-pointer">
+                          <label key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors cursor-pointer">
+                            <div className="flex items-center gap-2">
                               <input
                                 type="checkbox"
                                 checked={selectedGroupJids.includes(g.id)}
@@ -479,10 +495,11 @@ export function CampaignsPage() {
                                 className="accent-accent"
                               />
                               <span className="text-sm font-medium text-charcoal">{g.name}</span>
+                              <span className="text-[10px] text-muted mr-auto" dir="ltr">{g.participantsCount} חברים</span>
                               {!hasAdmin && (
                                 <span className="text-[9px] bg-amber-50 text-amber-600 px-1 rounded border border-amber-100">אין מנהל</span>
                               )}
-                            </label>
+                            </div>
                             {selectedGroupJids.includes(g.id) && (
                               <div className="mt-1 flex flex-wrap gap-1 pr-6">
                                 {hasAdmin ? (
@@ -501,7 +518,7 @@ export function CampaignsPage() {
                                 )}
                               </div>
                             )}
-                          </div>
+                          </label>
                         );
                        })}
                     </div>

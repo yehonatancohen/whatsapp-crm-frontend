@@ -133,6 +133,19 @@ export function useCancelCampaign() {
   });
 }
 
+export function useRestartCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.post(`/campaigns/${id}/restart`);
+      return data as Campaign;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    },
+  });
+}
+
 export function useCampaignFailures(id: string | null) {
   return useQuery({
     queryKey: ['campaigns', id, 'failures'],
