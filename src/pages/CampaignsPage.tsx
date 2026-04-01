@@ -47,10 +47,11 @@ export function CampaignsPage() {
 
   const activeAccounts = accounts.filter(a => a.status === 'AUTHENTICATED');
 
-  // Fetch groups for newly selected accounts
+  // Fetch groups for newly selected accounts (or all accounts when switching to GROUP mode)
   useEffect(() => {
     const fetchNewAccountGroups = async () => {
-      const missing = selectedAccountIds.filter(id => !accountGroups[id]);
+      // When switching to GROUP mode, re-fetch all selected accounts (not just missing ones)
+      const missing = selectedAccountIds.filter(id => !(id in accountGroups));
       if (missing.length === 0) return;
 
       setGroupsLoading(true);
@@ -136,8 +137,29 @@ export function CampaignsPage() {
     );
   };
 
-  const checkAccountInGroup = (accId: string, groupJid: string) => {
-    return (accountGroups[accId] || []).some(g => g.id === groupJid);
+  const checkAccountAdminInGroup = (accId: string, groupJid: string) => {
+    return (accountGroups[accId] || []).some(g => g.id === groupJid && g.isAdmin);
+  };
+
+  const getAdminAccountsForGroup = (groupJid: string) => {
+    return selectedAccountIds.filter(accId => checkAccountAdminInGroup(accId, groupJid));
+  };
+
+  const refreshGroups = async () => {
+    if (selectedAccountIds.length === 0) return;
+    setGroupsLoading(true);
+    try {
+      const results = await Promise.all(
+        selectedAccountIds.map(id => api.get(`/accounts/${id}/groups`).then(r => ({ id, groups: r.data })))
+      );
+      const newGroups: Record<string, WhatsAppGroup[]> = {};
+      results.forEach(res => { newGroups[res.id] = res.groups; });
+      setAccountGroups(newGroups);
+    } catch (err) {
+      console.error('Failed to refresh groups', err);
+    } finally {
+      setGroupsLoading(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -427,37 +449,63 @@ export function CampaignsPage() {
                   {selectedAccountIds.length === 0 ? (
                     <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100">בחר חשבונות שולחים תחילה כדי לראות את הקבוצות שלהם</p>
                   ) : (
+                    <>
+                    <div className="flex items-center justify-end mb-1.5">
+                      <button
+                        type="button"
+                        onClick={refreshGroups}
+                        disabled={groupsLoading}
+                        className="text-[10px] text-accent hover:text-accent-hover flex items-center gap-1 disabled:opacity-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                          <path d="M21.5 2v6h-6"/><path d="M2.5 12A10 10 0 0 1 19 4.5l2.5 3.5"/><path d="M2.5 22v-6h6"/><path d="M21.5 12A10 10 0 0 1 5 19.5l-2.5-3.5"/>
+                        </svg>
+                        רענן קבוצות
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 bg-cream border border-border rounded-lg">
                       {groupsLoading ? <p className="text-xs text-muted p-2 text-center">טוען קבוצות...</p> :
                        allAvailableGroups.length === 0 ? <p className="text-xs text-muted p-2 text-center">לא נמצאו קבוצות בחשבונות שנבחרו</p> :
-                       allAvailableGroups.map(g => (
-                        <div key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedGroupJids.includes(g.id)}
-                              onChange={() => toggleGroupJid(g.id)}
-                              className="accent-accent"
-                            />
-                            <span className="text-sm font-medium text-charcoal">{g.name}</span>
-                          </label>
-                          {selectedGroupJids.includes(g.id) && (
-                            <div className="mt-1 flex flex-wrap gap-1 pr-6">
-                              {selectedAccountIds.map(accId => {
-                                const inGroup = checkAccountInGroup(accId, g.id);
-                                if (inGroup) return null;
-                                const acc = activeAccounts.find(a => a.id === accId);
-                                return (
-                                  <span key={accId} className="text-[9px] bg-red-50 text-red-600 px-1 rounded border border-red-100">
-                                    {acc?.label} לא חבר בקבוצה
+                       allAvailableGroups.map(g => {
+                        const adminAccounts = getAdminAccountsForGroup(g.id);
+                        const hasAdmin = adminAccounts.length > 0;
+                        return (
+                          <div key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedGroupJids.includes(g.id)}
+                                onChange={() => toggleGroupJid(g.id)}
+                                className="accent-accent"
+                              />
+                              <span className="text-sm font-medium text-charcoal">{g.name}</span>
+                              {!hasAdmin && (
+                                <span className="text-[9px] bg-amber-50 text-amber-600 px-1 rounded border border-amber-100">אין מנהל</span>
+                              )}
+                            </label>
+                            {selectedGroupJids.includes(g.id) && (
+                              <div className="mt-1 flex flex-wrap gap-1 pr-6">
+                                {hasAdmin ? (
+                                  adminAccounts.map(accId => {
+                                    const acc = activeAccounts.find(a => a.id === accId);
+                                    return (
+                                      <span key={accId} className="text-[9px] bg-green-50 text-green-700 px-1 rounded border border-green-100">
+                                        ✓ {acc?.label} ישלח
+                                      </span>
+                                    );
+                                  })
+                                ) : (
+                                  <span className="text-[9px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded border border-red-100">
+                                    שום חשבון נבחר אינו מנהל בקבוצה זו — ההודעה לא תישלח
                                   </span>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                       })}
                     </div>
+                    </>
                   )}
                 </div>
               )}
@@ -485,12 +533,26 @@ export function CampaignsPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-muted mb-1.5">תזמון שליחה (אופציונלי)</label>
-                  <input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(e) => setScheduledAt(e.target.value)}
-                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors text-right"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors text-right"
+                    />
+                    {scheduledAt && (
+                      <button
+                        type="button"
+                        onClick={() => setScheduledAt('')}
+                        className="text-muted hover:text-red-500 transition-colors flex-shrink-0"
+                        title="נקה תזמון"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <p className="text-[10px] text-faded mt-1">השאר ריק כדי לשמור כטיוטה ולהפעיל ידנית</p>
                 </div>
               </div>

@@ -120,6 +120,7 @@ export interface WhatsAppGroup {
   id: string;
   name: string;
   participantsCount: number;
+  isAdmin: boolean;
 }
 
 // ─── Admin Users ─────────────────────────────────────────────────
