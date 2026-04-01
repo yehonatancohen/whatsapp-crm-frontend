@@ -47,10 +47,10 @@ export function PromotionsPage() {
 
   const activeAccounts = accounts.filter(a => a.status === 'AUTHENTICATED');
 
-  // Fetch groups for selected accounts
+  // Fetch groups for newly selected accounts
   useEffect(() => {
     const fetchNewAccountGroups = async () => {
-      const missing = selectedAccountIds.filter(id => !accountGroups[id]);
+      const missing = selectedAccountIds.filter(id => !(id in accountGroups));
       if (missing.length === 0) return;
       setGroupsLoading(true);
       try {
@@ -66,6 +66,27 @@ export function PromotionsPage() {
     };
     if (selectedAccountIds.length > 0) fetchNewAccountGroups();
   }, [selectedAccountIds]);
+
+  const refreshGroups = async () => {
+    if (selectedAccountIds.length === 0) return;
+    setGroupsLoading(true);
+    try {
+      const results = await Promise.all(
+        selectedAccountIds.map(id => api.get(`/accounts/${id}/groups`).then(r => ({ id, groups: r.data }))),
+      );
+      const updated: Record<string, WhatsAppGroup[]> = {};
+      results.forEach(r => { updated[r.id] = r.groups; });
+      setAccountGroups(updated);
+    } catch { /* silent */ } finally {
+      setGroupsLoading(false);
+    }
+  };
+
+  const checkAccountAdminInGroup = (accId: string, groupJid: string) =>
+    (accountGroups[accId] || []).some(g => g.id === groupJid && g.isAdmin);
+
+  const getAdminAccountsForGroup = (groupJid: string) =>
+    selectedAccountIds.filter(accId => checkAccountAdminInGroup(accId, groupJid));
 
   // Load groups from selected collection
   useEffect(() => {
@@ -131,6 +152,7 @@ export function PromotionsPage() {
       name,
       sendTimes,
       daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       accountIds: selectedAccountIds,
       dailyLimitPerAccount: dailyLimit,
       messagesPerMinute,
@@ -305,46 +327,72 @@ export function PromotionsPage() {
                   </div>
                 )}
                 {selectedAccountIds.length === 0 ? (
-                  <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 p-3 rounded-lg border border-amber-100 dark:border-amber-800">בחר חשבונות שולחים תחילה</p>
+                  <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100">בחר חשבונות שולחים תחילה</p>
                 ) : (
-                  <div className="max-h-48 overflow-y-auto p-2 bg-cream border border-border rounded-lg space-y-1">
-                    {groupsLoading ? (
-                      <p className="text-xs text-muted p-2 text-center">טוען קבוצות...</p>
-                    ) : allGroups.length === 0 ? (
-                      <p className="text-xs text-muted p-2 text-center">לא נמצאו קבוצות</p>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-2 pb-2 border-b border-border mb-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedGroupJids(allGroups.map(g => g.id))}
-                            className="text-[10px] text-accent hover:underline"
-                          >
-                            בחר הכל
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedGroupJids([])}
-                            className="text-[10px] text-muted hover:underline"
-                          >
-                            נקה הכל
-                          </button>
-                        </div>
-                        {allGroups.map(g => (
-                          <label key={g.id} className="flex items-center gap-2 p-2 hover:bg-white rounded transition-colors cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedGroupJids.includes(g.id)}
-                              onChange={() => setSelectedGroupJids(prev => prev.includes(g.id) ? prev.filter(j => j !== g.id) : [...prev, g.id])}
-                              className="accent-accent"
-                            />
-                            <span className="text-sm text-charcoal">{g.name}</span>
-                            <span className="text-[10px] text-muted">{g.participantsCount} משתתפים</span>
+                  <>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => setSelectedGroupJids(allGroups.map(g => g.id))} className="text-[10px] text-accent hover:underline">בחר הכל</button>
+                        <button type="button" onClick={() => setSelectedGroupJids([])} className="text-[10px] text-muted hover:underline">נקה הכל</button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={refreshGroups}
+                        disabled={groupsLoading}
+                        className="text-[10px] text-accent hover:text-accent-hover flex items-center gap-1 disabled:opacity-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                          <path d="M21.5 2v6h-6"/><path d="M2.5 12A10 10 0 0 1 19 4.5l2.5 3.5"/><path d="M2.5 22v-6h6"/><path d="M21.5 12A10 10 0 0 1 5 19.5l-2.5-3.5"/>
+                        </svg>
+                        רענן
+                      </button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto p-2 bg-cream border border-border rounded-lg space-y-1">
+                      {groupsLoading ? (
+                        <p className="text-xs text-muted p-2 text-center">טוען קבוצות...</p>
+                      ) : allGroups.length === 0 ? (
+                        <p className="text-xs text-muted p-2 text-center">לא נמצאו קבוצות</p>
+                      ) : allGroups.map(g => {
+                        const adminAccounts = getAdminAccountsForGroup(g.id);
+                        const hasAdmin = adminAccounts.length > 0;
+                        return (
+                          <label key={g.id} className="flex flex-col p-2 hover:bg-white rounded transition-colors cursor-pointer">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedGroupJids.includes(g.id)}
+                                onChange={() => setSelectedGroupJids(prev => prev.includes(g.id) ? prev.filter(j => j !== g.id) : [...prev, g.id])}
+                                className="accent-accent"
+                              />
+                              <span className="text-sm text-charcoal">{g.name}</span>
+                              <span className="text-[10px] text-muted mr-auto" dir="ltr">{g.participantsCount} חברים</span>
+                              {!hasAdmin && (
+                                <span className="text-[9px] bg-amber-50 text-amber-600 px-1 rounded border border-amber-100">אין מנהל</span>
+                              )}
+                            </div>
+                            {selectedGroupJids.includes(g.id) && (
+                              <div className="mt-1 flex flex-wrap gap-1 pr-6">
+                                {hasAdmin ? (
+                                  adminAccounts.map(accId => {
+                                    const acc = activeAccounts.find(a => a.id === accId);
+                                    return (
+                                      <span key={accId} className="text-[9px] bg-green-50 text-green-700 px-1 rounded border border-green-100">
+                                        ✓ {acc?.label} ישלח
+                                      </span>
+                                    );
+                                  })
+                                ) : (
+                                  <span className="text-[9px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded border border-red-100">
+                                    שום חשבון נבחר אינו מנהל — ההודעה לא תישלח
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </label>
-                        ))}
-                      </>
-                    )}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
                 {selectedGroupJids.length > 0 && (
                   <p className="text-[10px] text-accent mt-1">{selectedGroupJids.length} קבוצות נבחרו</p>
