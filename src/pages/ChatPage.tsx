@@ -3,6 +3,8 @@ import {
   useConversations,
   useChatMessages,
   useSendMessage,
+  useMarkSeen,
+  useDeleteMessage,
   useGroupInfo,
   useAddParticipants,
   usePromoteParticipants,
@@ -510,6 +512,8 @@ export function ChatPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showList, setShowList] = useState(true); // mobile toggle
   const [showGroupPanel, setShowGroupPanel] = useState(false);
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [hoveredMsgId, setHoveredMsgId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -519,11 +523,20 @@ export function ChatPage() {
     selectedChat?.chatId ?? null,
   );
   const sendMutation = useSendMessage();
+  const markSeen = useMarkSeen();
+  const deleteMessage = useDeleteMessage();
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Mark chat as seen when opened
+  useEffect(() => {
+    if (!selectedChat) return;
+    markSeen.mutateAsync({ accountId: selectedChat.accountId, chatId: selectedChat.chatId }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChat?.accountId, selectedChat?.chatId]);
 
   // Filter conversations
   const filtered = searchQuery
@@ -543,12 +556,15 @@ export function ChatPage() {
     e.preventDefault();
     if (!selectedChat || !messageText.trim() || sendMutation.isPending) return;
     const text = messageText.trim();
+    const quotedId = replyTo?.id;
     setMessageText('');
+    setReplyTo(null);
     try {
       await sendMutation.mutateAsync({
         accountId: selectedChat.accountId,
         chatId: selectedChat.chatId,
         body: text,
+        quotedMessageId: quotedId,
       });
     } catch {
       setMessageText(text);
@@ -638,7 +654,7 @@ export function ChatPage() {
       </div>
 
       {/* Main Area: Chat */}
-      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 bg-cream-dark relative overflow-hidden`}>
+      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 relative overflow-hidden`} style={{ background: '#e5ddd5' }}>
         {selectedChat ? (
           <>
             {/* Chat Header */}
@@ -693,18 +709,52 @@ export function ChatPage() {
                   {sortedMsgs.map((msg, index) => {
                     const prev = index > 0 ? sortedMsgs[index - 1] : null;
                     const showTail = !prev || prev.fromMe !== msg.fromMe;
-                    
+                    const isHovered = hoveredMsgId === msg.id;
+                    const authorDisplay = msg.author?.replace('@c.us', '');
+
                     // RTL context: justify-start = right, justify-end = left
                     // User messages (fromMe) → right side → justify-start
                     // Other messages (!fromMe) → left side → justify-end
                     return (
-                      <div key={msg.id} className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''}`}>
-                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-accent text-white' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
-                          {/* Sender Name for Group Chats */}
-                          {selectedChat.isGroup && msg.author && !msg.fromMe && (
-                            <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{msg.author}</p>
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''} group/msg relative`}
+                        onMouseEnter={() => setHoveredMsgId(msg.id)}
+                        onMouseLeave={() => setHoveredMsgId(null)}
+                      >
+                        {/* Action buttons — shown on hover, positioned beside the bubble */}
+                        <div className={`flex items-center gap-1 mx-1.5 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'} ${msg.fromMe ? 'order-first' : 'order-last'}`}>
+                          {/* Reply button */}
+                          <button
+                            onClick={() => setReplyTo(msg)}
+                            title="ענה"
+                            className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-accent transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" /></svg>
+                          </button>
+                          {/* Delete button — only for own messages */}
+                          {msg.fromMe && (
+                            <button
+                              onClick={async () => {
+                                if (!confirm('למחוק הודעה זו?')) return;
+                                try {
+                                  await deleteMessage.mutateAsync({ accountId: selectedChat.accountId, chatId: selectedChat.chatId, messageId: msg.id });
+                                } catch { /* ignore */ }
+                              }}
+                              title="מחק"
+                              className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-red-500 transition-colors"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
+                            </button>
                           )}
-                          
+                        </div>
+
+                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-charcoal' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                          {/* Sender Name for Group Chats */}
+                          {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
+                            <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{authorDisplay}</p>
+                          )}
+
                           {msg.hasMedia && ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ? (
                             <MediaBubble msg={msg} accountId={selectedChat.accountId} chatId={selectedChat.chatId} />
                           ) : msg.type === 'chat' ? (
@@ -715,7 +765,7 @@ export function ChatPage() {
                               ))}
                             </>
                           ) : (
-                            <div className={`break-words whitespace-pre-wrap italic ${msg.fromMe ? 'text-white/70' : 'text-muted'}`} dir="auto">
+                            <div className="break-words whitespace-pre-wrap italic text-charcoal/60" dir="auto">
                               {msg.type === 'image' ? '📷 תמונה' :
                                msg.type === 'video' ? '🎥 וידאו' :
                                msg.type === 'audio' || msg.type === 'ptt' ? '🎵 אודיו' :
@@ -724,10 +774,10 @@ export function ChatPage() {
                                msg.body || `[${msg.type}]`}
                             </div>
                           )}
-                          <div className={`flex items-center justify-end gap-1 mt-0.5 ${msg.fromMe ? 'text-white/70' : 'text-muted'}`}>
+                          <div className="flex items-center justify-end gap-1 mt-0.5 text-charcoal/50">
                             <span className="text-[11px] leading-none">{formatTime(msg.timestamp)}</span>
                             {msg.fromMe && msg.ack != null && (
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] leading-none ${msg.ack >= 2 ? (theme === 'dark' ? 'text-blue-400' : 'text-blue-200') : 'text-white/50'}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] leading-none ${msg.ack >= 2 ? (theme === 'dark' ? 'text-blue-500' : 'text-blue-400') : 'text-charcoal/40'}`}>
                                 {msg.ack >= 2 ? (
                                   <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
                                 ) : (
@@ -745,8 +795,21 @@ export function ChatPage() {
               )}
             </div>
 
+            {/* Reply Preview Bar */}
+            {replyTo && (
+              <div className="px-3 pt-2 pb-0 bg-white border-t border-border z-10 w-full flex items-center gap-2">
+                <div className="flex-1 border-r-4 border-accent bg-cream rounded-md px-3 py-1.5 min-w-0">
+                  <p className="text-[11px] font-semibold text-accent truncate">{replyTo.fromMe ? 'אתה' : (replyTo.author?.replace('@c.us', '') || 'נמען')}</p>
+                  <p className="text-xs text-charcoal/70 truncate" dir="auto">{replyTo.body || `[${replyTo.type}]`}</p>
+                </div>
+                <button onClick={() => setReplyTo(null)} className="text-muted hover:text-charcoal shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              </div>
+            )}
+
             {/* Input */}
-            <form onSubmit={handleSend} className="p-3 bg-white border-t border-border flex items-center gap-3 z-10 w-full">
+            <form onSubmit={handleSend} className={`p-3 bg-white flex items-center gap-3 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
               <input
                 ref={inputRef}
                 type="text"

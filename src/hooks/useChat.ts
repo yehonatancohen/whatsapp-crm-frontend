@@ -27,6 +27,7 @@ export interface ChatMessage {
   ack?: number;
   author?: string;
   hasMedia?: boolean;
+  quotedMsg?: { body: string; author?: string; fromMe: boolean };
 }
 
 export interface IncomingChatMessage {
@@ -221,8 +222,8 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ accountId, chatId, body }: { accountId: string; chatId: string; body: string }) => {
-      const { data } = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/send`, { body });
+    mutationFn: async ({ accountId, chatId, body, quotedMessageId }: { accountId: string; chatId: string; body: string; quotedMessageId?: string }) => {
+      const { data } = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/send`, { body, quotedMessageId });
       return data as ChatMessage;
     },
     onSuccess: (msg, { accountId, chatId }) => {
@@ -236,6 +237,32 @@ export function useSendMessage() {
         },
       );
       queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+  });
+}
+
+export function useMarkSeen() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ accountId, chatId }: { accountId: string; chatId: string }) => {
+      await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/seen`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+  });
+}
+
+export function useDeleteMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, messageId }: { accountId: string; chatId: string; messageId: string }) => {
+      await api.delete(`/chat/${accountId}/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`);
+    },
+    onSuccess: (_data, { accountId, chatId }) => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'messages', accountId, chatId] });
     },
   });
 }
