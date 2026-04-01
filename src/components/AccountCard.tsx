@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { AccountResponse } from '../types';
+import { api } from '../lib/api';
 import {
   useAccountProfile,
   useUpdateProfile,
@@ -26,6 +27,26 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
   const [newLabel, setNewLabel] = useState(account.label);
   const [isRenaming, setIsRenaming] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showPairingInput, setShowPairingInput] = useState(false);
+  const [pairingPhone, setPairingPhone] = useState('');
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [pairingLoading, setPairingLoading] = useState(false);
+  const [pairingError, setPairingError] = useState<string | null>(null);
+
+  const handleRequestPairingCode = async () => {
+    if (!pairingPhone.trim()) return;
+    setPairingLoading(true);
+    setPairingError(null);
+    setPairingCode(null);
+    try {
+      const { data } = await api.post(`/accounts/${account.id}/pairing-code`, { phoneNumber: pairingPhone });
+      setPairingCode(data.code);
+    } catch (err: any) {
+      setPairingError(err.response?.data?.error || 'נכשל בקבלת קוד');
+    } finally {
+      setPairingLoading(false);
+    }
+  };
 
   const status = statusConfig[account.status] ?? {
     color: 'text-muted',
@@ -125,12 +146,62 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
           </div>
         </div>
 
-        {/* QR Code */}
+        {/* QR Code / Pairing Code */}
         {account.status === 'QR_READY' && account.qrCode && (
-          <div className="flex justify-center">
-            <div className="bg-white dark:bg-white rounded-lg p-4 inline-block mt-1 border border-border">
-              <QRCodeSVG value={account.qrCode} size={180} bgColor="#ffffff" fgColor="#000000" />
-            </div>
+          <div className="mt-1">
+            {!showPairingInput ? (
+              <>
+                <div className="flex justify-center">
+                  <div className="bg-white rounded-lg p-4 inline-block border border-border">
+                    <QRCodeSVG value={account.qrCode} size={180} bgColor="#ffffff" fgColor="#000000" />
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowPairingInput(true); setPairingCode(null); setPairingError(null); }}
+                  className="w-full mt-2 text-xs text-accent hover:text-accent/80 font-medium py-1.5 border border-accent/20 rounded-lg hover:bg-accent/5 transition-colors"
+                >
+                  משתמש באותו טלפון? השתמש בקוד חיבור
+                </button>
+              </>
+            ) : (
+              <div className="space-y-2 text-right">
+                <p className="text-xs text-muted">
+                  הכנס את מספר הטלפון של החשבון שאתה מחבר. תקבל קוד 8 ספרות שתזין בוואטסאפ ← מכשירים מקושרים ← קשר מכשיר ← קישור עם מספר טלפון.
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    value={pairingPhone}
+                    onChange={(e) => setPairingPhone(e.target.value)}
+                    placeholder="972501234567"
+                    dir="ltr"
+                    className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3 py-2 text-sm outline-none focus:border-accent transition-colors"
+                  />
+                  <button
+                    onClick={handleRequestPairingCode}
+                    disabled={pairingLoading || !pairingPhone.trim()}
+                    className="bg-accent hover:bg-accent/90 text-white text-xs font-medium px-3 py-2 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {pairingLoading ? '...' : 'קבל קוד'}
+                  </button>
+                </div>
+                {pairingCode && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                    <p className="text-xs text-green-700 mb-1">הזן קוד זה בוואטסאפ:</p>
+                    <p className="text-2xl font-bold text-green-800 tracking-widest" dir="ltr">{pairingCode}</p>
+                  </div>
+                )}
+                {pairingError && (
+                  <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{pairingError}</p>
+                )}
+                <button
+                  onClick={() => { setShowPairingInput(false); setPairingCode(null); setPairingError(null); }}
+                  className="text-xs text-muted hover:text-charcoal"
+                >
+                  ← חזור לסריקת QR
+                </button>
+              </div>
+            )}
           </div>
         )}
 
