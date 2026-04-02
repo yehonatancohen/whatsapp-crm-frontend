@@ -1,12 +1,86 @@
 import { useDashboardStats, useActivity } from '../hooks/useActivity';
+import { useNavigate } from 'react-router-dom';
+
+const onboardingSteps = [
+  {
+    num: 1,
+    title: 'חבר חשבון וואטסאפ',
+    desc: 'עבור ל"חשבונות", לחץ "הוסף חשבון" וסרוק את קוד ה-QR באפליקציית וואטסאפ (מכשירים מקושרים).',
+    path: '/accounts',
+    cta: 'עבור לחשבונות',
+  },
+  {
+    num: 2,
+    title: 'הפעל חימום מספרים',
+    desc: 'לאחר חיבור חשבון, הפעל חימום כדי לבנות מוניטין ולמנוע חסימות כששולחים קמפיינים.',
+    path: '/warmup',
+    cta: 'עבור לחימום',
+  },
+  {
+    num: 3,
+    title: 'ייבא אנשי קשר',
+    desc: 'העלה קובץ CSV עם מספרי הטלפון של הלקוחות שלך (בפורמט בינלאומי, למשל 972501234567).',
+    path: '/contacts',
+    cta: 'עבור לאנשי קשר',
+  },
+  {
+    num: 4,
+    title: 'צור קמפיין',
+    desc: 'בחר תבנית, בחר רשימת תפוצה וקבע לוח זמנים — ושלח הודעות לאלפי אנשי קשר.',
+    path: '/campaigns',
+    cta: 'עבור לקמפיינים',
+  },
+];
+
+function GettingStarted() {
+  const navigate = useNavigate();
+  return (
+    <div className="bg-white border border-border rounded-xl p-5 shadow-soft mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-7 h-7 rounded-full bg-accent-light flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-accent">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+        <h2 className="text-sm font-semibold text-charcoal">מדריך התחלה מהירה</h2>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {onboardingSteps.map((step) => (
+          <div key={step.num} className="flex gap-3 p-3 rounded-lg border border-border bg-cream/40">
+            <div className="w-6 h-6 rounded-full bg-accent text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+              {step.num}
+            </div>
+            <div className="text-right flex-1 min-w-0">
+              <p className="text-sm font-medium text-charcoal mb-0.5">{step.title}</p>
+              <p className="text-xs text-muted leading-relaxed mb-2">{step.desc}</p>
+              <button
+                onClick={() => navigate(step.path)}
+                className="text-xs text-accent hover:text-accent-hover font-medium"
+              >
+                {step.cta} ←
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: activity, isLoading: activityLoading } = useActivity(20);
 
+  const isNewUser = !statsLoading && (stats?.totalAccounts ?? 0) === 0;
+
   return (
     <>
       <h1 className="text-2xl font-semibold text-charcoal mb-6 text-right">לוח בקרה</h1>
+
+      {/* Onboarding guide for new users */}
+      {isNewUser && <GettingStarted />}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

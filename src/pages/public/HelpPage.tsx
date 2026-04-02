@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+const SUPPORT_EMAIL = 'yoncohenyon@gmail.com';
+
 const faqs = [
   {
     q: 'איך מחברים חשבון וואטסאפ?',
@@ -23,12 +25,13 @@ const faqs = [
   },
   {
     q: 'איך עובד נושא התשלום?',
-    a: 'אנחנו משתמשים ב-Stripe לעיבוד תשלומים מאובטח. תוכל לבחור בין תוכניות חודשיות שונות ולבטל בכל עת דרך פורטל הניהול בהגדרות.',
+    a: 'התשלומים מתבצעים ישירות מולי באופן אישי. צרו קשר בוואטסאפ או במייל לתיאום ובחירת תוכנית.',
   },
 ];
 
 export function HelpPage() {
   const [openIndex, setOpenOpenIndex] = useState<number | null>(null);
+  const [emailRevealed, setEmailRevealed] = useState(false);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 text-right bg-cream transition-colors min-h-screen">
@@ -67,13 +70,23 @@ export function HelpPage() {
 
       <div className="mt-16 bg-accent-light/30 border border-accent/10 rounded-2xl p-8 text-center">
         <h2 className="text-xl font-bold text-charcoal mb-2">צריך עזרה נוספת?</h2>
-        <p className="text-sm text-muted mb-6">צוות התמיכה שלנו זמין עבורך לכל שאלה טכנית או עסקית.</p>
-        <a
-          href="mailto:support@parties247.co.il"
-          className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-8 py-3 rounded-lg transition-colors"
-        >
-          שלח לנו אימייל
-        </a>
+        <p className="text-sm text-muted mb-6">זמין עבורך לכל שאלה טכנית או עסקית.</p>
+        {emailRevealed ? (
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-8 py-3 rounded-lg transition-colors"
+            dir="ltr"
+          >
+            {SUPPORT_EMAIL}
+          </a>
+        ) : (
+          <button
+            onClick={() => setEmailRevealed(true)}
+            className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-8 py-3 rounded-lg transition-colors"
+          >
+            לחץ לחשיפת כתובת המייל
+          </button>
+        )}
       </div>
     </div>
   );

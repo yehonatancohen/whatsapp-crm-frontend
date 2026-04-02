@@ -1,4 +1,10 @@
+import { useState } from 'react';
+
+const SUPPORT_EMAIL = 'yoncohenyon@gmail.com';
+
 export function AboutPage() {
+  const [emailRevealed, setEmailRevealed] = useState(false);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 text-right bg-cream transition-colors min-h-screen">
       <h1 className="text-3xl font-bold text-charcoal mb-6">אודות שדר</h1>
@@ -21,10 +27,19 @@ export function AboutPage() {
 
         <div className="pt-8 border-t border-border mt-12">
           <p className="text-sm">
-            יש לך שאלות? צור איתנו קשר בכתובת:{' '}
-            <a href="mailto:support@parties247.co.il" className="text-accent hover:text-accent-hover font-medium">
-              support@parties247.co.il
-            </a>
+            יש לך שאלות? צור קשר:{' '}
+            {emailRevealed ? (
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-accent hover:text-accent-hover font-medium" dir="ltr">
+                {SUPPORT_EMAIL}
+              </a>
+            ) : (
+              <button
+                onClick={() => setEmailRevealed(true)}
+                className="text-accent hover:text-accent-hover font-medium underline underline-offset-2"
+              >
+                לחץ לחשיפת כתובת המייל
+              </button>
+            )}
           </p>
         </div>
       </div>

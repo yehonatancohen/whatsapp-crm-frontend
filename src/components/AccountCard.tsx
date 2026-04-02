@@ -152,7 +152,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
             {!showPairingInput ? (
               <>
                 <div className="flex justify-center">
-                  <div className="bg-white rounded-lg p-4 inline-block border border-border">
+                  <div className="rounded-lg p-4 inline-block border border-border" style={{ backgroundColor: '#ffffff', borderColor: '#e0ded8' }}>
                     <QRCodeSVG value={account.qrCode} size={180} bgColor="#ffffff" fgColor="#000000" />
                   </div>
                 </div>
