@@ -72,6 +72,7 @@ export interface Campaign {
   deliveredCount: number;
   failedCount: number;
   contactListId: string | null;
+  accountIds: string[];
   createdAt: string;
 }
 
