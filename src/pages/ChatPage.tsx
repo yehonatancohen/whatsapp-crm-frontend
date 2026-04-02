@@ -749,7 +749,7 @@ export function ChatPage() {
                           )}
                         </div>
 
-                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-charcoal' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{authorDisplay}</p>
@@ -774,10 +774,10 @@ export function ChatPage() {
                                msg.body || `[${msg.type}]`}
                             </div>
                           )}
-                          <div className="flex items-center justify-end gap-1 mt-0.5 text-charcoal/50">
+                          <div className={`flex items-center justify-end gap-1 mt-0.5 ${msg.fromMe ? 'text-[#111111]/50' : 'text-charcoal/50'}`}>
                             <span className="text-[11px] leading-none">{formatTime(msg.timestamp)}</span>
                             {msg.fromMe && msg.ack != null && (
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] leading-none ${msg.ack >= 2 ? (theme === 'dark' ? 'text-blue-500' : 'text-blue-400') : 'text-charcoal/40'}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] leading-none ${msg.ack >= 2 ? (theme === 'dark' ? 'text-blue-500' : 'text-blue-400') : 'text-[#111111]/40'}`}>
                                 {msg.ack >= 2 ? (
                                   <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
                                 ) : (
