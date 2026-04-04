@@ -33,13 +33,18 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
   const [pairingLoading, setPairingLoading] = useState(false);
   const [pairingError, setPairingError] = useState<string | null>(null);
 
+  const normalizePhone = (raw: string) => {
+    const digits = raw.replace(/\D/g, '');
+    return digits.startsWith('0') ? '972' + digits.slice(1) : digits;
+  };
+
   const handleRequestPairingCode = async () => {
     if (!pairingPhone.trim()) return;
     setPairingLoading(true);
     setPairingError(null);
     setPairingCode(null);
     try {
-      const { data } = await api.post(`/accounts/${account.id}/pairing-code`, { phoneNumber: pairingPhone });
+      const { data } = await api.post(`/accounts/${account.id}/pairing-code`, { phoneNumber: normalizePhone(pairingPhone) });
       setPairingCode(data.code);
     } catch (err: any) {
       setPairingError(err.response?.data?.error || 'נכשל בקבלת קוד');
@@ -173,7 +178,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
                     type="tel"
                     value={pairingPhone}
                     onChange={(e) => setPairingPhone(e.target.value)}
-                    placeholder="972501234567"
+                    placeholder="0501234567"
                     dir="ltr"
                     className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3 py-2 text-sm outline-none focus:border-accent transition-colors"
                   />
