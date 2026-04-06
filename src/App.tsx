@@ -29,6 +29,10 @@ import { TermsPage } from './pages/public/TermsPage';
 import { PrivacyPage } from './pages/public/PrivacyPage';
 import { HelpPage } from './pages/public/HelpPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { TemplatesPage } from './pages/TemplatesPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
+import { AutoRepliesPage } from './pages/AutoRepliesPage';
+import { ScheduledMessagesPage } from './pages/ScheduledMessagesPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +85,10 @@ function App() {
                 <Route path="/group-collections" element={<GroupCollectionsPage />} />
                 <Route path="/promotions" element={<PromotionsPage />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/auto-replies" element={<AutoRepliesPage />} />
+                <Route path="/scheduled-messages" element={<ScheduledMessagesPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/admin/users" element={<AdminUsersPage />} />
               </Route>

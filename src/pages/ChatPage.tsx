@@ -17,6 +17,7 @@ import {
 } from '../hooks/useChat';
 import { useAccounts } from '../hooks/useAccounts';
 import { useTheme } from '../context/ThemeContext';
+import { useCreateScheduledMessage } from '../hooks/useScheduledMessages';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api').replace(/\/api\/?$/, '');
 
@@ -514,6 +515,10 @@ export function ChatPage() {
   const [showGroupPanel, setShowGroupPanel] = useState(false);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [hoveredMsgId, setHoveredMsgId] = useState<string | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('');
+  const scheduleMutation = useCreateScheduledMessage();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -583,9 +588,9 @@ export function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 bg-cream overflow-hidden md:rounded-xl shadow-lg border border-border">
       {/* Sidebar: Chat List */}
-      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-80 lg:w-96 border-l border-border bg-white flex-shrink-0`}>
+      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
-          <h2 className="text-charcoal font-semibold text-lg mb-2">תיבת הודעות</h2>
+          <h2 className="text-charcoal font-semibold text-base sm:text-lg mb-2">תיבת הודעות</h2>
           <input
             type="text"
             value={searchQuery}
@@ -612,9 +617,9 @@ export function ChatPage() {
                   <button
                     key={`${chat.accountId}-${chat.chatId}`}
                     onClick={() => handleSelect(chat)}
-                    className={`flex items-start gap-3 p-3 text-right transition-colors border-b border-border hover:bg-cream ${isSelected ? 'bg-cream-dark' : ''}`}
+                    className={`flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 text-right transition-colors border-b border-border hover:bg-cream active:bg-cream-dark ${isSelected ? 'bg-cream-dark' : ''}`}
                   >
-                    <div className="w-12 h-12 rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted">
                       {chat.isGroup ? (
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                       ) : (
@@ -658,12 +663,12 @@ export function ChatPage() {
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="p-3 bg-white border-b border-border flex items-center gap-3 z-10 w-full shadow-sm">
+            <div className="p-2 sm:p-3 bg-white border-b border-border flex items-center gap-2 sm:gap-3 z-10 w-full shadow-sm">
               {/* Back button - mobile */}
               <button onClick={() => setShowList(true)} className="text-muted hover:text-charcoal md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted shrink-0">
                 {selectedChat.isGroup ? (
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                 ) : (
@@ -749,7 +754,7 @@ export function ChatPage() {
                           )}
                         </div>
 
-                        <div className={`relative max-w-[75%] sm:max-w-[65%] rounded-lg px-3 py-1.5 shadow-sm text-[14.2px] leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                        <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14.2px] leading-[18px] sm:leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{authorDisplay}</p>
@@ -808,18 +813,72 @@ export function ChatPage() {
               </div>
             )}
 
+            {/* Schedule Modal */}
+            {showScheduleModal && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
+                <div className="bg-white rounded-xl p-5 w-80 shadow-xl mx-4">
+                  <h3 className="text-sm font-semibold text-charcoal mb-3 text-right">תזמון הודעה</h3>
+                  <p className="text-xs text-muted text-right mb-3 whitespace-pre-wrap" dir="auto">"{messageText.trim().slice(0, 100)}{messageText.length > 100 ? '...' : ''}"</p>
+                  <div className="space-y-2 mb-4">
+                    <input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm" />
+                    <input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} className="w-full px-3 py-2 border border-border rounded-lg text-sm" />
+                  </div>
+                  <div className="flex gap-2 justify-start">
+                    <button onClick={() => setShowScheduleModal(false)} className="px-3 py-1.5 border border-border rounded-lg text-xs text-muted hover:bg-cream">ביטול</button>
+                    <button
+                      disabled={!scheduleDate || !scheduleTime || scheduleMutation.isPending}
+                      onClick={async () => {
+                        const scheduledAt = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
+                        await scheduleMutation.mutateAsync({
+                          chatId: selectedChat!.chatId,
+                          chatName: selectedChat!.name,
+                          body: messageText.trim(),
+                          scheduledAt,
+                          accountId: selectedChat!.accountId,
+                        });
+                        setMessageText('');
+                        setShowScheduleModal(false);
+                        setScheduleDate('');
+                        setScheduleTime('');
+                      }}
+                      className="px-3 py-1.5 bg-accent text-white rounded-lg text-xs font-medium hover:bg-accent-hover disabled:opacity-50"
+                    >
+                      {scheduleMutation.isPending ? 'מתזמן...' : 'תזמן'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Input */}
-            <form onSubmit={handleSend} className={`p-3 bg-white flex items-center gap-3 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
+            <form onSubmit={handleSend} className={`p-3 bg-white flex items-center gap-2 sm:gap-3 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
               <input
                 ref={inputRef}
                 type="text"
-                className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-4 py-2.5 outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 text-sm"
+                className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3 sm:px-4 py-2.5 outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 text-sm min-w-0"
                 dir="auto"
                 placeholder="הקלד הודעה"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 disabled={sendMutation.isPending}
               />
+              {/* Schedule button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!messageText.trim()) return;
+                  const now = new Date();
+                  now.setMinutes(now.getMinutes() + 30);
+                  setScheduleDate(now.toISOString().split('T')[0]);
+                  setScheduleTime(now.toTimeString().slice(0, 5));
+                  setShowScheduleModal(true);
+                }}
+                disabled={!messageText.trim()}
+                className="w-10 h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted disabled:opacity-30 hover:text-accent hover:border-accent/30 transition-colors shrink-0"
+                title="תזמן הודעה"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+              </button>
               <button
                 type="submit"
                 disabled={!messageText.trim() || sendMutation.isPending}

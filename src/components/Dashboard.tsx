@@ -1,5 +1,6 @@
 import { useDashboardStats, useActivity } from '../hooks/useActivity';
 import { useNavigate } from 'react-router-dom';
+import { UsageDashboard } from './UsageDashboard';
 
 const onboardingSteps = [
   {
@@ -88,6 +89,11 @@ export function Dashboard() {
         <StatCard label="אנשי קשר" value={statsLoading ? '-' : (stats?.totalContacts ?? 0)} color="blue" />
         <StatCard label="קמפיינים פעילים" value={statsLoading ? '-' : (stats?.activeCampaigns ?? 0)} sub={`${stats?.totalCampaigns ?? 0} סה"כ`} color="amber" />
         <StatCard label="הודעות היום" value={statsLoading ? '-' : (stats?.messagesToday ?? 0)} sub={`${stats?.warmupEnabled ?? 0} בחימום`} color="violet" />
+      </div>
+
+      {/* Usage Dashboard */}
+      <div className="mb-8">
+        <UsageDashboard />
       </div>
 
       {/* Activity Timeline */}

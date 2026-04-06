@@ -234,3 +234,105 @@ export interface DashboardStats {
   messagesToday: number;
   warmupEnabled: number;
 }
+
+// ─── Message Templates ──────────────────────────────────────────
+export interface MessageTemplate {
+  id: string;
+  name: string;
+  content: string;
+  category: string | null;
+  variables: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Auto-Replies ───────────────────────────────────────────────
+export type AutoReplyMatchType = 'EXACT' | 'CONTAINS' | 'STARTS_WITH' | 'REGEX';
+
+export interface AutoReply {
+  id: string;
+  name: string;
+  isActive: boolean;
+  matchType: AutoReplyMatchType;
+  matchValue: string;
+  replyMessage: string;
+  accountIds: string[];
+  onlyPrivate: boolean;
+  cooldownSec: number;
+  triggerCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Scheduled Messages ─────────────────────────────────────────
+export type ScheduledMessageStatus = 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
+
+export interface ScheduledMessage {
+  id: string;
+  chatId: string;
+  chatName: string | null;
+  body: string;
+  scheduledAt: string;
+  status: ScheduledMessageStatus;
+  errorMessage: string | null;
+  sentAt: string | null;
+  accountId: string;
+  createdAt: string;
+  account: { id: string; label: string };
+}
+
+// ─── Campaign Variants (A/B Testing) ────────────────────────────
+export interface CampaignVariant {
+  id: string;
+  name: string;
+  messageTemplate: string;
+  weight: number;
+  sentCount: number;
+  deliveredCount: number;
+  failedCount: number;
+  replyCount: number;
+  campaignId: string;
+}
+
+// ─── Analytics ──────────────────────────────────────────────────
+export interface CampaignStats {
+  campaigns: Array<{
+    id: string;
+    name: string;
+    status: CampaignStatus;
+    type: CampaignType;
+    totalMessages: number;
+    sentCount: number;
+    deliveredCount: number;
+    failedCount: number;
+    startedAt: string | null;
+    completedAt: string | null;
+    createdAt: string;
+  }>;
+  summary: {
+    totalCampaigns: number;
+    totalMessages: number;
+    totalSent: number;
+    totalDelivered: number;
+    totalFailed: number;
+    deliveryRate: number;
+    failureRate: number;
+  };
+}
+
+export interface MessageTrend {
+  date: string;
+  sent: number;
+  delivered: number;
+}
+
+export interface UsageData {
+  planTier: string;
+  subscriptionStatus: string;
+  usage: {
+    accounts: number;
+    contacts: number;
+    campaignsThisMonth: number;
+    messagesToday: number;
+  };
+}

@@ -55,6 +55,10 @@ export function CampaignsPage() {
   // Track pending action to avoid double-submit
   const pendingAction = useRef<'start' | 'draft' | 'save' | null>(null);
 
+  // A/B Testing state
+  const [enableAB, setEnableAB] = useState(false);
+  const [variants, setVariants] = useState<Array<{ name: string; messageTemplate: string; weight: number }>>([]);
+
   const activeAccounts = accounts.filter(a => a.status === 'AUTHENTICATED');
 
   // Fetch groups for newly selected accounts
@@ -109,6 +113,8 @@ export function CampaignsPage() {
     setDelayMin(30);
     setDelayMax(60);
     setDailyLimit(50);
+    setEnableAB(false);
+    setVariants([]);
   };
 
   const fillFormFromCampaign = (c: Campaign) => {
@@ -162,6 +168,7 @@ export function CampaignsPage() {
     scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
     messagesPerMinute: Math.floor(60 / ((delayMin + delayMax) / 2)),
     dailyLimitPerAccount: dailyLimit,
+    variants: enableAB ? variants : undefined,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -546,6 +553,83 @@ export function CampaignsPage() {
                     <WhatsAppPreview text={message} />
                   </div>
                 )}
+
+                {/* A/B Testing Toggle */}
+                <div className="mt-3 border-t border-border pt-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={enableAB} onChange={(e) => {
+                      setEnableAB(e.target.checked);
+                      if (e.target.checked && variants.length === 0) {
+                        setVariants([
+                          { name: 'וריאנט A', messageTemplate: message, weight: 50 },
+                          { name: 'וריאנט B', messageTemplate: '', weight: 50 },
+                        ]);
+                      }
+                    }} className="rounded border-border" />
+                    <span className="text-sm font-medium text-muted">A/B Testing</span>
+                    <span className="text-[10px] text-faded">— שלח הודעות שונות לקבוצות שונות ובדוק מה עובד</span>
+                  </label>
+
+                  {enableAB && (
+                    <div className="mt-3 space-y-3">
+                      {variants.map((v, i) => (
+                        <div key={i} className="border border-border rounded-lg p-3 bg-cream/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              {variants.length > 2 && (
+                                <button type="button" onClick={() => setVariants(variants.filter((_, j) => j !== i))} className="text-red-500 text-xs hover:text-red-600">הסר</button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <input
+                                value={v.name}
+                                onChange={(e) => { const u = [...variants]; u[i].name = e.target.value; setVariants(u); }}
+                                className="w-28 px-2 py-1 border border-border rounded text-xs text-right"
+                                placeholder="שם הוריאנט"
+                              />
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  value={v.weight}
+                                  onChange={(e) => { const u = [...variants]; u[i].weight = Number(e.target.value); setVariants(u); }}
+                                  min={1} max={100}
+                                  className="w-14 px-2 py-1 border border-border rounded text-xs text-center"
+                                />
+                                <span className="text-[10px] text-muted">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          <textarea
+                            value={v.messageTemplate}
+                            onChange={(e) => { const u = [...variants]; u[i].messageTemplate = e.target.value; setVariants(u); }}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-border rounded-lg text-sm text-right bg-white"
+                            placeholder="תוכן ההודעה לוריאנט זה..."
+                            dir="auto"
+                          />
+                          {v.messageTemplate.trim() && (
+                            <div className="mt-1.5 p-2 bg-[#e5ddd5] dark:bg-[#0b141a] rounded-lg">
+                              <WhatsAppPreview text={v.messageTemplate} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setVariants([...variants, { name: `וריאנט ${String.fromCharCode(65 + variants.length)}`, messageTemplate: '', weight: Math.floor(100 / (variants.length + 1)) }])}
+                        className="text-xs text-accent hover:text-accent-hover font-medium"
+                      >
+                        + הוסף וריאנט
+                      </button>
+                      <div className="text-[10px] text-muted text-right">
+                        סה"כ משקל: {variants.reduce((s, v) => s + v.weight, 0)}%
+                        {variants.reduce((s, v) => s + v.weight, 0) !== 100 && (
+                          <span className="text-amber-500 mr-1">(מומלץ 100%)</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Schedule */}
