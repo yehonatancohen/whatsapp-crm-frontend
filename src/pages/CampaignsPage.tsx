@@ -222,12 +222,12 @@ export function CampaignsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'DRAFT': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
-      case 'PENDING': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
-      case 'RUNNING': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'PAUSED': return 'bg-violet-100 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400';
-      case 'COMPLETED': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
-      case 'CANCELLED': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
-      case 'FAILED': return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+      case 'SCHEDULED': return 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'RUNNING': return 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400';
+      case 'PAUSED': return 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400';
+      case 'COMPLETED': return 'bg-emerald-50 text-emerald-600 dark:bg-green-900/20 dark:text-green-400';
+      case 'CANCELLED': return 'bg-red-50 text-red-500 dark:bg-gray-800 dark:text-gray-400';
+      case 'FAILED': return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -235,8 +235,8 @@ export function CampaignsPage() {
   const translateStatus = (status: string) => {
     switch (status) {
       case 'DRAFT': return 'טיוטה';
-      case 'PENDING': return 'ממתין';
-      case 'RUNNING': return 'בהרצה';
+      case 'SCHEDULED': return 'מתוזמן';
+      case 'RUNNING': return 'פעיל';
       case 'PAUSED': return 'מושהה';
       case 'COMPLETED': return 'הושלם';
       case 'CANCELLED': return 'בוטל';
@@ -263,7 +263,7 @@ export function CampaignsPage() {
       );
     }
 
-    if (c.status === 'PENDING') {
+    if (c.status === 'SCHEDULED') {
       actions.push(
         <button key="edit" onClick={() => openEdit(c)}
           className="text-accent hover:text-accent-hover text-xs font-medium" title="ערוך קמפיין">
