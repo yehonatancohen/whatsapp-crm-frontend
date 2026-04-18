@@ -186,6 +186,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
       const res = await addMutation.mutateAsync({ accountId, chatId, phoneNumbers: phones });
       setResults(res);
       setSelectedAccountIds(new Set());
+      if (Object.values(res).some(r => r.inviteSent)) setShowInviteLink(true);
     } catch {
       // error handled by mutation
     }
@@ -203,6 +204,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
       const res = await addMutation.mutateAsync({ accountId, chatId, phoneNumbers: numbers });
       setResults(res);
       setPhoneInput('');
+      if (Object.values(res).some(r => r.inviteSent)) setShowInviteLink(true);
     } catch {
       // error handled by mutation
     }
@@ -720,7 +722,7 @@ export function ChatPage() {
       </div>
 
       {/* Main Area: Chat */}
-      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 relative overflow-hidden`} style={{ background: '#e5ddd5' }}>
+      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 min-w-0 relative overflow-hidden`} style={{ background: '#e5ddd5' }}>
         {selectedChat ? (
           <>
             {/* Chat Header */}
@@ -815,7 +817,7 @@ export function ChatPage() {
                           )}
                         </div>
 
-                        <div className={`relative max-w-[85%] sm:max-w-[75%] md:max-w-[65%] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14.2px] leading-[18px] sm:leading-[19px] ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
+                        <div className={`relative max-w-[82%] sm:max-w-[72%] md:max-w-[62%] min-w-0 rounded-lg px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14.2px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
                           {/* Sender Name for Group Chats */}
                           {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
                             <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{authorDisplay}</p>
@@ -825,7 +827,7 @@ export function ChatPage() {
                             <MediaBubble msg={msg} accountId={selectedChat.accountId} chatId={selectedChat.chatId} />
                           ) : msg.type === 'chat' ? (
                             <>
-                              <div className="break-words whitespace-pre-wrap" dir="auto">{msg.body}</div>
+                              <div className="break-all whitespace-pre-wrap" dir="auto">{msg.body}</div>
                               {extractUrls(msg.body).slice(0, 1).map(url => (
                                 <LinkPreview key={url} url={url} />
                               ))}

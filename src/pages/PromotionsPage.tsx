@@ -517,12 +517,13 @@ export function PromotionsPage() {
                           <button
                             type="button"
                             onClick={() => setMessagePool(prev => prev.map((m, i) => i === idx ? { ...m, isActive: !m.isActive } : m))}
-                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${msg.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
+                            dir="ltr"
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${msg.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
                             title={msg.isActive ? 'פעיל — לחץ לכיבוי' : 'כבוי — לחץ להפעלה'}
                           >
-                            <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${msg.isActive ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${msg.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
-                          <span className="text-[9px] text-muted">{msg.isActive ? 'פעיל' : 'כבוי'}</span>
+                          <span className={`text-[10px] font-medium ${msg.isActive ? 'text-green-600' : 'text-muted'}`}>{msg.isActive ? 'פעיל' : 'כבוי'}</span>
                         </div>
                         {messagePool.length > 1 && (
                           <button
