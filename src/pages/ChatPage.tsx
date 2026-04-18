@@ -11,6 +11,7 @@ import {
   useDemoteParticipants,
   useRemoveParticipants,
   useUpdateGroupSettings,
+  useGroupInviteLink,
   type Conversation,
   type ChatMessage,
   type AddParticipantResult,
@@ -149,6 +150,9 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set());
   const [showManualInput, setShowManualInput] = useState(false);
   const [actionMenu, setActionMenu] = useState<string | null>(null);
+  const [showInviteLink, setShowInviteLink] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const { data: inviteLinkData, isLoading: inviteLinkLoading } = useGroupInviteLink(accountId, chatId, showInviteLink);
 
   const canAdd = groupInfo?.iAmAdmin || groupInfo?.canAnyoneAdd;
 
@@ -235,6 +239,60 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
             <p className="text-xs text-muted" dir="auto">{groupInfo.description}</p>
           )}
         </div>
+
+        {/* Invite Link */}
+        {groupInfo.iAmAdmin && (
+          <div className="border border-border rounded-lg p-3 bg-cream/50">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-charcoal flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+                לינק הצטרפות לקבוצה
+              </h4>
+              {!showInviteLink && (
+                <button
+                  onClick={() => setShowInviteLink(true)}
+                  className="text-xs text-accent hover:text-accent-hover font-medium"
+                >
+                  הצג
+                </button>
+              )}
+            </div>
+            {showInviteLink && (
+              inviteLinkLoading ? (
+                <div className="flex items-center justify-center py-2">
+                  <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : inviteLinkData?.inviteLink ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 bg-white border border-border rounded-lg p-2">
+                    <p className="text-xs text-charcoal flex-1 break-all" dir="ltr">{inviteLinkData.inviteLink}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(inviteLinkData.inviteLink);
+                        setCopiedLink(true);
+                        setTimeout(() => setCopiedLink(false), 2000);
+                      }}
+                      className="flex-1 text-xs bg-accent hover:bg-accent-hover text-white font-medium py-1.5 rounded-lg transition-colors"
+                    >
+                      {copiedLink ? '✓ הועתק!' : 'העתק לינק'}
+                    </button>
+                    <button
+                      onClick={() => setShowInviteLink(false)}
+                      className="text-xs text-muted hover:text-charcoal py-1.5 px-3 transition-colors"
+                    >
+                      הסתר
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-muted">שלח לינק זה לאנשים שרוצים להצטרף לקבוצה</p>
+                </div>
+              ) : (
+                <p className="text-xs text-red-500">לא ניתן לקבל לינק כעת</p>
+              )
+            )}
+          </div>
+        )}
 
         {/* Add Participants */}
         {canAdd && (
@@ -376,9 +434,14 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
             {results && (
               <div className="mt-3 space-y-1.5">
                 {Object.entries(results).map(([id, r]) => (
-                  <div key={id} className={`flex items-center justify-between text-xs p-2 rounded-md ${r.success ? 'bg-green-50 text-green-700' : r.inviteSent ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
-                    <span dir="ltr" className="font-mono">{id.replace('@c.us', '')}</span>
-                    <span>{r.success ? 'נוסף' : r.inviteSent ? 'הזמנה נשלחה' : r.message}</span>
+                  <div key={id} className={`text-xs p-2 rounded-md ${r.success ? 'bg-green-50 text-green-700' : r.inviteSent ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+                    <div className="flex items-center justify-between">
+                      <span dir="ltr" className="font-mono">{id.replace('@c.us', '')}</span>
+                      <span>{r.success ? 'נוסף ✓' : r.inviteSent ? 'הזמנה נשלחה' : r.message}</span>
+                    </div>
+                    {r.inviteSent && (
+                      <p className="text-[10px] mt-1 text-blue-600">הגדרות פרטיות מנעו הוספה ישירה — ניתן לשלוח לינק הצטרפות במקום (ראה "לינק הצטרפות" למעלה)</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -626,28 +689,26 @@ export function ChatPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline mb-0.5">
-                        <span className="text-charcoal font-medium truncate pl-2">{chat.name}</span>
-                        {chat.timestamp != null && (
-                          <span className="text-xs text-muted whitespace-nowrap">{formatDate(chat.timestamp)}</span>
-                        )}
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex justify-between items-center gap-1 mb-0.5">
+                        <span className="text-charcoal font-medium text-sm truncate">{chat.name}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {chat.unreadCount > 0 && (
+                            <span className="bg-accent text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">{chat.unreadCount}</span>
+                          )}
+                          {chat.timestamp != null && (
+                            <span className="text-[10px] text-muted whitespace-nowrap">{formatDate(chat.timestamp)}</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5 overflow-hidden">
-                        {chat.lastMessage && (
-                          <>
-                            {chat.lastMessage.fromMe && (
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-muted flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
-                            )}
-                            <p className="text-sm text-muted truncate" dir="auto">{chat.lastMessage.body}</p>
-                          </>
+                      <div className="flex items-center gap-1 overflow-hidden">
+                        {chat.lastMessage?.fromMe && (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-muted shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
                         )}
-                      </div>
-                      <div className="mt-1 flex items-baseline justify-between">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-light text-accent border border-accent/20">{chat.accountLabel}</span>
-                        {chat.unreadCount > 0 && (
-                          <span className="bg-accent text-white text-xs px-2 py-0.5 rounded-full">{chat.unreadCount}</span>
-                        )}
+                        <p className="text-xs text-muted truncate min-w-0" dir="auto">
+                          {chat.lastMessage?.body || ''}
+                        </p>
+                        <span className="text-[10px] shrink-0 px-1 py-0.5 rounded bg-accent-light text-accent border border-accent/20 ml-auto">{chat.accountLabel}</span>
                       </div>
                     </div>
                   </button>

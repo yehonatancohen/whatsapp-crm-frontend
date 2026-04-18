@@ -1,11 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';import { useAccounts } from '../hooks/useAccounts';
+import { useState, useEffect, useMemo, useRef } from 'react';import { useAccounts } from '../hooks/useAccounts';
 import {
   usePromotions,
   useCreatePromotion,
+  useUpdatePromotion,
   useDeletePromotion,
   useTogglePromotion,
   usePromotion,
   usePromotionLogs,
+  useAddPromotionMessage,
+  useUpdatePromotionMessage,
+  useDeletePromotionMessage,
+  useUpdatePromotionGroups,
 } from '../hooks/usePromotions';
 import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
 import { api } from '../lib/api';
@@ -20,8 +25,13 @@ export function PromotionsPage() {
   const { accounts } = useAccounts();
   const { data: promotions = [], isLoading } = usePromotions();
   const createMutation = useCreatePromotion();
+  const updateMutation = useUpdatePromotion();
   const deleteMutation = useDeletePromotion();
   const toggleMutation = useTogglePromotion();
+  const addMessageMutation = useAddPromotionMessage();
+  const updateMessageMutation = useUpdatePromotionMessage();
+  const deleteMessageMutation = useDeletePromotionMessage();
+  const updateGroupsMutation = useUpdatePromotionGroups();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [logsId, setLogsId] = useState<string | null>(null);
@@ -35,7 +45,8 @@ export function PromotionsPage() {
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [sendTimes, setSendTimes] = useState<string[]>(['09:00']);
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
-  const [messagePool, setMessagePool] = useState<Array<{ content: string }>>([{ content: '' }]);
+  const [messagePool, setMessagePool] = useState<Array<{ id?: string; content: string; isActive: boolean }>>([{ content: '', isActive: true }]);
+  const originalMessageIdsRef = useRef<string[]>([]);
   const [dailyLimit, setDailyLimit] = useState(50);
   const [messagesPerMinute, setMessagesPerMinute] = useState(2);
 
@@ -113,7 +124,8 @@ export function PromotionsPage() {
     setSelectedCollectionId('');
     setSendTimes(['09:00']);
     setDaysOfWeek([]);
-    setMessagePool([{ content: '' }]);
+    setMessagePool([{ content: '', isActive: true }]);
+    originalMessageIdsRef.current = [];
     setDailyLimit(50);
     setMessagesPerMinute(2);
     setEditId(null);
@@ -131,7 +143,8 @@ export function PromotionsPage() {
     setSelectedGroupJids(p.groups.map(g => g.groupJid));
     setSendTimes(p.sendTimes.length ? p.sendTimes : ['09:00']);
     setDaysOfWeek(p.daysOfWeek);
-    setMessagePool(p.messages.length ? p.messages.map(m => ({ content: m.content })) : [{ content: '' }]);
+    setMessagePool(p.messages.length ? p.messages.map(m => ({ id: m.id, content: m.content, isActive: m.isActive })) : [{ content: '', isActive: true }]);
+    originalMessageIdsRef.current = p.messages.map(m => m.id);
     setDailyLimit(p.dailyLimitPerAccount);
     setMessagesPerMinute(p.messagesPerMinute);
     setModalOpen(true);
@@ -148,17 +161,49 @@ export function PromotionsPage() {
       return { jid, name: g?.name };
     });
 
-    await createMutation.mutateAsync({
-      name,
-      sendTimes,
-      daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      accountIds: selectedAccountIds,
-      dailyLimitPerAccount: dailyLimit,
-      messagesPerMinute,
-      groups: groupData,
-      messages: validMessages,
-    });
+    if (editId) {
+      // Update existing promotion
+      await updateMutation.mutateAsync({
+        id: editId,
+        name,
+        sendTimes,
+        daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : [],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        accountIds: selectedAccountIds,
+        dailyLimitPerAccount: dailyLimit,
+        messagesPerMinute,
+      });
+
+      // Update groups
+      await updateGroupsMutation.mutateAsync({ promotionId: editId, groups: groupData });
+
+      // Sync messages: update existing, add new, delete removed
+      const currentIds = new Set(validMessages.filter(m => m.id).map(m => m.id!));
+      const removedIds = originalMessageIdsRef.current.filter(id => !currentIds.has(id));
+
+      await Promise.all([
+        ...removedIds.map(id => deleteMessageMutation.mutateAsync({ promotionId: editId, messageId: id })),
+        ...validMessages.map(m => {
+          if (m.id) {
+            return updateMessageMutation.mutateAsync({ promotionId: editId, messageId: m.id, content: m.content, isActive: m.isActive });
+          } else {
+            return addMessageMutation.mutateAsync({ promotionId: editId, content: m.content });
+          }
+        }),
+      ]);
+    } else {
+      await createMutation.mutateAsync({
+        name,
+        sendTimes,
+        daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        accountIds: selectedAccountIds,
+        dailyLimitPerAccount: dailyLimit,
+        messagesPerMinute,
+        groups: groupData,
+        messages: validMessages.map(m => ({ content: m.content })),
+      });
+    }
 
     setModalOpen(false);
     resetForm();
@@ -467,7 +512,18 @@ export function PromotionsPage() {
                   {messagePool.map((msg, idx) => (
                     <div key={idx} className="border border-border rounded-lg p-3 bg-cream/50">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] text-muted font-medium">הודעה {idx + 1}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted font-medium">הודעה {idx + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => setMessagePool(prev => prev.map((m, i) => i === idx ? { ...m, isActive: !m.isActive } : m))}
+                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${msg.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
+                            title={msg.isActive ? 'פעיל — לחץ לכיבוי' : 'כבוי — לחץ להפעלה'}
+                          >
+                            <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${msg.isActive ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+                          </button>
+                          <span className="text-[9px] text-muted">{msg.isActive ? 'פעיל' : 'כבוי'}</span>
+                        </div>
                         {messagePool.length > 1 && (
                           <button
                             type="button"
@@ -497,7 +553,7 @@ export function PromotionsPage() {
                   ))}
                   <button
                     type="button"
-                    onClick={() => setMessagePool(prev => [...prev, { content: '' }])}
+                    onClick={() => setMessagePool(prev => [...prev, { content: '', isActive: true }])}
                     className="text-xs text-accent hover:text-accent-hover font-medium"
                   >
                     + הוסף הודעה למאגר
@@ -538,10 +594,10 @@ export function PromotionsPage() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  disabled={createMutation.isPending || selectedAccountIds.length === 0 || selectedGroupJids.length === 0}
+                  disabled={(editId ? updateMutation.isPending : createMutation.isPending) || selectedAccountIds.length === 0 || selectedGroupJids.length === 0}
                   className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {createMutation.isPending ? 'יוצר...' : editId ? 'עדכן קידום' : 'צור קידום'}
+                  {(editId ? updateMutation.isPending : createMutation.isPending) ? (editId ? 'מעדכן...' : 'יוצר...') : editId ? 'עדכן קידום' : 'צור קידום'}
                 </button>
                 <button
                   type="button"

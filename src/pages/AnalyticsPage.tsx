@@ -59,7 +59,7 @@ export function AnalyticsPage() {
       <h1 className="text-2xl font-semibold text-charcoal mb-6 text-right">אנליטיקס</h1>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         <SummaryCard label="קמפיינים" value={statsLoading ? '-' : (summary?.totalCampaigns ?? 0)} color="accent" />
         <SummaryCard label='סה"כ הודעות' value={statsLoading ? '-' : (summary?.totalMessages ?? 0)} color="blue" />
         <SummaryCard label="נשלחו" value={statsLoading ? '-' : (summary?.totalSent ?? 0)} color="amber" />
@@ -68,7 +68,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Message Trends Chart */}
-      <div className="bg-white border border-border rounded-xl p-5 shadow-soft mb-8">
+      <div className="bg-white border border-border rounded-xl p-4 sm:p-5 shadow-soft mb-6">
         <h2 className="text-sm font-semibold text-charcoal mb-4 text-right">מגמת הודעות (30 יום אחרונים)</h2>
         {trendsLoading ? (
           <p className="text-sm text-muted text-right">טוען...</p>
@@ -91,56 +91,91 @@ export function AnalyticsPage() {
         )}
       </div>
 
-      {/* Campaign Performance Table */}
-      <div className="bg-white border border-border rounded-xl p-5 shadow-soft">
+      {/* Campaign Performance */}
+      <div className="bg-white border border-border rounded-xl p-4 sm:p-5 shadow-soft">
         <h2 className="text-sm font-semibold text-charcoal mb-4 text-right">ביצועי קמפיינים</h2>
         {statsLoading ? (
           <p className="text-sm text-muted text-right">טוען...</p>
         ) : !stats?.campaigns.length ? (
           <p className="text-sm text-muted text-right">אין קמפיינים עדיין</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm" dir="rtl">
-              <thead>
-                <tr className="border-b border-border text-muted text-xs">
-                  <th className="text-right py-2 px-2 font-medium">שם</th>
-                  <th className="text-right py-2 px-2 font-medium">סטטוס</th>
-                  <th className="text-right py-2 px-2 font-medium">סוג</th>
-                  <th className="text-right py-2 px-2 font-medium">הודעות</th>
-                  <th className="text-right py-2 px-2 font-medium">נשלחו</th>
-                  <th className="text-right py-2 px-2 font-medium">הגיעו</th>
-                  <th className="text-right py-2 px-2 font-medium">נכשלו</th>
-                  <th className="text-right py-2 px-2 font-medium">אחוז הצלחה</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.campaigns.map((c) => {
-                  const rate = c.sentCount > 0 ? Math.round((c.deliveredCount / c.sentCount) * 100) : 0;
-                  return (
-                    <tr key={c.id} className="border-b border-border/50 hover:bg-cream/30">
-                      <td className="py-2 px-2 font-medium text-charcoal">{c.name}</td>
-                      <td className="py-2 px-2">
-                        <StatusBadge status={c.status} />
-                      </td>
-                      <td className="py-2 px-2 text-muted">{c.type === 'DIRECT_MESSAGE' ? 'ישיר' : 'קבוצה'}</td>
-                      <td className="py-2 px-2 text-muted">{c.totalMessages}</td>
-                      <td className="py-2 px-2 text-muted">{c.sentCount}</td>
-                      <td className="py-2 px-2 text-emerald-600">{c.deliveredCount}</td>
-                      <td className="py-2 px-2 text-red-500">{c.failedCount}</td>
-                      <td className="py-2 px-2">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-                            <div className="h-full bg-accent rounded-full" style={{ width: `${rate}%` }} />
+          <>
+            {/* Mobile: card layout */}
+            <div className="sm:hidden space-y-3">
+              {stats.campaigns.map((c) => {
+                const rate = c.sentCount > 0 ? Math.round((c.deliveredCount / c.sentCount) * 100) : 0;
+                return (
+                  <div key={c.id} className="border border-border rounded-lg p-3 bg-cream/30">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="text-sm font-medium text-charcoal">{c.name}</span>
+                      <StatusBadge status={c.status} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-center mb-2">
+                      <div>
+                        <p className="text-muted">נשלחו</p>
+                        <p className="font-semibold text-charcoal">{c.sentCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted">הגיעו</p>
+                        <p className="font-semibold text-emerald-600">{c.deliveredCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted">נכשלו</p>
+                        <p className="font-semibold text-red-500">{c.failedCount}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                        <div className="h-full bg-accent rounded-full" style={{ width: `${rate}%` }} />
+                      </div>
+                      <span className="text-xs text-muted w-8 text-left">{rate}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop: table layout */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm" dir="rtl">
+                <thead>
+                  <tr className="border-b border-border text-muted text-xs">
+                    <th className="text-right py-2 px-2 font-medium">שם</th>
+                    <th className="text-right py-2 px-2 font-medium">סטטוס</th>
+                    <th className="text-right py-2 px-2 font-medium">סוג</th>
+                    <th className="text-right py-2 px-2 font-medium">הודעות</th>
+                    <th className="text-right py-2 px-2 font-medium">נשלחו</th>
+                    <th className="text-right py-2 px-2 font-medium">הגיעו</th>
+                    <th className="text-right py-2 px-2 font-medium">נכשלו</th>
+                    <th className="text-right py-2 px-2 font-medium">אחוז הצלחה</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.campaigns.map((c) => {
+                    const rate = c.sentCount > 0 ? Math.round((c.deliveredCount / c.sentCount) * 100) : 0;
+                    return (
+                      <tr key={c.id} className="border-b border-border/50 hover:bg-cream/30">
+                        <td className="py-2 px-2 font-medium text-charcoal">{c.name}</td>
+                        <td className="py-2 px-2"><StatusBadge status={c.status} /></td>
+                        <td className="py-2 px-2 text-muted">{c.type === 'DIRECT_MESSAGE' ? 'ישיר' : 'קבוצה'}</td>
+                        <td className="py-2 px-2 text-muted">{c.totalMessages}</td>
+                        <td className="py-2 px-2 text-muted">{c.sentCount}</td>
+                        <td className="py-2 px-2 text-emerald-600">{c.deliveredCount}</td>
+                        <td className="py-2 px-2 text-red-500">{c.failedCount}</td>
+                        <td className="py-2 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                              <div className="h-full bg-accent rounded-full" style={{ width: `${rate}%` }} />
+                            </div>
+                            <span className="text-xs text-muted w-8">{rate}%</span>
                           </div>
-                          <span className="text-xs text-muted w-8">{rate}%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </>

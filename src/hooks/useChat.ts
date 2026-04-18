@@ -201,6 +201,17 @@ export function useRemoveParticipants() {
   });
 }
 
+export function useGroupInviteLink(accountId: string | null, chatId: string | null, enabled = false) {
+  return useQuery<{ inviteLink: string }>({
+    queryKey: ['chat', 'invite-link', accountId, chatId],
+    queryFn: async () => {
+      const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId!)}/invite-link`);
+      return data;
+    },
+    enabled: !!accountId && !!chatId && enabled,
+  });
+}
+
 export function useUpdateGroupSettings() {
   const queryClient = useQueryClient();
   return useMutation({
