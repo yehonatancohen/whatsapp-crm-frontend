@@ -3,6 +3,7 @@ import {
   useConversations,
   useChatMessages,
   useSendMessage,
+  useSendVoice,
   useMarkSeen,
   useDeleteMessage,
   useGroupInfo,
@@ -595,28 +596,47 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
 export function ChatPage() {
   const { theme } = useTheme();
   const { conversations, loading: loadingConversations } = useConversations();
+  const { accounts } = useAccounts();
   const [selectedChat, setSelectedChat] = useState<{ accountId: string; chatId: string; name: string; isGroup: boolean } | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showList, setShowList] = useState(true); // mobile toggle
+  const [showList, setShowList] = useState(true);
   const [showGroupPanel, setShowGroupPanel] = useState(false);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [hoveredMsgId, setHoveredMsgId] = useState<string | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
-  const scheduleMutation = useCreateScheduledMessage();
+  const [msgLimit, setMsgLimit] = useState(100);
 
+  // New chat
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [newChatPhone, setNewChatPhone] = useState('');
+  const [newChatAccountId, setNewChatAccountId] = useState('');
+
+  // Voice recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const scheduleMutation = useCreateScheduledMessage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { messages, loading: loadingMessages } = useChatMessages(
     selectedChat?.accountId ?? null,
     selectedChat?.chatId ?? null,
+    msgLimit,
   );
   const sendMutation = useSendMessage();
+  const sendVoiceMutation = useSendVoice();
   const markSeen = useMarkSeen();
   const deleteMessage = useDeleteMessage();
+
+  // Reset limit when switching chats
+  useEffect(() => { setMsgLimit(100); }, [selectedChat?.accountId, selectedChat?.chatId]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -630,7 +650,14 @@ export function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat?.accountId, selectedChat?.chatId]);
 
-  // Filter conversations
+  // Pre-select first authenticated account for new chat modal
+  useEffect(() => {
+    if (!newChatAccountId) {
+      const first = accounts.find(a => a.status === 'AUTHENTICATED');
+      if (first) setNewChatAccountId(first.id);
+    }
+  }, [accounts, newChatAccountId]);
+
   const filtered = searchQuery
     ? conversations.filter((c) =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -642,6 +669,16 @@ export function ChatPage() {
     setSelectedChat({ accountId: conv.accountId, chatId: conv.chatId, name: conv.name, isGroup: conv.isGroup });
     setShowList(false);
     setShowGroupPanel(false);
+  }
+
+  function handleNewChat() {
+    if (!newChatPhone.trim() || !newChatAccountId) return;
+    const phone = newChatPhone.trim().replace(/[\s\-+()]/g, '');
+    const chatId = `${phone}@c.us`;
+    setSelectedChat({ accountId: newChatAccountId, chatId, name: newChatPhone.trim(), isGroup: false });
+    setShowNewChat(false);
+    setShowList(false);
+    setNewChatPhone('');
   }
 
   async function handleSend(e: React.FormEvent) {
@@ -657,6 +694,7 @@ export function ChatPage() {
         chatId: selectedChat.chatId,
         body: text,
         quotedMessageId: quotedId,
+        _limit: msgLimit,
       });
     } catch {
       setMessageText(text);
@@ -664,12 +702,75 @@ export function ChatPage() {
     inputRef.current?.focus();
   }
 
-  // Find active conversation metadata
+  async function startRecording() {
+    if (!selectedChat) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+        ? 'audio/ogg;codecs=opus'
+        : 'audio/webm';
+      const mr = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.start(100);
+      setIsRecording(true);
+      setRecordingDuration(0);
+      recordingTimerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000);
+    } catch {
+      alert('לא ניתן לגשת למיקרופון');
+    }
+  }
+
+  async function stopRecordingAndSend() {
+    const mr = mediaRecorderRef.current;
+    if (!mr || !selectedChat) return;
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    setIsRecording(false);
+    setRecordingDuration(0);
+    const capturedLimit = msgLimit;
+    mr.onstop = async () => {
+      const mimeType = mr.mimeType || 'audio/webm';
+      const blob = new Blob(audioChunksRef.current, { type: mimeType });
+      if (blob.size < 500) { mr.stream.getTracks().forEach(t => t.stop()); return; }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(',')[1];
+        try {
+          await sendVoiceMutation.mutateAsync({
+            accountId: selectedChat.accountId,
+            chatId: selectedChat.chatId,
+            data: base64,
+            mimeType,
+            _limit: capturedLimit,
+          });
+        } catch { /* ignore */ }
+      };
+      reader.readAsDataURL(blob);
+      mr.stream.getTracks().forEach(t => t.stop());
+    };
+    mr.stop();
+    mediaRecorderRef.current = null;
+  }
+
+  function cancelRecording() {
+    const mr = mediaRecorderRef.current;
+    if (!mr) return;
+    mr.onstop = null;
+    try { mr.stop(); } catch { /* ignore */ }
+    mr.stream.getTracks().forEach(t => t.stop());
+    mediaRecorderRef.current = null;
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    setIsRecording(false);
+    setRecordingDuration(0);
+  }
+
   const activeConv = conversations.find(
     (c) => c.accountId === selectedChat?.accountId && c.chatId === selectedChat?.chatId,
   );
 
-  // Sorted messages (oldest first)
   const sortedMsgs = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
   const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
@@ -679,7 +780,16 @@ export function ChatPage() {
       {/* Sidebar: Chat List */}
       <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
-          <h2 className="text-charcoal font-semibold text-base sm:text-lg mb-2">תיבת הודעות</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
+            <button
+              onClick={() => setShowNewChat(true)}
+              className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center text-white transition-colors shrink-0"
+              title="שיחה חדשה"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            </button>
+          </div>
           <input
             type="text"
             value={searchQuery}
@@ -688,6 +798,55 @@ export function ChatPage() {
             className="w-full bg-white text-charcoal rounded-lg px-3 py-2 text-sm border border-border outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50"
           />
         </div>
+
+        {/* New Chat Modal */}
+        {showNewChat && (
+          <div className="absolute inset-0 z-50 bg-black/40 flex items-start justify-center pt-16 px-4">
+            <div className="bg-white dark:bg-cream-dark rounded-xl shadow-xl w-full max-w-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={() => setShowNewChat(false)} className="text-muted hover:text-charcoal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+                <h3 className="text-charcoal font-semibold">שיחה חדשה</h3>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-muted block mb-1 text-right">מספר טלפון</label>
+                  <input
+                    type="tel"
+                    value={newChatPhone}
+                    onChange={(e) => setNewChatPhone(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleNewChat()}
+                    placeholder="972501234567"
+                    dir="ltr"
+                    autoFocus
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2.5 text-sm outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50"
+                  />
+                  <p className="text-[10px] text-muted mt-1 text-right">ללא + ורווחים, כולל קידומת מדינה (ישראל: 972...)</p>
+                </div>
+                <div>
+                  <label className="text-xs text-muted block mb-1 text-right">חשבון שולח</label>
+                  <select
+                    value={newChatAccountId}
+                    onChange={(e) => setNewChatAccountId(e.target.value)}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-1 focus:ring-accent/50"
+                  >
+                    {accounts.filter(a => a.status === 'AUTHENTICATED').map(a => (
+                      <option key={a.id} value={a.id}>{a.label} {a.phoneNumber ? `(${a.phoneNumber})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={handleNewChat}
+                  disabled={!newChatPhone.trim() || !newChatAccountId}
+                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+                >
+                  פתח שיחה
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto">
           {loadingConversations ? (
@@ -798,6 +957,19 @@ export function ChatPage() {
                 </div>
               ) : (
                 <div className="flex flex-col justify-end mt-auto gap-0.5">
+                  {/* Load earlier messages */}
+                  {sortedMsgs.length >= msgLimit && (
+                    <div className="flex justify-center py-2">
+                      <button
+                        onClick={() => setMsgLimit(l => l + 100)}
+                        disabled={loadingMessages}
+                        className="text-xs px-4 py-1.5 rounded-full shadow-sm transition-colors disabled:opacity-50"
+                        style={{ background: theme === 'dark' ? 'rgba(11,20,26,0.85)' : 'rgba(225,220,212,0.95)', color: theme === 'dark' ? '#8aab9e' : '#667b6e' }}
+                      >
+                        {loadingMessages ? '...' : 'טען הודעות קודמות'}
+                      </button>
+                    </div>
+                  )}
                   {sortedMsgs.map((msg, index) => {
                     const prev = index > 0 ? sortedMsgs[index - 1] : null;
                     const showTail = !prev || prev.fromMe !== msg.fromMe;
@@ -884,13 +1056,17 @@ export function ChatPage() {
                             <div className={`flex items-center justify-end gap-1 mt-0.5 ${msg.fromMe ? sentTimeColor : recvTimeColor}`}>
                               <span className="text-[11px] leading-none">{formatTime(msg.timestamp)}</span>
                               {msg.fromMe && msg.ack != null && (
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] ${msg.ack >= 2 ? 'text-blue-400' : 'opacity-50'}`}>
-                                  {msg.ack >= 2 ? (
-                                    <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
-                                  ) : (
-                                    <polyline points="20 6 9 17 4 12" />
-                                  )}
-                                </svg>
+                                msg.ack === 0 ? (
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[13px] h-[13px] opacity-40"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                ) : (
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] ${msg.ack >= 3 ? 'text-blue-400' : 'opacity-50'}`}>
+                                    {msg.ack >= 2 ? (
+                                      <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
+                                    ) : (
+                                      <polyline points="20 6 9 17 4 12" />
+                                    )}
+                                  </svg>
+                                )
                               )}
                             </div>
                           </div>
@@ -955,44 +1131,79 @@ export function ChatPage() {
 
             {/* Input */}
             <form onSubmit={handleSend} className={`p-2 sm:p-3 bg-white dark:bg-cream-dark flex items-center gap-2 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
-              <input
-                ref={inputRef}
-                type="text"
-                className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3 sm:px-4 py-2.5 outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 text-sm min-w-0"
-                dir="auto"
-                placeholder="הקלד הודעה"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                disabled={sendMutation.isPending}
-              />
-              {/* Schedule button */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (!messageText.trim()) return;
-                  const now = new Date();
-                  now.setMinutes(now.getMinutes() + 30);
-                  setScheduleDate(now.toISOString().split('T')[0]);
-                  setScheduleTime(now.toTimeString().slice(0, 5));
-                  setShowScheduleModal(true);
-                }}
-                disabled={!messageText.trim()}
-                className="w-10 h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted disabled:opacity-30 hover:text-accent hover:border-accent/30 transition-colors shrink-0"
-                title="תזמן הודעה"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-              </button>
-              <button
-                type="submit"
-                disabled={!messageText.trim() || sendMutation.isPending}
-                className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white disabled:opacity-50 hover:bg-accent-hover transition-colors shrink-0"
-              >
-                {sendMutation.isPending ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mr-0.5 rotate-180"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
-                )}
-              </button>
+              {isRecording ? (
+                /* Recording state */
+                <div className="flex-1 flex items-center gap-2.5 bg-cream border border-accent/50 rounded-lg px-3 py-2.5">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  <span className="text-sm text-charcoal flex-1">מקליט... {recordingDuration}ש'</span>
+                  <button type="button" onClick={cancelRecording} className="text-muted hover:text-red-500 transition-colors shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
+              ) : (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className="flex-1 bg-cream border border-border text-charcoal rounded-lg px-3 sm:px-4 py-2.5 outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50 text-sm min-w-0"
+                  dir="auto"
+                  placeholder="הקלד הודעה"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  disabled={sendMutation.isPending}
+                />
+              )}
+
+              {isRecording ? (
+                /* Stop recording → send */
+                <button
+                  type="button"
+                  onClick={stopRecordingAndSend}
+                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white hover:bg-accent-hover transition-colors shrink-0 animate-pulse"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>
+                </button>
+              ) : messageText.trim() ? (
+                <>
+                  {/* Schedule button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const now = new Date();
+                      now.setMinutes(now.getMinutes() + 30);
+                      setScheduleDate(now.toISOString().split('T')[0]);
+                      setScheduleTime(now.toTimeString().slice(0, 5));
+                      setShowScheduleModal(true);
+                    }}
+                    className="w-10 h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-colors shrink-0"
+                    title="תזמן הודעה"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  </button>
+                  {/* Send button */}
+                  <button
+                    type="submit"
+                    disabled={sendMutation.isPending}
+                    className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white disabled:opacity-50 hover:bg-accent-hover transition-colors shrink-0"
+                  >
+                    {sendMutation.isPending ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                    )}
+                  </button>
+                </>
+              ) : (
+                /* Mic button */
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  disabled={sendVoiceMutation.isPending}
+                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white hover:bg-accent-hover transition-colors shrink-0 disabled:opacity-50"
+                  title="הקלטת הודעה קולית"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
+                </button>
+              )}
             </form>
           </>
         ) : (

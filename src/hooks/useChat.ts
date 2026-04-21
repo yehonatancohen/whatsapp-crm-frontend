@@ -71,16 +71,16 @@ export function useConversations() {
   return { conversations, loading: isLoading, error: error?.message };
 }
 
-export function useChatMessages(accountId: string | null, chatId: string | null) {
+export function useChatMessages(accountId: string | null, chatId: string | null, limit = 100) {
   const queryClient = useQueryClient();
   const socket = useSocket();
 
   const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
-    queryKey: ['chat', 'messages', accountId, chatId],
+    queryKey: ['chat', 'messages', accountId, chatId, limit],
     queryFn: async () => {
       if (!accountId || !chatId) return [];
       const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId)}/messages`, {
-        params: { limit: 100 },
+        params: { limit },
       });
       return data;
     },
@@ -88,27 +88,12 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
     staleTime: 60_000,
   });
 
-  // Listen for new messages for this specific chat → append optimistically
+  // Listen for new messages → invalidate to refetch with current limit
   useEffect(() => {
     if (!socket || !accountId || !chatId) return;
     const handler = (msg: IncomingChatMessage) => {
       if (msg.accountId === accountId && msg.chatId === chatId) {
-        queryClient.setQueryData<ChatMessage[]>(
-          ['chat', 'messages', accountId, chatId],
-          (old) => {
-            if (!old) return old;
-            // Avoid duplicates
-            if (old.some((m) => m.id === msg.messageId)) return old;
-            return [...old, {
-              id: msg.messageId,
-              body: msg.body,
-              fromMe: msg.fromMe,
-              timestamp: msg.timestamp,
-              type: msg.type,
-              author: msg.author,
-            }];
-          },
-        );
+        queryClient.invalidateQueries({ queryKey: ['chat', 'messages', accountId, chatId] });
       }
     };
     socket.on('chat:message', handler);
@@ -235,14 +220,35 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ accountId, chatId, body, quotedMessageId }: { accountId: string; chatId: string; body: string; quotedMessageId?: string }) => {
+    mutationFn: async ({ accountId, chatId, body, quotedMessageId, _limit }: { accountId: string; chatId: string; body: string; quotedMessageId?: string; _limit?: number }) => {
       const { data } = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/send`, { body, quotedMessageId });
-      return data as ChatMessage;
+      return { msg: data as ChatMessage, limit: _limit ?? 100 };
     },
-    onSuccess: (msg, { accountId, chatId }) => {
-      // Append the sent message
+    onSuccess: ({ msg, limit }, { accountId, chatId }) => {
       queryClient.setQueryData<ChatMessage[]>(
-        ['chat', 'messages', accountId, chatId],
+        ['chat', 'messages', accountId, chatId, limit],
+        (old) => {
+          if (!old) return [msg];
+          if (old.some((m) => m.id === msg.id)) return old;
+          return [...old, msg];
+        },
+      );
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+  });
+}
+
+export function useSendVoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, data, mimeType, _limit }: { accountId: string; chatId: string; data: string; mimeType: string; _limit?: number }) => {
+      const res = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/send-voice`, { data, mimeType });
+      return { msg: res.data as ChatMessage, limit: _limit ?? 100 };
+    },
+    onSuccess: ({ msg, limit }, { accountId, chatId }) => {
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat', 'messages', accountId, chatId, limit],
         (old) => {
           if (!old) return [msg];
           if (old.some((m) => m.id === msg.id)) return old;
