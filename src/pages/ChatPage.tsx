@@ -136,6 +136,28 @@ function formatDate(ts: number) {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+function formatDateSeparator(ts: number) {
+  const d = new Date(ts * 1000);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return 'היום';
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return 'אתמול';
+  return d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function sameDay(ts1: number, ts2: number) {
+  return new Date(ts1 * 1000).toDateString() === new Date(ts2 * 1000).toDateString();
+}
+
+// Deterministic per-author color from a fixed palette (WhatsApp-style)
+const AUTHOR_COLORS = ['#e91e8c','#0099cc','#00bfa5','#7c4dff','#ff6d00','#388e3c','#c62828','#1565c0'];
+function authorColor(authorId: string) {
+  let hash = 0;
+  for (let i = 0; i < authorId.length; i++) hash = (hash * 31 + authorId.charCodeAt(i)) >>> 0;
+  return AUTHOR_COLORS[hash % AUTHOR_COLORS.length];
+}
+
 function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId: string; onClose: () => void }) {
   const { groupInfo, loading, refetch } = useGroupInfo(accountId, chatId);
   const { accounts } = useAccounts();
@@ -650,8 +672,10 @@ export function ChatPage() {
   // Sorted messages (oldest first)
   const sortedMsgs = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
+  const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
+
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 bg-cream overflow-hidden md:rounded-xl shadow-lg border border-border">
+    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 overflow-x-hidden md:rounded-xl shadow-lg border border-border">
       {/* Sidebar: Chat List */}
       <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
@@ -722,11 +746,11 @@ export function ChatPage() {
       </div>
 
       {/* Main Area: Chat */}
-      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 min-w-0 relative overflow-hidden`} style={{ background: '#e5ddd5' }}>
+      <div className={`${!showList ? 'flex' : 'hidden'} md:flex flex-col flex-1 min-w-0 relative overflow-hidden`} style={{ background: chatBg }}>
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="p-2 sm:p-3 bg-white border-b border-border flex items-center gap-2 sm:gap-3 z-10 w-full shadow-sm">
+            <div className="p-2 sm:p-3 bg-white dark:bg-cream-dark border-b border-border flex items-center gap-2 sm:gap-3 z-10 w-full shadow-sm">
               {/* Back button - mobile */}
               <button onClick={() => setShowList(true)} className="text-muted hover:text-charcoal md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -778,81 +802,97 @@ export function ChatPage() {
                     const prev = index > 0 ? sortedMsgs[index - 1] : null;
                     const showTail = !prev || prev.fromMe !== msg.fromMe;
                     const isHovered = hoveredMsgId === msg.id;
-                    const authorDisplay = msg.author?.replace('@c.us', '');
+                    const authorId = msg.author || '';
+                    const authorDisplay = msg.authorName || (authorId ? authorId.replace('@c.us', '') : '');
+                    const showDateSep = !prev || !sameDay(prev.timestamp, msg.timestamp);
 
-                    // RTL context: justify-start = right, justify-end = left
-                    // User messages (fromMe) → right side → justify-start
-                    // Other messages (!fromMe) → left side → justify-end
+                    const sentBubble = theme === 'dark'
+                      ? 'bg-[#005c4b] text-white'
+                      : 'bg-[#dcf8c6] text-[#111111]';
+                    const recvBubble = theme === 'dark'
+                      ? 'bg-[#202c33] text-white'
+                      : 'bg-white border border-border/60 text-charcoal';
+                    const sentTimeColor = theme === 'dark' ? 'text-white/50' : 'text-[#111111]/50';
+                    const recvTimeColor = theme === 'dark' ? 'text-white/50' : 'text-charcoal/50';
+
+                    // RTL: justify-start = right, justify-end = left
                     return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : ''} group/msg relative`}
-                        onMouseEnter={() => setHoveredMsgId(msg.id)}
-                        onMouseLeave={() => setHoveredMsgId(null)}
-                      >
-                        {/* Action buttons — shown on hover, positioned beside the bubble */}
-                        <div className={`flex items-center gap-1 mx-1.5 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'} ${msg.fromMe ? 'order-first' : 'order-last'}`}>
-                          {/* Reply button */}
-                          <button
-                            onClick={() => setReplyTo(msg)}
-                            title="ענה"
-                            className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-accent transition-colors"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" /></svg>
-                          </button>
-                          {/* Delete button — only for own messages */}
-                          {msg.fromMe && (
+                      <div key={msg.id}>
+                        {showDateSep && (
+                          <div className="flex justify-center my-2">
+                            <span className="text-[11px] px-3 py-1 rounded-full shadow-sm select-none"
+                              style={{ background: theme === 'dark' ? 'rgba(11,20,26,0.85)' : 'rgba(225,220,212,0.95)', color: theme === 'dark' ? '#8aab9e' : '#667b6e' }}>
+                              {formatDateSeparator(msg.timestamp)}
+                            </span>
+                          </div>
+                        )}
+                        <div
+                          className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : 'mt-px'} group/msg relative`}
+                          onMouseEnter={() => setHoveredMsgId(msg.id)}
+                          onMouseLeave={() => setHoveredMsgId(null)}
+                        >
+                          {/* Action buttons on hover */}
+                          <div className={`flex items-center gap-1 mx-1.5 transition-opacity duration-100 ${isHovered ? 'opacity-100' : 'opacity-0'} ${msg.fromMe ? 'order-first' : 'order-last'}`}>
                             <button
-                              onClick={async () => {
-                                if (!confirm('למחוק הודעה זו?')) return;
-                                try {
-                                  await deleteMessage.mutateAsync({ accountId: selectedChat.accountId, chatId: selectedChat.chatId, messageId: msg.id });
-                                } catch { /* ignore */ }
-                              }}
-                              title="מחק"
-                              className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-red-500 transition-colors"
+                              onClick={() => setReplyTo(msg)}
+                              title="ענה"
+                              className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-accent transition-colors"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" /></svg>
                             </button>
-                          )}
-                        </div>
-
-                        <div className={`relative max-w-[82%] sm:max-w-[72%] md:max-w-[62%] min-w-0 rounded-lg px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14.2px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? 'bg-[#dcf8c6] text-[#111111]' : 'bg-white border border-border text-charcoal'} ${showTail ? (msg.fromMe ? 'rounded-tr-none' : 'rounded-tl-none') : ''}`}>
-                          {/* Sender Name for Group Chats */}
-                          {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
-                            <p className="text-[11px] font-bold mb-0.5 text-accent opacity-90">{authorDisplay}</p>
-                          )}
-
-                          {msg.hasMedia && ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ? (
-                            <MediaBubble msg={msg} accountId={selectedChat.accountId} chatId={selectedChat.chatId} />
-                          ) : msg.type === 'chat' ? (
-                            <>
-                              <div className="break-all whitespace-pre-wrap" dir="auto">{msg.body}</div>
-                              {extractUrls(msg.body).slice(0, 1).map(url => (
-                                <LinkPreview key={url} url={url} />
-                              ))}
-                            </>
-                          ) : (
-                            <div className="break-words whitespace-pre-wrap italic text-charcoal/60" dir="auto">
-                              {msg.type === 'image' ? '📷 תמונה' :
-                               msg.type === 'video' ? '🎥 וידאו' :
-                               msg.type === 'audio' || msg.type === 'ptt' ? '🎵 אודיו' :
-                               msg.type === 'document' ? '📄 מסמך' :
-                               msg.type === 'sticker' ? '🏷️ סטיקר' :
-                               msg.body || `[${msg.type}]`}
-                            </div>
-                          )}
-                          <div className={`flex items-center justify-end gap-1 mt-0.5 ${msg.fromMe ? 'text-[#111111]/50' : 'text-charcoal/50'}`}>
-                            <span className="text-[11px] leading-none">{formatTime(msg.timestamp)}</span>
-                            {msg.fromMe && msg.ack != null && (
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] leading-none ${msg.ack >= 2 ? (theme === 'dark' ? 'text-blue-500' : 'text-blue-400') : 'text-[#111111]/40'}`}>
-                                {msg.ack >= 2 ? (
-                                  <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
-                                ) : (
-                                  <polyline points="20 6 9 17 4 12" />
-                                )}
-                              </svg>
+                            {msg.fromMe && (
+                              <button
+                                onClick={async () => {
+                                  if (!confirm('למחוק הודעה זו?')) return;
+                                  try {
+                                    await deleteMessage.mutateAsync({ accountId: selectedChat.accountId, chatId: selectedChat.chatId, messageId: msg.id });
+                                  } catch { /* ignore */ }
+                                }}
+                                title="מחק"
+                                className="w-7 h-7 rounded-full bg-white shadow border border-border flex items-center justify-center text-muted hover:text-red-500 transition-colors"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg>
+                              </button>
                             )}
+                          </div>
+
+                          <div className={`msg-in relative max-w-[78%] sm:max-w-[68%] md:max-w-[58%] min-w-0 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? sentBubble : recvBubble} ${showTail ? (msg.fromMe ? 'rounded-tr-sm' : 'rounded-tl-sm') : ''}`}>
+                            {/* Sender name in group chats */}
+                            {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
+                              <p className="text-[11.5px] font-semibold mb-0.5 leading-tight" style={{ color: authorColor(authorId) }}>{authorDisplay}</p>
+                            )}
+
+                            {msg.hasMedia && ['image', 'video', 'audio', 'ptt', 'document', 'sticker'].includes(msg.type) ? (
+                              <MediaBubble msg={msg} accountId={selectedChat.accountId} chatId={selectedChat.chatId} />
+                            ) : msg.type === 'chat' ? (
+                              <>
+                                <div className="break-words whitespace-pre-wrap" dir="auto">{msg.body}</div>
+                                {extractUrls(msg.body).slice(0, 1).map(url => (
+                                  <LinkPreview key={url} url={url} />
+                                ))}
+                              </>
+                            ) : (
+                              <div className="break-words whitespace-pre-wrap italic opacity-60" dir="auto">
+                                {msg.type === 'image' ? '📷 תמונה' :
+                                 msg.type === 'video' ? '🎥 וידאו' :
+                                 msg.type === 'audio' || msg.type === 'ptt' ? '🎵 אודיו' :
+                                 msg.type === 'document' ? '📄 מסמך' :
+                                 msg.type === 'sticker' ? '🏷️ סטיקר' :
+                                 msg.body || `[${msg.type}]`}
+                              </div>
+                            )}
+                            <div className={`flex items-center justify-end gap-1 mt-0.5 ${msg.fromMe ? sentTimeColor : recvTimeColor}`}>
+                              <span className="text-[11px] leading-none">{formatTime(msg.timestamp)}</span>
+                              {msg.fromMe && msg.ack != null && (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-[14px] h-[14px] ${msg.ack >= 2 ? 'text-blue-400' : 'opacity-50'}`}>
+                                  {msg.ack >= 2 ? (
+                                    <><polyline points="20 6 9 17 4 12" /><polyline points="20 10 16 14" /></>
+                                  ) : (
+                                    <polyline points="20 6 9 17 4 12" />
+                                  )}
+                                </svg>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -865,7 +905,7 @@ export function ChatPage() {
 
             {/* Reply Preview Bar */}
             {replyTo && (
-              <div className="px-3 pt-2 pb-0 bg-white border-t border-border z-10 w-full flex items-center gap-2">
+              <div className="px-3 pt-2 pb-0 bg-white dark:bg-cream-dark border-t border-border z-10 w-full flex items-center gap-2">
                 <div className="flex-1 border-r-4 border-accent bg-cream rounded-md px-3 py-1.5 min-w-0">
                   <p className="text-[11px] font-semibold text-accent truncate">{replyTo.fromMe ? 'אתה' : (replyTo.author?.replace('@c.us', '') || 'נמען')}</p>
                   <p className="text-xs text-charcoal/70 truncate" dir="auto">{replyTo.body || `[${replyTo.type}]`}</p>
@@ -914,7 +954,7 @@ export function ChatPage() {
             )}
 
             {/* Input */}
-            <form onSubmit={handleSend} className={`p-3 bg-white flex items-center gap-2 sm:gap-3 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
+            <form onSubmit={handleSend} className={`p-2 sm:p-3 bg-white dark:bg-cream-dark flex items-center gap-2 z-10 w-full ${replyTo ? '' : 'border-t border-border'}`}>
               <input
                 ref={inputRef}
                 type="text"

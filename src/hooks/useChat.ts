@@ -26,6 +26,7 @@ export interface ChatMessage {
   type: string;
   ack?: number;
   author?: string;
+  authorName?: string;
   hasMedia?: boolean;
   quotedMsg?: { body: string; author?: string; fromMe: boolean };
 }
@@ -84,6 +85,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null)
       return data;
     },
     enabled: !!accountId && !!chatId,
+    staleTime: 60_000,
   });
 
   // Listen for new messages for this specific chat → append optimistically
