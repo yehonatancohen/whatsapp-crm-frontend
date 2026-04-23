@@ -625,7 +625,7 @@ export function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, loading: loadingMessages } = useChatMessages(
+  const { messages, loading: loadingMessages, isError: messagesError, refetch: refetchMessages } = useChatMessages(
     selectedChat?.accountId ?? null,
     selectedChat?.chatId ?? null,
     msgLimit,
@@ -950,6 +950,13 @@ export function ChatPage() {
               {loadingMessages ? (
                 <div className="flex items-center justify-center flex-1">
                   <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : messagesError ? (
+                <div className="flex items-center justify-center flex-1">
+                  <div className="text-center py-3 bg-white border border-border rounded-lg px-4 text-sm text-muted shadow-sm flex flex-col gap-2">
+                    <span>שגיאה בטעינת הודעות</span>
+                    <button onClick={() => refetchMessages()} className="text-xs underline text-accent">נסה שוב</button>
+                  </div>
                 </div>
               ) : sortedMsgs.length === 0 ? (
                 <div className="flex items-center justify-center flex-1">

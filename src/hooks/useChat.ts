@@ -75,7 +75,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
   const queryClient = useQueryClient();
   const socket = useSocket();
 
-  const { data: messages = [], isLoading, error } = useQuery<ChatMessage[]>({
+  const { data: messages = [], isLoading, isError, error, refetch } = useQuery<ChatMessage[]>({
     queryKey: ['chat', 'messages', accountId, chatId, limit],
     queryFn: async () => {
       if (!accountId || !chatId) return [];
@@ -86,6 +86,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
     },
     enabled: !!accountId && !!chatId,
     staleTime: 60_000,
+    retry: 1,
   });
 
   // Listen for new messages → invalidate to refetch with current limit
@@ -100,7 +101,7 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
     return () => { socket.off('chat:message', handler); };
   }, [socket, accountId, chatId, queryClient]);
 
-  return { messages, loading: isLoading, error: error?.message };
+  return { messages, loading: isLoading, isError, error: error?.message, refetch };
 }
 
 export interface GroupSettings {
