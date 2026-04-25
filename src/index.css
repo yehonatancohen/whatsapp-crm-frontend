@@ -24,6 +24,14 @@
   --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Prevent horizontal scroll and touch overscroll on all devices/browsers.
+   Kept outside @layer so it wins over any layered utility that might conflict. */
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  max-width: 100%;
+}
+
 @layer base {
   :root {
     --color-cream: #F4F4F0;
@@ -42,26 +50,21 @@
     --color-cream: #121212;      /* Main background */
     --color-cream-dark: #1a1a1a; /* Secondary background / Sidebar */
     --color-white: #1e1e1e;      /* Card backgrounds */
-    
+
     --color-charcoal: #f5f5f5;   /* Primary text */
     --color-ink: #e0e0e0;        /* Body text */
     --color-muted: #a0a0a0;      /* Secondary text */
     --color-faded: #707070;      /* Disabled/Placeholder */
-    
+
     --color-border: #2d2d2d;     /* Subtle borders */
     --color-border-strong: #404040;
-    
+
     --color-accent-light: rgba(255, 87, 34, 0.15);
     --color-accent-subtle: rgba(255, 87, 34, 0.08);
   }
 
-  html {
-    overflow-x: hidden;
-  }
-
   body {
     @apply bg-cream text-charcoal antialiased transition-colors duration-200 font-sans;
-    overflow-x: hidden;
   }
 }
 
