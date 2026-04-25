@@ -26,7 +26,7 @@ export function AppLayout() {
           <Logo className="h-7" />
         </header>
 
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
           <div className="max-w-6xl mx-auto">
             <Outlet />
           </div>
