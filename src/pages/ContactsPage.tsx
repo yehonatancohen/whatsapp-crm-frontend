@@ -104,7 +104,7 @@ export function ContactsPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setWizardOpen(true)}
-            className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-[#ffffff] text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
@@ -150,7 +150,7 @@ export function ContactsPage() {
                 <button
                   onClick={handleBatchAddToList}
                   disabled={!targetListId || isAddingToList}
-                  className="bg-accent text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
+                  className="bg-accent text-[#ffffff] text-xs font-bold px-4 py-2 rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
                 >
                   בצע הוספה
                 </button>
@@ -278,7 +278,7 @@ function ContactListsView({
               className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2 text-sm outline-none focus:border-accent mb-3 text-right"
             />
             <div className="flex gap-2">
-              <button type="submit" className="flex-1 bg-accent text-white text-xs font-medium py-2 rounded-lg">צור</button>
+              <button type="submit" className="flex-1 bg-accent text-[#ffffff] text-xs font-medium py-2 rounded-lg">צור</button>
               <button type="button" onClick={() => setIsCreating(false)} className="flex-1 bg-cream text-charcoal text-xs font-medium py-2 rounded-lg">ביטול</button>
             </div>
           </form>
@@ -384,7 +384,7 @@ function ListDetailView({ listId, onBack }: { listId: string; onBack: () => void
             <span className="text-xs text-muted">{list?.entries?.length || 0} אנשי קשר</span>
             <button
               onClick={() => setShowAddPanel(!showAddPanel)}
-              className="flex items-center gap-1.5 text-xs font-medium bg-accent text-white px-3 py-1.5 rounded-lg hover:bg-accent-hover transition-colors"
+              className="flex items-center gap-1.5 text-xs font-medium bg-accent text-[#ffffff] px-3 py-1.5 rounded-lg hover:bg-accent-hover transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />

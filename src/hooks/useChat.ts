@@ -85,8 +85,9 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
       return data;
     },
     enabled: !!accountId && !!chatId,
-    staleTime: 60_000,
-    retry: 1,
+    staleTime: 30_000,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
   });
 
   // Listen for new messages → invalidate to refetch with current limit

@@ -49,7 +49,7 @@ export function VerifyEmailPage() {
               </div>
               <h2 className="text-lg font-semibold text-charcoal mb-2">האימייל אומת בהצלחה!</h2>
               <p className="text-sm text-muted mb-6">תודה שאימתת את כתובת האימייל שלך. כעת תוכל להמשיך ללוח הבקרה.</p>
-              <Link to="/dashboard" className="bg-accent hover:bg-accent-hover text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors inline-block">
+              <Link to="/dashboard" className="bg-accent hover:bg-accent-hover text-[#ffffff] text-sm font-medium px-6 py-2.5 rounded-lg transition-colors inline-block">
                 מעבר ללוח הבקרה
               </Link>
             </>

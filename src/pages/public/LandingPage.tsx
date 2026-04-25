@@ -58,7 +58,7 @@ export function LandingPage() {
             הפלטפורמה המקיפה לשיווק בוואטסאפ, ניהול מספר חשבונות ושיפור הקשר עם הלקוחות.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/register" className="bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-lg transition-colors">
+            <Link to="/register" className="bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-6 py-3 rounded-lg transition-colors">
               התחל ניסיון חינם
             </Link>
             <Link to="/pricing" className="text-muted hover:text-charcoal font-medium px-6 py-3 transition-colors">
@@ -94,7 +94,7 @@ export function LandingPage() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-charcoal mb-3">מוכן להתחיל?</h2>
           <p className="text-muted mb-6">הצטרף לאלפי עסקים המשתמשים ב-<span className="font-logo text-xl">שדר</span> כדי לצמוח בוואטסאפ.</p>
-          <Link to="/register" className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-lg transition-colors">
+          <Link to="/register" className="inline-block bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-6 py-3 rounded-lg transition-colors">
             התחל את תקופת הניסיון שלך
           </Link>
         </div>

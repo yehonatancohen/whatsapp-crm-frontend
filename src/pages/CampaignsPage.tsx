@@ -354,7 +354,7 @@ export function CampaignsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
+          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-[#ffffff] text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -672,7 +672,7 @@ export function CampaignsPage() {
                 {isEditing ? (
                   <>
                     <button type="submit" disabled={isBusy || selectedAccountIds.length === 0}
-                      className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50">
+                      className="flex-1 bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-3 rounded-lg transition-colors disabled:opacity-50">
                       {updateMutation.isPending ? 'שומר...' : 'שמור שינויים'}
                     </button>
                     <button type="button" onClick={closeModal}
@@ -686,7 +686,7 @@ export function CampaignsPage() {
                       type="submit"
                       disabled={isBusy || selectedAccountIds.length === 0}
                       onClick={() => { pendingAction.current = 'start'; }}
-                      className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                         <path d="M8 5v14l11-7z" />

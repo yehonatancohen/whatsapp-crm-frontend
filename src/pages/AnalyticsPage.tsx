@@ -20,7 +20,7 @@ function BarChart({ data, maxHeight = 120 }: { data: Array<{ date: string; sent:
             </div>
             <span className="text-[8px] text-muted mt-1 truncate w-full text-center">{dateLabel}</span>
             {/* Tooltip */}
-            <div className="absolute bottom-full mb-1 bg-charcoal text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+            <div className="absolute bottom-full mb-1 bg-charcoal text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
               {d.date}: {d.sent} נשלחו, {d.delivered} הגיעו
             </div>
           </div>

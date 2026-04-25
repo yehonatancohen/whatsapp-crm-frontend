@@ -96,7 +96,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
               <button
                 onClick={handleImport}
                 disabled={!file || isImporting}
-                className="flex-1 px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-lg transition-colors"
+                className="flex-1 px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-[#ffffff] rounded-lg transition-colors"
               >
                 {isImporting ? 'מייבא...' : 'ייבא'}
               </button>
@@ -153,7 +153,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
             <div className="flex justify-end mt-5">
               <button
                 onClick={handleClose}
-                className="w-full px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors"
+                className="w-full px-5 py-2 text-sm font-medium bg-accent hover:bg-accent-hover text-[#ffffff] rounded-lg transition-colors"
               >
                 סיום
               </button>

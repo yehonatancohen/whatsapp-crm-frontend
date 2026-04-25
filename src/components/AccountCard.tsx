@@ -185,7 +185,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
                   <button
                     onClick={handleRequestPairingCode}
                     disabled={pairingLoading || !pairingPhone.trim()}
-                    className="bg-accent hover:bg-accent/90 text-white text-xs font-medium px-3 py-2 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
+                    className="bg-accent hover:bg-accent/90 text-[#ffffff] text-xs font-medium px-3 py-2 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
                   >
                     {pairingLoading ? '...' : 'קבל קוד'}
                   </button>
@@ -405,7 +405,7 @@ function ProfileModal({ accountId, accountLabel, onClose }: { accountId: string;
             <button
               onClick={handleSave}
               disabled={isSaving || (!displayName && !statusText.trim())}
-              className="w-full py-2.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-accent text-[#ffffff] rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {updateProfile.isPending ? 'שומר...' : 'שמור שינויים'}
             </button>

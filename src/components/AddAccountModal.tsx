@@ -81,7 +81,7 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
             <button
               type="submit"
               disabled={loading || !label.trim()}
-              className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
             >
               {loading ? 'יוצר...' : 'צור חשבון'}
             </button>

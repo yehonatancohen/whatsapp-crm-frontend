@@ -70,7 +70,7 @@ export function PricingPage() {
                 }`}
               >
                 {isPro && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-[#ffffff] text-xs font-semibold px-3 py-1 rounded-full">
                     הכי פופולרי
                   </div>
                 )}
@@ -110,7 +110,7 @@ export function PricingPage() {
                     rel="noopener noreferrer"
                     className={`w-full text-center text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                       isPro
-                        ? 'bg-accent hover:bg-accent-hover text-white'
+                        ? 'bg-accent hover:bg-accent-hover text-[#ffffff]'
                         : 'bg-white hover:bg-cream border border-border text-charcoal'
                     }`}
                   >

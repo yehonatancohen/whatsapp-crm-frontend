@@ -52,7 +52,7 @@ export function VerifyEmailPendingPage() {
           <button
             onClick={handleResend}
             disabled={loading || sent}
-            className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors mb-4"
+            className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-[#ffffff] text-sm font-medium py-2.5 rounded-lg transition-colors mb-4"
           >
             {loading ? 'שולח...' : sent ? 'האימייל נשלח שוב' : 'שלח שוב אימייל אימות'}
           </button>

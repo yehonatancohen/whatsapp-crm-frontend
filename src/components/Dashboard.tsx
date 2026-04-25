@@ -50,7 +50,7 @@ function GettingStarted() {
       <div className="grid sm:grid-cols-2 gap-3">
         {onboardingSteps.map((step) => (
           <div key={step.num} className="flex gap-3 p-3 rounded-lg border border-border bg-cream/40">
-            <div className="w-6 h-6 rounded-full bg-accent text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-6 h-6 rounded-full bg-accent text-[#ffffff] text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
               {step.num}
             </div>
             <div className="text-right flex-1 min-w-0">

@@ -59,7 +59,7 @@ export function TemplatesPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-charcoal text-right">תבניות הודעות</h1>
-        <button onClick={openCreate} className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors">
+        <button onClick={openCreate} className="px-4 py-2 bg-accent text-[#ffffff] rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors">
           + תבנית חדשה
         </button>
       </div>
@@ -69,7 +69,7 @@ export function TemplatesPage() {
         <div className="flex gap-2 mb-4 flex-wrap">
           <button
             onClick={() => setSelectedCategory(undefined)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!selectedCategory ? 'bg-accent text-white' : 'bg-cream text-muted hover:bg-cream-dark'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!selectedCategory ? 'bg-accent text-[#ffffff]' : 'bg-cream text-muted hover:bg-cream-dark'}`}
           >
             הכל
           </button>
@@ -77,7 +77,7 @@ export function TemplatesPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedCategory === cat ? 'bg-accent text-white' : 'bg-cream text-muted hover:bg-cream-dark'}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedCategory === cat ? 'bg-accent text-[#ffffff]' : 'bg-cream text-muted hover:bg-cream-dark'}`}
             >
               {cat}
             </button>
@@ -185,7 +185,7 @@ export function TemplatesPage() {
               <button
                 onClick={handleSave}
                 disabled={!name || !content || createMutation.isPending || updateMutation.isPending}
-                className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-accent text-[#ffffff] rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'שומר...' : 'שמור'}
               </button>
