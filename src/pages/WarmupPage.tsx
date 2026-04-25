@@ -116,6 +116,11 @@ export function WarmupPage() {
             {relevantAccounts.map(acc => {
               const accWarmup = warmupStatuses.find((c: WarmupStatus) => c.accountId === acc.id);
               const disconnected = acc.status === 'DISCONNECTED';
+              // Other authenticated accounts whose numbers should be saved in this account's contacts
+              const otherAuthAccounts = relevantAccounts.filter(
+                a => a.id !== acc.id && a.status === 'AUTHENTICATED' && a.phoneNumber,
+              );
+              const hasContactWarning = !disconnected && otherAuthAccounts.length > 0;
               return (
                 <button
                   key={acc.id}
@@ -137,6 +142,12 @@ export function WarmupPage() {
                       </p>
                       {disconnected && (
                         <p className="text-[10px] text-red-500 font-medium">מנותק</p>
+                      )}
+                      {hasContactWarning && (
+                        <p className="text-[10px] text-amber-600 font-medium flex items-center gap-0.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                          {otherAuthAccounts.length} מספרים לשמירה
+                        </p>
                       )}
                     </div>
                   </div>
@@ -350,6 +361,48 @@ export function WarmupPage() {
                   })}
                 </div>
               </div>
+
+              {/* Contact Check */}
+              {(() => {
+                const otherAccounts = relevantAccounts.filter(
+                  a => a.id !== selectedAccountId && a.status === 'AUTHENTICATED' && a.phoneNumber,
+                );
+                if (otherAccounts.length === 0) return null;
+                return (
+                  <div className="border border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-700/30 rounded-xl p-4">
+                    <div className="flex items-start gap-2 mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-amber-600 shrink-0 mt-0.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-800 dark:text-amber-400">בדוק שמירת אנשי קשר</p>
+                        <p className="text-xs text-amber-700 dark:text-amber-500 mt-0.5 leading-relaxed">
+                          החימום עובד טוב יותר כשהמספרים הבאים שמורים באנשי הקשר של חשבון זה. מספר שאינו שמור יופיע כ"מספר לא ידוע" בוואטסאפ ועלול לפגוע באיכות החימום.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {otherAccounts.map(acc => {
+                        const phone = acc.phoneNumber!.startsWith('+') ? acc.phoneNumber! : `+${acc.phoneNumber}`;
+                        return (
+                          <div key={acc.id} className="flex items-center justify-between bg-white dark:bg-cream-dark border border-amber-100 dark:border-amber-700/20 rounded-lg px-3 py-2">
+                            <div>
+                              <p className="text-xs font-medium text-charcoal">{acc.label}</p>
+                              <p className="text-[11px] text-muted" dir="ltr">{phone}</p>
+                            </div>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(phone)}
+                              className="text-[10px] text-accent hover:text-accent-hover font-medium flex items-center gap-1 shrink-0"
+                              title="העתק מספר"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                              העתק
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="bg-accent-light/30 border border-accent/10 p-4 rounded-xl">
                 <h3 className="text-sm font-bold text-accent mb-2">איך זה עובד?</h3>

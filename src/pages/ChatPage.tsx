@@ -776,9 +776,9 @@ export function ChatPage() {
   const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 overflow-x-hidden md:rounded-xl shadow-lg border border-border">
+    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 overflow-hidden md:rounded-xl shadow-lg border border-border">
       {/* Sidebar: Chat List */}
-      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all`}>
+      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full max-w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all overflow-hidden`}>
         <div className="p-3 bg-cream-dark border-b border-border">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
@@ -953,9 +953,11 @@ export function ChatPage() {
                 </div>
               ) : messagesError ? (
                 <div className="flex items-center justify-center flex-1">
-                  <div className="text-center py-3 bg-white border border-border rounded-lg px-4 text-sm text-muted shadow-sm flex flex-col gap-2">
-                    <span>שגיאה בטעינת הודעות</span>
-                    <button onClick={() => refetchMessages()} className="text-xs underline text-accent">נסה שוב</button>
+                  <div className="text-center py-4 bg-white border border-border rounded-xl px-5 text-sm text-muted shadow-sm flex flex-col gap-2 max-w-xs mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-muted mx-auto opacity-50"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span className="text-charcoal font-medium">לא ניתן לטעון הודעות</span>
+                    <span className="text-xs text-muted leading-relaxed">ייתכן שהחשבון מנותק מוואטסאפ או שהשיחה אינה זמינה כרגע. בדוק שהחשבון מחובר.</span>
+                    <button onClick={() => refetchMessages()} className="text-xs text-accent hover:text-accent-hover font-medium mt-1">נסה שוב</button>
                   </div>
                 </div>
               ) : sortedMsgs.length === 0 ? (
