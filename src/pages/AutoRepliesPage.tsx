@@ -70,7 +70,7 @@ export function AutoRepliesPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-charcoal text-right">תגובות אוטומטיות</h1>
-        <button onClick={openCreate} className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors">
+        <button onClick={openCreate} className="px-4 py-2 bg-accent text-[#ffffff] rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors">
           + כלל חדש
         </button>
       </div>
@@ -195,7 +195,7 @@ export function AutoRepliesPage() {
               <button
                 onClick={handleSave}
                 disabled={!name || !matchValue || !replyMessage || createMutation.isPending || updateMutation.isPending}
-                className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-accent text-[#ffffff] rounded-lg text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'שומר...' : 'שמור'}
               </button>

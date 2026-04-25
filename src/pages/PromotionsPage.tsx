@@ -225,7 +225,7 @@ export function PromotionsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
+          className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-[#ffffff] text-sm font-medium px-4 py-2.5 rounded-lg transition-colors self-start sm:self-auto"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -458,7 +458,7 @@ export function PromotionsPage() {
                       onClick={() => setDaysOfWeek(prev => prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx])}
                       className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${
                         daysOfWeek.includes(idx)
-                          ? 'bg-accent text-white'
+                          ? 'bg-accent text-[#ffffff]'
                           : daysOfWeek.length === 0
                             ? 'bg-accent/20 text-accent border border-accent/30'
                             : 'bg-cream text-muted border border-border hover:border-accent'
@@ -596,7 +596,7 @@ export function PromotionsPage() {
                 <button
                   type="submit"
                   disabled={(editId ? updateMutation.isPending : createMutation.isPending) || selectedAccountIds.length === 0 || selectedGroupJids.length === 0}
-                  className="flex-1 bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
                 >
                   {(editId ? updateMutation.isPending : createMutation.isPending) ? (editId ? 'מעדכן...' : 'יוצר...') : editId ? 'עדכן קידום' : 'צור קידום'}
                 </button>

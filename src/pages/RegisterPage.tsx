@@ -127,7 +127,7 @@ export function RegisterPage() {
           <button
             type="submit"
             disabled={loading || !agreedToTerms}
-            className="w-full mt-4 bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="w-full mt-4 bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-[#ffffff] text-sm font-medium py-2.5 rounded-lg transition-colors"
           >
             {loading ? 'יוצר חשבון...' : 'הרשמה'}
           </button>

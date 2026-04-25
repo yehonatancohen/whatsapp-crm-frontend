@@ -9,7 +9,7 @@ export function NotFoundPage() {
         <p className="text-muted mb-8">הדף שאתה מחפש אינו קיים או שהועבר לכתובת אחרת.</p>
         <Link
           to="/"
-          className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-lg transition-colors"
+          className="inline-block bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-6 py-3 rounded-lg transition-colors"
         >
           חזרה לדף הבית
         </Link>

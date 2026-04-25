@@ -63,7 +63,7 @@ export function PublicLayout() {
             </button>
             {user ? (
               <>
-                <Link to="/dashboard" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
+                <Link to="/dashboard" className="text-sm bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-4 py-2 rounded-lg transition-colors">
                   לוח בקרה
                 </Link>
                 <button onClick={handleLogout} className="text-sm text-muted hover:text-charcoal transition-colors">
@@ -75,7 +75,7 @@ export function PublicLayout() {
                 <Link to="/login" className="text-sm text-muted hover:text-charcoal transition-colors">
                   התחברות
                 </Link>
-                <Link to="/register" className="text-sm bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg transition-colors">
+                <Link to="/register" className="text-sm bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-4 py-2 rounded-lg transition-colors">
                   הרשמה
                 </Link>
               </>

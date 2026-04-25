@@ -51,7 +51,7 @@ export function ResetPasswordPage() {
               </div>
               <h2 className="text-lg font-semibold text-charcoal mb-2">הסיסמה שונתה</h2>
               <p className="text-sm text-muted mb-6">הסיסמה שלך עודכנה בהצלחה. כעת תוכל להתחבר לחשבונך.</p>
-              <Link to="/login" className="bg-accent hover:bg-accent-hover text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors inline-block">
+              <Link to="/login" className="bg-accent hover:bg-accent-hover text-[#ffffff] text-sm font-medium px-6 py-2.5 rounded-lg transition-colors inline-block">
                 התחברות
               </Link>
             </div>
@@ -97,7 +97,7 @@ export function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full bg-accent hover:bg-accent-hover disabled:bg-gray-200 text-[#ffffff] text-sm font-medium py-2.5 rounded-lg transition-colors"
                 >
                   {loading ? 'מאפס...' : 'איפוס סיסמה'}
                 </button>

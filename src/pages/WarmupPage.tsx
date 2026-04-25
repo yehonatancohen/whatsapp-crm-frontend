@@ -177,7 +177,7 @@ export function WarmupPage() {
                     <button
                       onClick={handleReconnect}
                       disabled={isReconnecting}
-                      className="px-5 py-2 rounded-full text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-all"
+                      className="px-5 py-2 rounded-full text-sm font-bold bg-blue-600 text-[#ffffff] hover:bg-blue-700 disabled:opacity-50 transition-all"
                     >
                       {isReconnecting ? 'מתחבר...' : 'חבר מחדש'}
                     </button>
@@ -187,7 +187,7 @@ export function WarmupPage() {
                       className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
                         currentConfig?.isEnabled
                           ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                          : 'bg-accent text-white hover:bg-accent-hover'
+                          : 'bg-accent text-[#ffffff] hover:bg-accent-hover'
                       }`}
                     >
                       {currentConfig?.isEnabled ? 'עצור חימום' : 'הפעל חימום'}
@@ -205,7 +205,7 @@ export function WarmupPage() {
                   </div>
                   <button
                     onClick={() => setShowBanConfirm(true)}
-                    className="shrink-0 mr-3 px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-all"
+                    className="shrink-0 mr-3 px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-[#ffffff] hover:bg-red-700 transition-all"
                   >
                     התחל שחזור
                   </button>
@@ -221,7 +221,7 @@ export function WarmupPage() {
                     <button
                       onClick={handleBanRecovery}
                       disabled={isBanRecovering}
-                      className="px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-all"
+                      className="px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-[#ffffff] hover:bg-red-700 disabled:opacity-50 transition-all"
                     >
                       {isBanRecovering ? 'מעבד...' : 'כן, אפס והתחל שחזור'}
                     </button>
@@ -334,7 +334,7 @@ export function WarmupPage() {
                         'border-border opacity-50'
                       }`}>
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                          isActive ? 'bg-accent text-white' :
+                          isActive ? 'bg-accent text-[#ffffff]' :
                           isPast ? 'bg-green-100 text-green-600' :
                           'bg-cream text-faded'
                         }`}>

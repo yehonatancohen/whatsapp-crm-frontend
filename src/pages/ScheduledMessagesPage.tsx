@@ -38,7 +38,7 @@ export function ScheduledMessagesPage() {
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === tab.key ? 'bg-accent text-white' : 'bg-cream text-muted hover:bg-cream-dark'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === tab.key ? 'bg-accent text-[#ffffff]' : 'bg-cream text-muted hover:bg-cream-dark'}`}
           >
             {tab.label}
           </button>

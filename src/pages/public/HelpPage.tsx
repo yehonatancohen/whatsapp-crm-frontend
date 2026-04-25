@@ -74,7 +74,7 @@ export function HelpPage() {
         {emailRevealed ? (
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-8 py-3 rounded-lg transition-colors"
+            className="inline-block bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-8 py-3 rounded-lg transition-colors"
             dir="ltr"
           >
             {SUPPORT_EMAIL}
@@ -82,7 +82,7 @@ export function HelpPage() {
         ) : (
           <button
             onClick={() => setEmailRevealed(true)}
-            className="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-8 py-3 rounded-lg transition-colors"
+            className="inline-block bg-accent hover:bg-accent-hover text-[#ffffff] font-medium px-8 py-3 rounded-lg transition-colors"
           >
             לחץ לחשיפת כתובת המייל
           </button>

@@ -299,7 +299,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                         setCopiedLink(true);
                         setTimeout(() => setCopiedLink(false), 2000);
                       }}
-                      className="flex-1 text-xs bg-accent hover:bg-accent-hover text-white font-medium py-1.5 rounded-lg transition-colors"
+                      className="flex-1 text-xs bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-1.5 rounded-lg transition-colors"
                     >
                       {copiedLink ? '✓ הועתק!' : 'העתק לינק'}
                     </button>
@@ -330,7 +330,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
             {!showWarning ? (
               <button
                 onClick={() => setShowWarning(true)}
-                className="w-full text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors"
+                className="w-full text-sm bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-2 rounded-lg transition-colors"
               >
                 הוסף אנשים לקבוצה
               </button>
@@ -386,11 +386,11 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                       <button
                         onClick={handleAddAccounts}
                         disabled={addMutation.isPending}
-                        className="w-full mt-2 text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                        className="w-full mt-2 text-sm bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
                       >
                         {addMutation.isPending ? (
                           <span className="flex items-center justify-center gap-2">
-                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <div className="w-3.5 h-3.5 border-2 border-[#ffffff] border-t-transparent rounded-full animate-spin" />
                             מוסיף...
                           </span>
                         ) : `הוסף ${selectedAccountIds.size} חשבונות`}
@@ -426,11 +426,11 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                       <button
                         onClick={handleAddManual}
                         disabled={!phoneInput.trim() || addMutation.isPending}
-                        className="flex-1 text-sm bg-accent hover:bg-accent-hover text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                        className="flex-1 text-sm bg-accent hover:bg-accent-hover text-[#ffffff] font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
                       >
                         {addMutation.isPending ? (
                           <span className="flex items-center justify-center gap-2">
-                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <div className="w-3.5 h-3.5 border-2 border-[#ffffff] border-t-transparent rounded-full animate-spin" />
                             מוסיף...
                           </span>
                         ) : 'הוסף'}
@@ -784,7 +784,7 @@ export function ChatPage() {
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
             <button
               onClick={() => setShowNewChat(true)}
-              className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center text-white transition-colors shrink-0"
+              className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center text-[#ffffff] transition-colors shrink-0"
               title="שיחה חדשה"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
@@ -839,7 +839,7 @@ export function ChatPage() {
                 <button
                   onClick={handleNewChat}
                   disabled={!newChatPhone.trim() || !newChatAccountId}
-                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-40 text-[#ffffff] font-medium py-2.5 rounded-lg text-sm transition-colors"
                 >
                   פתח שיחה
                 </button>
@@ -865,7 +865,7 @@ export function ChatPage() {
                   <button
                     key={`${chat.accountId}-${chat.chatId}`}
                     onClick={() => handleSelect(chat)}
-                    className={`flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 text-right transition-colors border-b border-border hover:bg-cream active:bg-cream-dark ${isSelected ? 'bg-cream-dark' : ''}`}
+                    className={`w-full flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 text-right transition-colors border-b border-border hover:bg-cream active:bg-cream-dark overflow-hidden ${isSelected ? 'bg-cream-dark' : ''}`}
                   >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted">
                       {chat.isGroup ? (
@@ -879,7 +879,7 @@ export function ChatPage() {
                         <span className="text-charcoal font-medium text-sm truncate">{chat.name}</span>
                         <div className="flex items-center gap-1 shrink-0">
                           {chat.unreadCount > 0 && (
-                            <span className="bg-accent text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">{chat.unreadCount}</span>
+                            <span className="bg-accent text-[#ffffff] text-[10px] px-1.5 py-0.5 rounded-full leading-none">{chat.unreadCount}</span>
                           )}
                           {chat.timestamp != null && (
                             <span className="text-[10px] text-muted whitespace-nowrap">{formatDate(chat.timestamp)}</span>
@@ -890,10 +890,10 @@ export function ChatPage() {
                         {chat.lastMessage?.fromMe && (
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-muted shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
                         )}
-                        <p className="text-xs text-muted truncate min-w-0" dir="auto">
+                        <p className="text-xs text-muted truncate flex-1 min-w-0" dir="auto">
                           {chat.lastMessage?.body || ''}
                         </p>
-                        <span className="text-[10px] shrink-0 px-1 py-0.5 rounded bg-accent-light text-accent border border-accent/20 ml-auto">{chat.accountLabel}</span>
+                        <span className="text-[10px] shrink-0 px-1 py-0.5 rounded bg-accent-light text-accent border border-accent/20">{chat.accountLabel}</span>
                       </div>
                     </div>
                   </button>
@@ -986,13 +986,13 @@ export function ChatPage() {
                     const showDateSep = !prev || !sameDay(prev.timestamp, msg.timestamp);
 
                     const sentBubble = theme === 'dark'
-                      ? 'bg-[#005c4b] text-white'
+                      ? 'bg-[#005c4b] text-[#e9edef]'
                       : 'bg-[#dcf8c6] text-[#111111]';
                     const recvBubble = theme === 'dark'
-                      ? 'bg-[#202c33] text-white'
+                      ? 'bg-[#202c33] text-[#e9edef]'
                       : 'bg-white border border-border/60 text-charcoal';
-                    const sentTimeColor = theme === 'dark' ? 'text-white/50' : 'text-[#111111]/50';
-                    const recvTimeColor = theme === 'dark' ? 'text-white/50' : 'text-charcoal/50';
+                    const sentTimeColor = theme === 'dark' ? 'text-[#e9edef]/50' : 'text-[#111111]/50';
+                    const recvTimeColor = theme === 'dark' ? 'text-[#e9edef]/50' : 'text-charcoal/50';
 
                     // RTL: justify-start = right, justify-end = left
                     return (
@@ -1127,7 +1127,7 @@ export function ChatPage() {
                         setScheduleDate('');
                         setScheduleTime('');
                       }}
-                      className="px-3 py-1.5 bg-accent text-white rounded-lg text-xs font-medium hover:bg-accent-hover disabled:opacity-50"
+                      className="px-3 py-1.5 bg-accent text-[#ffffff] rounded-lg text-xs font-medium hover:bg-accent-hover disabled:opacity-50"
                     >
                       {scheduleMutation.isPending ? 'מתזמן...' : 'תזמן'}
                     </button>
@@ -1165,7 +1165,7 @@ export function ChatPage() {
                 <button
                   type="button"
                   onClick={stopRecordingAndSend}
-                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white hover:bg-accent-hover transition-colors shrink-0 animate-pulse"
+                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-[#ffffff] hover:bg-accent-hover transition-colors shrink-0 animate-pulse"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>
                 </button>
@@ -1190,10 +1190,10 @@ export function ChatPage() {
                   <button
                     type="submit"
                     disabled={sendMutation.isPending}
-                    className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white disabled:opacity-50 hover:bg-accent-hover transition-colors shrink-0"
+                    className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-[#ffffff] disabled:opacity-50 hover:bg-accent-hover transition-colors shrink-0"
                   >
                     {sendMutation.isPending ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#ffffff] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
                     )}
@@ -1205,7 +1205,7 @@ export function ChatPage() {
                   type="button"
                   onClick={startRecording}
                   disabled={sendVoiceMutation.isPending}
-                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-white hover:bg-accent-hover transition-colors shrink-0 disabled:opacity-50"
+                  className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-[#ffffff] hover:bg-accent-hover transition-colors shrink-0 disabled:opacity-50"
                   title="הקלטת הודעה קולית"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
