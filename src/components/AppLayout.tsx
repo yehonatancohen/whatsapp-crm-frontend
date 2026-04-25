@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Logo } from './Logo';
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { pathname } = useLocation();
+  const isFullBleed = pathname === '/chat';
 
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-screen bg-cream flex overflow-hidden">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col md:pr-60">
+      <div className="flex-1 flex flex-col md:pr-60 min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="h-14 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
+        <header className="h-14 bg-white border-b border-border flex items-center justify-between px-4 md:hidden shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 text-muted hover:text-charcoal transition-colors"
@@ -26,11 +28,17 @@ export function AppLayout() {
           <Logo className="h-7" />
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
-          <div className="max-w-6xl mx-auto">
+        {isFullBleed ? (
+          <div className="flex-1 overflow-hidden">
             <Outlet />
           </div>
-        </main>
+        ) : (
+          <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+            <div className="max-w-6xl mx-auto">
+              <Outlet />
+            </div>
+          </main>
+        )}
       </div>
     </div>
   );

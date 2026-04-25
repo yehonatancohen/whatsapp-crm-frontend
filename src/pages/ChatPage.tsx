@@ -776,7 +776,7 @@ export function ChatPage() {
   const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 overflow-hidden md:rounded-xl shadow-lg border border-border">
+    <div className="flex h-full md:rounded-xl shadow-lg border border-border overflow-hidden">
       {/* Sidebar: Chat List */}
       <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full max-w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all overflow-hidden`}>
         <div className="p-3 bg-cream-dark border-b border-border">
