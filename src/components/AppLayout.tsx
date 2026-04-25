@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Logo } from './Logo';
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const isChatPage = location.pathname.startsWith('/chat');
 
   return (
     <div className="min-h-screen bg-cream flex overflow-x-hidden">
@@ -26,7 +28,7 @@ export function AppLayout() {
           <Logo className="h-7" />
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <main className={`flex-1 ${isChatPage ? 'md:p-8' : 'p-4 md:p-8'} overflow-x-hidden`}>
           <div className="max-w-6xl mx-auto">
             <Outlet />
           </div>
