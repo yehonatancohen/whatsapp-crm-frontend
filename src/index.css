@@ -55,8 +55,13 @@
     --color-accent-subtle: rgba(255, 87, 34, 0.08);
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-cream text-charcoal antialiased transition-colors duration-200 font-sans;
+    overflow-x: hidden;
   }
 }
 
