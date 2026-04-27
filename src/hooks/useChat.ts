@@ -262,6 +262,28 @@ export function useSendVoice() {
   });
 }
 
+export function useSendImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ accountId, chatId, data, mimeType, caption, _limit }: { accountId: string; chatId: string; data: string; mimeType: string; caption?: string; _limit?: number }) => {
+      const res = await api.post(`/chat/${accountId}/${encodeURIComponent(chatId)}/send-image`, { data, mimeType, caption });
+      return { msg: res.data as ChatMessage, limit: _limit ?? 100 };
+    },
+    onSuccess: ({ msg, limit }, { accountId, chatId }) => {
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat', 'messages', accountId, chatId, limit],
+        (old) => {
+          if (!old) return [msg];
+          if (old.some((m) => m.id === msg.id)) return old;
+          return [...old, msg];
+        },
+      );
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+  });
+}
+
 export function useMarkSeen() {
   const queryClient = useQueryClient();
 
