@@ -14,6 +14,7 @@ import {
   useRemoveParticipants,
   useUpdateGroupSettings,
   useGroupInviteLink,
+  useJoinGroupViaLink,
   type Conversation,
   type ChatMessage,
   type AddParticipantResult,
@@ -30,9 +31,48 @@ function getMediaUrl(accountId: string, chatId: string, messageId: string) {
 }
 
 const URL_REGEX = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
+const WA_INVITE_REGEX = /https?:\/\/chat\.whatsapp\.com\/([A-Za-z0-9_-]+)/;
 
 function extractUrls(text: string): string[] {
   return text?.match(URL_REGEX) || [];
+}
+
+function extractWaInviteLink(text: string): string | null {
+  const m = text?.match(WA_INVITE_REGEX);
+  return m ? m[0] : null;
+}
+
+function JoinGroupButton({ inviteLink, accountId }: { inviteLink: string; accountId: string }) {
+  const joinMutation = useJoinGroupViaLink();
+  const [done, setDone] = useState(false);
+
+  if (done) {
+    return <span className="text-[11px] text-accent font-medium mt-1 block">הצטרפת לקבוצה!</span>;
+  }
+
+  return (
+    <button
+      onClick={async () => {
+        try {
+          await joinMutation.mutateAsync({ accountId, inviteLink });
+          setDone(true);
+        } catch {
+          alert('לא ניתן להצטרף לקבוצה. הלינק אולי פג תוקף.');
+        }
+      }}
+      disabled={joinMutation.isPending}
+      className="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-accent text-[#ffffff] hover:bg-accent-hover transition-colors disabled:opacity-50"
+    >
+      {joinMutation.isPending ? (
+        <><div className="w-2.5 h-2.5 border border-[#ffffff] border-t-transparent rounded-full animate-spin" />מצטרף...</>
+      ) : (
+        <>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></svg>
+          הצטרף לקבוצה
+        </>
+      )}
+    </button>
+  );
 }
 
 function LinkPreview({ url }: { url: string }) {
@@ -615,6 +655,12 @@ export function ChatPage() {
   const [newChatPhone, setNewChatPhone] = useState('');
   const [newChatAccountId, setNewChatAccountId] = useState('');
 
+  // Join group via link
+  const [showJoinGroup, setShowJoinGroup] = useState(false);
+  const [joinGroupLink, setJoinGroupLink] = useState('');
+  const [joinGroupAccountId, setJoinGroupAccountId] = useState('');
+  const joinGroupMutation = useJoinGroupViaLink();
+
   // Voice recording
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -821,13 +867,22 @@ export function ChatPage() {
         <div className="p-3 bg-cream-dark border-b border-border">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
-            <button
-              onClick={() => setShowNewChat(true)}
-              className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center text-[#ffffff] transition-colors shrink-0"
-              title="שיחה חדשה"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setShowJoinGroup(true)}
+                className="w-8 h-8 rounded-full bg-cream border border-border hover:bg-cream-dark flex items-center justify-center text-muted transition-colors shrink-0"
+                title="הצטרף לקבוצה דרך לינק"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+              </button>
+              <button
+                onClick={() => setShowNewChat(true)}
+                className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center text-[#ffffff] transition-colors shrink-0"
+                title="שיחה חדשה"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </button>
+            </div>
           </div>
           <input
             type="text"
@@ -881,6 +936,68 @@ export function ChatPage() {
                   className="w-full bg-accent hover:bg-accent-hover disabled:opacity-40 text-[#ffffff] font-medium py-2.5 rounded-lg text-sm transition-colors"
                 >
                   פתח שיחה
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Join Group via Link Modal */}
+        {showJoinGroup && (
+          <div className="absolute inset-0 z-50 bg-black/40 flex items-start justify-center pt-16 px-4">
+            <div className="bg-white dark:bg-cream-dark rounded-xl shadow-xl w-full max-w-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={() => { setShowJoinGroup(false); setJoinGroupLink(''); }} className="text-muted hover:text-charcoal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+                <h3 className="text-charcoal font-semibold">הצטרף לקבוצה דרך לינק</h3>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-muted block mb-1 text-right">לינק הצטרפות לקבוצה</label>
+                  <input
+                    type="url"
+                    value={joinGroupLink}
+                    onChange={(e) => setJoinGroupLink(e.target.value)}
+                    placeholder="https://chat.whatsapp.com/..."
+                    dir="ltr"
+                    autoFocus
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2.5 text-sm outline-none placeholder:text-muted focus:ring-1 focus:ring-accent/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted block mb-1 text-right">חשבון להצטרפות</label>
+                  <select
+                    value={joinGroupAccountId}
+                    onChange={(e) => setJoinGroupAccountId(e.target.value)}
+                    className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-1 focus:ring-accent/50"
+                  >
+                    <option value="">בחר חשבון</option>
+                    {accounts.filter(a => a.status === 'AUTHENTICATED').map(a => (
+                      <option key={a.id} value={a.id}>{a.label} {a.phoneNumber ? `(${a.phoneNumber})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                {joinGroupMutation.isError && (
+                  <p className="text-xs text-red-500 text-right">לא ניתן להצטרף. הלינק אולי לא תקין או פג תוקף.</p>
+                )}
+                {joinGroupMutation.isSuccess && (
+                  <p className="text-xs text-accent text-right font-medium">הצטרפת לקבוצה בהצלחה!</p>
+                )}
+                <button
+                  onClick={async () => {
+                    if (!joinGroupLink.trim() || !joinGroupAccountId) return;
+                    try {
+                      await joinGroupMutation.mutateAsync({ accountId: joinGroupAccountId, inviteLink: joinGroupLink.trim() });
+                      setTimeout(() => { setShowJoinGroup(false); setJoinGroupLink(''); }, 1500);
+                    } catch { /* error shown above */ }
+                  }}
+                  disabled={!joinGroupLink.trim() || !joinGroupAccountId || joinGroupMutation.isPending}
+                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-40 text-[#ffffff] font-medium py-2.5 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  {joinGroupMutation.isPending ? (
+                    <><div className="w-4 h-4 border-2 border-[#ffffff] border-t-transparent rounded-full animate-spin" />מצטרף...</>
+                  ) : 'הצטרף לקבוצה'}
                 </button>
               </div>
             </div>
@@ -1085,9 +1202,15 @@ export function ChatPage() {
                             ) : msg.type === 'chat' ? (
                               <>
                                 <div className="break-words whitespace-pre-wrap" dir="auto">{msg.body}</div>
-                                {extractUrls(msg.body).slice(0, 1).map(url => (
-                                  <LinkPreview key={url} url={url} />
-                                ))}
+                                {(() => {
+                                  const waLink = extractWaInviteLink(msg.body);
+                                  if (waLink && !msg.fromMe) {
+                                    return <JoinGroupButton inviteLink={waLink} accountId={selectedChat.accountId} />;
+                                  }
+                                  return extractUrls(msg.body).slice(0, 1).map(url => (
+                                    <LinkPreview key={url} url={url} />
+                                  ));
+                                })()}
                               </>
                             ) : (
                               <div className="break-words whitespace-pre-wrap italic opacity-60" dir="auto">

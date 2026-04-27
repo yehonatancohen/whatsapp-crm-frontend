@@ -10,6 +10,8 @@ export function AdminUsersPage() {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const [search, setSearch] = useState('');
+  const [rateLimitIp, setRateLimitIp] = useState('');
+  const [rateLimitStatus, setRateLimitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const { data: overview, isLoading: overviewLoading } = useQuery<AdminOverview>({
     queryKey: ['admin', 'overview'],
@@ -81,6 +83,18 @@ export function AdminUsersPage() {
       window.location.reload(); // Hard reload to ensure all states are cleared
     },
   });
+
+  async function handleClearRateLimit() {
+    if (!rateLimitIp.trim()) return;
+    setRateLimitStatus('idle');
+    try {
+      await api.post('/users/clear-rate-limit', { ip: rateLimitIp.trim() });
+      setRateLimitStatus('success');
+      setRateLimitIp('');
+    } catch {
+      setRateLimitStatus('error');
+    }
+  }
 
   return (
     <div className="text-right">
@@ -214,6 +228,34 @@ export function AdminUsersPage() {
             </tbody>
           </table>
         </div>
+      </div>
+      {/* Rate Limit Management */}
+      <div className="mt-8 bg-white border border-border rounded-xl shadow-soft p-5">
+        <h2 className="text-base font-semibold text-charcoal mb-1">ביטול Rate Limit</h2>
+        <p className="text-xs text-muted mb-4">הזן כתובת IP של משתמש שחסום על ידי rate limiter כדי לשחרר אותו.</p>
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <label className="text-xs text-muted block mb-1">כתובת IP</label>
+            <input
+              type="text"
+              value={rateLimitIp}
+              onChange={(e) => { setRateLimitIp(e.target.value); setRateLimitStatus('idle'); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleClearRateLimit()}
+              placeholder="1.2.3.4"
+              dir="ltr"
+              className="w-full bg-cream border border-border text-charcoal rounded-lg px-3 py-2 text-sm outline-none focus:border-accent transition-colors"
+            />
+          </div>
+          <button
+            onClick={handleClearRateLimit}
+            disabled={!rateLimitIp.trim()}
+            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-[#ffffff] text-sm font-medium rounded-lg transition-colors"
+          >
+            שחרר
+          </button>
+        </div>
+        {rateLimitStatus === 'success' && <p className="text-xs text-accent mt-2">Rate limit שוחרר בהצלחה.</p>}
+        {rateLimitStatus === 'error' && <p className="text-xs text-red-500 mt-2">שגיאה בשחרור rate limit. נסה שוב.</p>}
       </div>
     </div>
   );

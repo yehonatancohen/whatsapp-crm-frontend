@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -7,22 +7,25 @@ import { Logo } from '../components/Logo';
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { updateUser } = useAuth();
+  const { refreshUser } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const calledRef = useRef(false);
 
   useEffect(() => {
     if (!token) {
       setStatus('error');
       return;
     }
+    if (calledRef.current) return;
+    calledRef.current = true;
 
     api.get(`/auth/verify-email?token=${token}`)
       .then(() => {
         setStatus('success');
-        updateUser({ emailVerified: true });
+        refreshUser().catch(() => {});
       })
       .catch(() => setStatus('error'));
-  }, [token, updateUser]);
+  }, [token, refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-cream transition-colors">

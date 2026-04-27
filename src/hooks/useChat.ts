@@ -218,6 +218,19 @@ export function useUpdateGroupSettings() {
   });
 }
 
+export function useJoinGroupViaLink() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ accountId, inviteLink }: { accountId: string; inviteLink: string }) => {
+      const { data } = await api.post(`/chat/${accountId}/join-group`, { inviteLink });
+      return data as { success: boolean; chatId: string };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+  });
+}
+
 export function useSendMessage() {
   const queryClient = useQueryClient();
 
