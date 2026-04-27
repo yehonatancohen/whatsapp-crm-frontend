@@ -15,6 +15,7 @@ import {
   useUpdateGroupSettings,
   useGroupInviteLink,
   useJoinGroupViaLink,
+  useProfilePic,
   type Conversation,
   type ChatMessage,
   type AddParticipantResult,
@@ -72,6 +73,32 @@ function JoinGroupButton({ inviteLink, accountId }: { inviteLink: string; accoun
         </>
       )}
     </button>
+  );
+}
+
+function ChatAvatar({ accountId, chatId, isGroup, size = 'md' }: { accountId: string; chatId: string; isGroup: boolean; size?: 'sm' | 'md' }) {
+  const { data } = useProfilePic(accountId, chatId);
+  const sizeClass = size === 'sm' ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-8 h-8 sm:w-10 sm:h-10';
+
+  if (data?.url) {
+    return (
+      <img
+        src={data.url}
+        alt=""
+        className={`${sizeClass} rounded-full object-cover flex-shrink-0 border border-border`}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClass} rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted`}>
+      {isGroup ? (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+      )}
+    </div>
   );
 }
 
@@ -677,7 +704,7 @@ export function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, loading: loadingMessages, isError: messagesError, refetch: refetchMessages } = useChatMessages(
+  const { messages, loading: loadingMessages, isError: messagesError, error: messagesErrorMsg, refetch: refetchMessages } = useChatMessages(
     selectedChat?.accountId ?? null,
     selectedChat?.chatId ?? null,
     msgLimit,
@@ -1023,13 +1050,7 @@ export function ChatPage() {
                     onClick={() => handleSelect(chat)}
                     className={`w-full flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 text-right transition-colors border-b border-border hover:bg-cream active:bg-cream-dark overflow-hidden ${isSelected ? 'bg-cream-dark' : ''}`}
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted">
-                      {chat.isGroup ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                      )}
-                    </div>
+                    <ChatAvatar accountId={chat.accountId} chatId={chat.chatId} isGroup={chat.isGroup} size="sm" />
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex justify-between items-center gap-1 mb-0.5">
                         <span className="text-charcoal font-medium text-sm truncate">{chat.name}</span>
@@ -1070,13 +1091,7 @@ export function ChatPage() {
               <button onClick={() => setShowList(true)} className="text-muted hover:text-charcoal md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-cream border border-border flex items-center justify-center text-muted shrink-0">
-                {selectedChat.isGroup ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                )}
-              </div>
+              <ChatAvatar accountId={selectedChat.accountId} chatId={selectedChat.chatId} isGroup={selectedChat.isGroup} size="md" />
               <div className="min-w-0 flex-1 text-right">
                 <h3 className="text-charcoal font-medium leading-tight truncate">{selectedChat.name}</h3>
                 <span className="text-xs text-muted truncate block">באמצעות {activeConv?.accountLabel || selectedChat.accountId}</span>
@@ -1111,6 +1126,7 @@ export function ChatPage() {
                 <div className="flex items-center justify-center flex-1">
                   <div className="text-center py-3 bg-white border border-border rounded-lg px-4 text-sm text-muted shadow-sm flex flex-col gap-2">
                     <span>שגיאה בטעינת הודעות</span>
+                    {messagesErrorMsg && <span className="text-[11px] opacity-70 max-w-xs break-words" dir="ltr">{messagesErrorMsg}</span>}
                     <button onClick={() => refetchMessages()} className="text-xs underline text-accent">נסה שוב</button>
                   </div>
                 </div>

@@ -7,7 +7,7 @@ export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-cream flex overflow-x-hidden">
+    <div className="min-h-screen bg-cream flex">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col md:pr-60">
@@ -27,7 +27,7 @@ export function AppLayout() {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto overflow-hidden">
             <Outlet />
           </div>
         </main>

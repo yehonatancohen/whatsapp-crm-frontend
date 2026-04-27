@@ -86,8 +86,8 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
     },
     enabled: !!accountId && !!chatId,
     staleTime: 30_000,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
+    retry: 1,
+    retryDelay: 2000,
   });
 
   // Listen for new messages → invalidate to refetch with current limit
@@ -320,5 +320,18 @@ export function useDeleteMessage() {
     onSuccess: (_data, { accountId, chatId }) => {
       queryClient.invalidateQueries({ queryKey: ['chat', 'messages', accountId, chatId] });
     },
+  });
+}
+
+export function useProfilePic(accountId: string, chatId: string) {
+  return useQuery<{ url: string | null }>({
+    queryKey: ['chat', 'profile-pic', accountId, chatId],
+    queryFn: async () => {
+      const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId)}/profile-pic`);
+      return data;
+    },
+    enabled: !!accountId && !!chatId,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 0,
   });
 }
