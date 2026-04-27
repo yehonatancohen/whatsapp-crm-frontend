@@ -738,12 +738,16 @@ export function ChatPage() {
     }
   }, [accounts, newChatAccountId]);
 
+  // Filter out @lid (Linked Identity) chats — not supported by whatsapp-web.js
+  const supportedConversations = conversations.filter((c) => !c.chatId.endsWith('@lid'));
+
   const filtered = searchQuery
-    ? conversations.filter((c) =>
+    ? supportedConversations.filter((c) =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.accountLabel.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-    : conversations;
+    : supportedConversations;
+
 
   function handleSelect(conv: Conversation) {
     setSelectedChat({ accountId: conv.accountId, chatId: conv.chatId, name: conv.name, isGroup: conv.isGroup });
@@ -888,9 +892,9 @@ export function ChatPage() {
   const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -mx-4 md:-mx-8 overflow-hidden md:rounded-xl shadow-lg border border-border">
+    <div className="fixed inset-x-0 top-14 bottom-0 md:top-0 md:right-60 overflow-hidden flex border-t border-border md:border-0">
       {/* Sidebar: Chat List */}
-      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 min-w-0 border-l border-border bg-white flex-shrink-0 overflow-hidden transition-all`}>
+      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full max-w-sm md:max-w-none md:w-72 lg:w-80 xl:w-96 min-w-0 border-l border-border bg-white flex-shrink-0 overflow-hidden transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
@@ -1132,8 +1136,10 @@ export function ChatPage() {
                 <div className="flex items-center justify-center flex-1">
                   <div className="text-center py-3 bg-white border border-border rounded-lg px-4 text-sm text-muted shadow-sm flex flex-col gap-2">
                     <span>שגיאה בטעינת הודעות</span>
-                    {messagesErrorMsg && <span className="text-[11px] opacity-70 max-w-xs break-words" dir="ltr">{messagesErrorMsg}</span>}
-                    <button onClick={() => refetchMessages()} className="text-xs underline text-accent">נסה שוב</button>
+                    {messagesErrorMsg && <span className="text-[11px] opacity-70 max-w-xs break-words">{messagesErrorMsg}</span>}
+                    {!messagesErrorMsg?.includes('@lid') && (
+                      <button onClick={() => refetchMessages()} className="text-xs underline text-accent">נסה שוב</button>
+                    )}
                   </div>
                 </div>
               ) : sortedMsgs.length === 0 ? (
