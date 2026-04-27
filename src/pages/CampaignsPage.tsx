@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAccounts } from '../hooks/useAccounts';
 import {
   useCampaigns,
@@ -55,6 +55,12 @@ export function CampaignsPage() {
   // Track pending action to avoid double-submit
   const pendingAction = useRef<'start' | 'draft' | 'save' | null>(null);
 
+  // Image attachment
+  const [imageData, setImageData] = useState('');
+  const [imageMimeType, setImageMimeType] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
+  const campaignImageInputRef = useRef<HTMLInputElement>(null);
+
   // A/B Testing state
   const [enableAB, setEnableAB] = useState(false);
   const [variants, setVariants] = useState<Array<{ name: string; messageTemplate: string; weight: number }>>([]);
@@ -101,6 +107,20 @@ export function CampaignsPage() {
     });
   });
 
+  const handleCampaignImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setImageData(result.split(',')[1]);
+      setImageMimeType(file.type);
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }, []);
+
   const resetForm = () => {
     setName('');
     setMessage('');
@@ -115,6 +135,9 @@ export function CampaignsPage() {
     setDailyLimit(50);
     setEnableAB(false);
     setVariants([]);
+    setImageData('');
+    setImageMimeType('');
+    setImagePreview('');
   };
 
   const fillFormFromCampaign = (c: Campaign) => {
@@ -169,6 +192,8 @@ export function CampaignsPage() {
     messagesPerMinute: Math.floor(60 / ((delayMin + delayMax) / 2)),
     dailyLimitPerAccount: dailyLimit,
     variants: enableAB ? variants : undefined,
+    imageData: imageData || undefined,
+    imageMimeType: imageMimeType || undefined,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -541,6 +566,38 @@ export function CampaignsPage() {
                   )}
                 </div>
               )}
+
+              {/* Image Attachment */}
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1.5">תמונה (אופציונלי)</label>
+                <input ref={campaignImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleCampaignImageChange} />
+                {imagePreview ? (
+                  <div className="flex items-center gap-3 p-2 bg-cream border border-border rounded-lg">
+                    <img src={imagePreview} alt="תמונה שנבחרה" className="w-16 h-16 object-cover rounded-lg shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-charcoal font-medium truncate">תמונה נבחרה</p>
+                      <p className="text-[10px] text-muted">{imageMimeType}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setImageData(''); setImageMimeType(''); setImagePreview(''); }}
+                      className="text-muted hover:text-red-500 transition-colors p-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => campaignImageInputRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-border hover:border-accent/40 rounded-lg py-4 text-sm text-muted hover:text-accent transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                    לחץ להוספת תמונה
+                  </button>
+                )}
+                <p className="text-[10px] text-faded mt-1">התמונה תישלח יחד עם ההודעה לכל הנמענים</p>
+              </div>
 
               {/* Message */}
               <div>
