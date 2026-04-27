@@ -890,7 +890,7 @@ export function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] md:h-[calc(100vh-6rem)] -m-4 md:-m-8 overflow-x-hidden md:rounded-xl shadow-lg border border-border">
       {/* Sidebar: Chat List */}
-      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 border-l border-border bg-white flex-shrink-0 transition-all`}>
+      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-72 lg:w-80 xl:w-96 min-w-0 border-l border-border bg-white flex-shrink-0 overflow-hidden transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>

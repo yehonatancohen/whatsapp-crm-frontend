@@ -79,14 +79,25 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
     queryKey: ['chat', 'messages', accountId, chatId, limit],
     queryFn: async () => {
       if (!accountId || !chatId) return [];
-      const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId)}/messages`, {
-        params: { limit },
-      });
-      return data;
+      try {
+        const { data } = await api.get(`/chat/${accountId}/${encodeURIComponent(chatId)}/messages`, {
+          params: { limit },
+        });
+        return data;
+      } catch (err) {
+        const serverMsg = (err as { response?: { data?: { error?: string } } }).response?.data?.error;
+        if (serverMsg) throw new Error(serverMsg);
+        throw err;
+      }
     },
     enabled: !!accountId && !!chatId,
     staleTime: 30_000,
-    retry: 1,
+    retry: (failureCount, err) => {
+      // Don't retry on 4xx client errors (incl. 501 unsupported chat type)
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status && status >= 400 && status < 500) return false;
+      return failureCount < 1;
+    },
     retryDelay: 2000,
   });
 
