@@ -27,7 +27,7 @@ export function AppLayout() {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
-          <div className="max-w-6xl mx-auto overflow-hidden">
+          <div className="max-w-6xl mx-auto">
             <Outlet />
           </div>
         </main>
