@@ -571,7 +571,7 @@ export function PromotionsPage() {
                   <label className="block text-sm font-medium text-muted mb-1.5">מגבלה יומית/חשבון</label>
                   <input
                     type="number"
-                    value={dailyLimit}
+                    value={dailyLimit || ''}
                     onChange={e => setDailyLimit(Number(e.target.value))}
                     min={1}
                     max={200}
@@ -582,7 +582,7 @@ export function PromotionsPage() {
                   <label className="block text-sm font-medium text-muted mb-1.5">הודעות בדקה</label>
                   <input
                     type="number"
-                    value={messagesPerMinute}
+                    value={messagesPerMinute || ''}
                     onChange={e => setMessagesPerMinute(Number(e.target.value))}
                     min={1}
                     max={10}

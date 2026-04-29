@@ -647,7 +647,7 @@ export function CampaignsPage() {
                               <div className="flex items-center gap-1">
                                 <input
                                   type="number"
-                                  value={v.weight}
+                                  value={v.weight || ''}
                                   onChange={(e) => { const u = [...variants]; u[i].weight = Number(e.target.value); setVariants(u); }}
                                   min={1} max={100}
                                   className="w-14 px-2 py-1 border border-border rounded text-xs text-center"
@@ -711,15 +711,15 @@ export function CampaignsPage() {
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-muted mb-1.5">השהיה מינ' (שניות)</label>
-                  <input type="number" value={delayMin} onChange={(e) => setDelayMin(Number(e.target.value))} min={5} className={inputClass} />
+                  <input type="number" value={delayMin || ''} onChange={(e) => setDelayMin(Number(e.target.value))} min={5} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted mb-1.5">השהיה מקס' (שניות)</label>
-                  <input type="number" value={delayMax} onChange={(e) => setDelayMax(Number(e.target.value))} min={delayMin} className={inputClass} />
+                  <input type="number" value={delayMax || ''} onChange={(e) => setDelayMax(Number(e.target.value))} min={delayMin} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted mb-1.5">מגבלה יומית/חשבון</label>
-                  <input type="number" value={dailyLimit} onChange={(e) => setDailyLimit(Number(e.target.value))} min={1} className={inputClass} />
+                  <input type="number" value={dailyLimit || ''} onChange={(e) => setDailyLimit(Number(e.target.value))} min={1} className={inputClass} />
                   <p className="text-[10px] text-faded mt-1">מספר הודעות מקסימלי ליום לכל חשבון</p>
                 </div>
               </div>
