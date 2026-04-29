@@ -11,6 +11,11 @@ const topItems = [
     icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>,
   },
   {
+    label: 'חשבונות',
+    path: '/accounts',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  },
+  {
     label: "צ'אט",
     path: '/chat',
     icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /><path d="M3 15v4c0 1.1.9 2 2 2h14" /></svg>,
@@ -29,11 +34,6 @@ const topItems = [
     label: 'אנליטיקס',
     path: '/analytics',
     icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>,
-  },
-  {
-    label: 'הגדרות',
-    path: '/settings',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1.08H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.08z" /></svg>,
   },
 ];
 
@@ -62,14 +62,9 @@ const groups = [
   },
   {
     label: 'ניהול',
-    paths: ['/accounts', '/warmup', '/contacts', '/group-collections'],
+    paths: ['/warmup', '/contacts', '/group-collections'],
     icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
     items: [
-      {
-        label: 'חשבונות',
-        path: '/accounts',
-        icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
-      },
       {
         label: 'חימום',
         path: '/warmup',
@@ -145,7 +140,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`fixed right-0 top-0 h-screen w-60 bg-cream-dark border-l border-border flex flex-col z-50 transition-transform duration-300 ease-in-out will-change-transform ${
+        className={`fixed right-0 top-0 h-[100dvh] w-60 bg-cream-dark border-l border-border flex flex-col z-50 transition-transform duration-300 ease-in-out will-change-transform ${
           open ? 'translate-x-0' : 'translate-x-full'
         } md:translate-x-0 md:z-30`}
       >
@@ -282,15 +277,22 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             )}
           </button>
 
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-cream-dark flex items-center justify-center text-xs font-medium text-ink">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-charcoal truncate">{user?.name}</p>
-              <p className="text-xs text-muted truncate text-right" dir="ltr">{user?.email}</p>
-            </div>
-            <button onClick={handleLogout} className="text-faded hover:text-red-500 transition-colors" title="התנתקות">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { navigate('/settings'); onClose(); }}
+              className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-cream min-w-0 ${
+                location.pathname.startsWith('/settings') ? 'bg-accent-subtle' : ''
+              }`}
+            >
+              <div className="w-8 h-8 shrink-0 rounded-full bg-cream-dark flex items-center justify-center text-xs font-medium text-ink">
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-charcoal truncate">{user?.name}</p>
+                <p className="text-xs text-muted truncate text-right" dir="ltr">{user?.email}</p>
+              </div>
+            </button>
+            <button onClick={handleLogout} className="shrink-0 text-faded hover:text-red-500 transition-colors pr-3" title="התנתקות">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
