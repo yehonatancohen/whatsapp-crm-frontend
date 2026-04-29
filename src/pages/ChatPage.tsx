@@ -249,7 +249,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
 
   // Authenticated accounts not already in the group
   const participantNumbers = new Set(
-    (groupInfo?.participants || []).map((p) => p.id.replace('@c.us', '')),
+    (groupInfo?.participants || []).map((p) => (p.id || '').replace('@c.us', '')),
   );
   const availableAccounts = accounts.filter(
     (a) => a.status === 'AUTHENTICATED' && a.phoneNumber && !participantNumbers.has(a.phoneNumber),
@@ -593,7 +593,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                   </div>
                   <div className="min-w-0">
                     {p.name && <span className="text-charcoal text-xs block truncate">{p.name}</span>}
-                    <span className="text-muted font-mono text-[11px]" dir="ltr">{p.id.replace('@c.us', '')}</span>
+                    <span className="text-muted font-mono text-[11px]" dir="ltr">{(p.id || '').replace('@c.us', '')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -638,7 +638,7 @@ function GroupPanel({ accountId, chatId, onClose }: { accountId: string; chatId:
                           )}
                           <button
                             onClick={async () => {
-                              if (!confirm(`להסיר את ${p.id.replace('@c.us', '')} מהקבוצה?`)) return;
+                              if (!confirm(`להסיר את ${(p.id || '').replace('@c.us', '')} מהקבוצה?`)) return;
                               try { await removeMutation.mutateAsync({ accountId, chatId, participantIds: [p.id] }); refetch(); } catch { /* handled */ }
                               setActionMenu(null);
                             }}
@@ -1165,7 +1165,7 @@ export function ChatPage() {
                     const prev = index > 0 ? sortedMsgs[index - 1] : null;
                     const showTail = !prev || prev.fromMe !== msg.fromMe;
                     const isHovered = hoveredMsgId === msg.id;
-                    const authorId = msg.author || '';
+                    const authorId = typeof msg.author === 'string' ? msg.author : '';
                     const authorDisplay = msg.authorName || (authorId ? authorId.replace('@c.us', '') : '');
                     const showDateSep = !prev || !sameDay(prev.timestamp, msg.timestamp);
 
