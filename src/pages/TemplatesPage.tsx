@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { useTemplates, useTemplateCategories, useCreateTemplate, useUpdateTemplate, useDeleteTemplate } from '../hooks/useTemplates';
 import type { MessageTemplate } from '../types';
 
@@ -12,6 +13,7 @@ export function TemplatesPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<MessageTemplate | null>(null);
+  useScrollLock(showModal);
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');

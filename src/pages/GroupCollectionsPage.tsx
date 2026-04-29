@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { useAccounts } from '../hooks/useAccounts';
 import { useGroupCollections, useGroupCollectionDetail } from '../hooks/useGroupCollections';
 import { api } from '../lib/api';
@@ -8,6 +9,7 @@ export function GroupCollectionsPage() {
   const { collections, loading, createCollection, deleteCollection, isCreating } = useGroupCollections();
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  useScrollLock(modalOpen);
 
   const openCreate = () => {
     setEditId(null);

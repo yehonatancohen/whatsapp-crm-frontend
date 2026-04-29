@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react';import { useAccounts } from '../hooks/useAccounts';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';import { useAccounts } from '../hooks/useAccounts';
 import {
   usePromotions,
   useCreatePromotion,
@@ -36,6 +37,7 @@ export function PromotionsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [logsId, setLogsId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  useScrollLock(modalOpen || logsId !== null);
 
   // ─── Create/Edit Form State ──────────────────────────────────
 

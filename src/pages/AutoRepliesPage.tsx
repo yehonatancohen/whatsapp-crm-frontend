@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { useAutoReplies, useCreateAutoReply, useUpdateAutoReply, useToggleAutoReply, useDeleteAutoReply } from '../hooks/useAutoReplies';
 import { useAccounts } from '../hooks/useAccounts';
 import type { AutoReply, AutoReplyMatchType } from '../types';
@@ -20,6 +21,7 @@ export function AutoRepliesPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<AutoReply | null>(null);
+  useScrollLock(showModal);
 
   // Form state
   const [name, setName] = useState('');

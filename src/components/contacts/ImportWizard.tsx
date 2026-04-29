@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 type Mode = 'file' | 'text';
 
@@ -30,6 +31,7 @@ export function ImportWizard({ open, onClose, onImport, isImporting }: Props) {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  useScrollLock(open);
 
   if (!open) return null;
 

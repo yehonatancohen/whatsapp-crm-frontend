@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface Props {
   open: boolean;
@@ -11,6 +12,7 @@ export function AddAccountModal({ open, onClose, onAdd }: Props) {
   const [proxy, setProxy] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useScrollLock(open);
 
   if (!open) return null;
 

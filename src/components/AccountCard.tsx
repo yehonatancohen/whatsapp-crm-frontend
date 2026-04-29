@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { QRCodeSVG } from 'qrcode.react';
 import type { AccountResponse } from '../types';
 import { api } from '../lib/api';
@@ -32,6 +33,7 @@ export function AccountCard({ account, onRemove, onRename }: Props) {
   const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [pairingLoading, setPairingLoading] = useState(false);
   const [pairingError, setPairingError] = useState<string | null>(null);
+  useScrollLock(showProfile);
 
   const normalizePhone = (raw: string) => {
     const digits = raw.replace(/\D/g, '');

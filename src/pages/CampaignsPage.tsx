@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { useAccounts } from '../hooks/useAccounts';
 import {
   useCampaigns,
@@ -33,6 +34,7 @@ export function CampaignsPage() {
   // modal mode: null = closed, 'create' | 'edit' | 'clone'
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'clone' | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
+  useScrollLock(modalMode !== null);
 
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
