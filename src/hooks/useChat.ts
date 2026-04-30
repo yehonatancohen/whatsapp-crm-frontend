@@ -58,11 +58,58 @@ export function useConversations() {
     refetchInterval: 30_000, // refresh every 30s
   });
 
-  // Listen for new messages → refresh conversations list
+  // Listen for new messages → update conversation list in place so new chats
+  // appear immediately without waiting for getChats() to return them.
   useEffect(() => {
     if (!socket) return;
-    const handler = () => {
-      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    const handler = (msg: IncomingChatMessage) => {
+      queryClient.setQueryData<Conversation[]>(['chat', 'conversations'], (old) => {
+        if (!old) {
+          queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+          return old;
+        }
+
+        const idx = old.findIndex(
+          (c) => c.accountId === msg.accountId && c.chatId === msg.chatId,
+        );
+
+        const updatedLastMessage = {
+          body: msg.body,
+          timestamp: msg.timestamp,
+          fromMe: msg.fromMe,
+        };
+
+        let updated: Conversation[];
+        if (idx === -1) {
+          // New chat — prepend it
+          const newConv: Conversation = {
+            accountId: msg.accountId,
+            accountLabel: msg.accountLabel,
+            chatId: msg.chatId,
+            name: msg.chatName || msg.chatId,
+            unreadCount: msg.fromMe ? 0 : 1,
+            timestamp: msg.timestamp,
+            isGroup: msg.isGroup,
+            lastMessage: updatedLastMessage,
+          };
+          updated = [newConv, ...old];
+        } else {
+          // Existing chat — update last message and unread count
+          updated = old.map((c, i) =>
+            i !== idx
+              ? c
+              : {
+                  ...c,
+                  timestamp: msg.timestamp,
+                  unreadCount: msg.fromMe ? c.unreadCount : c.unreadCount + 1,
+                  lastMessage: updatedLastMessage,
+                },
+          );
+        }
+
+        // Keep sorted by timestamp desc
+        return [...updated].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      });
     };
     socket.on('chat:message', handler);
     return () => { socket.off('chat:message', handler); };
