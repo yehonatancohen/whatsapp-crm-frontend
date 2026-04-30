@@ -743,8 +743,8 @@ export function ChatPage() {
 
   const filtered = searchQuery
     ? supportedConversations.filter((c) =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.accountLabel.toLowerCase().includes(searchQuery.toLowerCase()),
+        (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.accountLabel || '').toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : supportedConversations;
 
