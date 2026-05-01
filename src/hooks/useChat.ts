@@ -148,17 +148,32 @@ export function useChatMessages(accountId: string | null, chatId: string | null,
     retryDelay: 2000,
   });
 
-  // Listen for new messages → invalidate to refetch with current limit
+  // Listen for new messages and message acks
   useEffect(() => {
     if (!socket || !accountId || !chatId) return;
-    const handler = (msg: IncomingChatMessage) => {
+    const msgHandler = (msg: IncomingChatMessage) => {
       if (msg.accountId === accountId && msg.chatId === chatId) {
         queryClient.invalidateQueries({ queryKey: ['chat', 'messages', accountId, chatId] });
       }
     };
-    socket.on('chat:message', handler);
-    return () => { socket.off('chat:message', handler); };
-  }, [socket, accountId, chatId, queryClient]);
+    
+    const ackHandler = (ackData: { accountId: string; chatId: string; messageId: string; ack: number }) => {
+      if (ackData.accountId === accountId && ackData.chatId === chatId) {
+        queryClient.setQueryData<ChatMessage[]>(['chat', 'messages', accountId, chatId, limit], (old) => {
+          if (!old) return old;
+          return old.map(m => m.id === ackData.messageId ? { ...m, ack: ackData.ack } : m);
+        });
+      }
+    };
+
+    socket.on('chat:message', msgHandler);
+    socket.on('chat:message_ack', ackHandler);
+    
+    return () => { 
+      socket.off('chat:message', msgHandler); 
+      socket.off('chat:message_ack', ackHandler);
+    };
+  }, [socket, accountId, chatId, queryClient, limit]);
 
   return { messages, loading: isLoading, isError, error: error?.message, refetch };
 }
