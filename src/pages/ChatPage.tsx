@@ -887,7 +887,10 @@ export function ChatPage() {
     (c) => c.accountId === selectedChat?.accountId && c.chatId === selectedChat?.chatId,
   );
 
-  const sortedMsgs = [...messages].sort((a, b) => a.timestamp - b.timestamp);
+  const HIDDEN_MSG_TYPES = new Set(['gp2', 'e2e_notification', 'protocol', 'notification_template', 'call_log']);
+  const sortedMsgs = [...messages]
+    .filter(m => !HIDDEN_MSG_TYPES.has(m.type))
+    .sort((a, b) => a.timestamp - b.timestamp);
 
   const chatBg = theme === 'dark' ? '#0b141a' : '#e5ddd5';
 
@@ -1054,13 +1057,7 @@ export function ChatPage() {
                     onClick={() => handleSelect(chat)}
                     className={`w-full flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 text-right transition-colors border-b border-border hover:bg-cream active:bg-cream-dark overflow-hidden ${isSelected ? 'bg-cream-dark' : ''}`}
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-cream-dark border border-border flex-shrink-0 flex items-center justify-center text-muted">
-                      {chat.isGroup ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                      )}
-                    </div>
+                    <ChatAvatar accountId={chat.accountId} chatId={chat.chatId} isGroup={chat.isGroup} size="sm" />
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex justify-between items-center gap-1 mb-0.5">
                         <span className="text-charcoal font-medium text-sm truncate">{chat.name}</span>
