@@ -61,6 +61,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ['activity'] });
     });
 
+    // Conversations refresh trigger
+    newSocket.on('conversations:refresh', () => {
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    });
+
     setSocket(newSocket);
 
     return () => {
