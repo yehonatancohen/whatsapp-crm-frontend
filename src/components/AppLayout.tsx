@@ -12,7 +12,7 @@ export function AppLayout() {
 
       <div className="flex-1 flex flex-col md:pr-60">
         {/* Mobile Header */}
-        <header className="h-14 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
+        <header className="sticky top-0 z-10 h-14 bg-white border-b border-border flex items-center justify-between px-4 md:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 text-muted hover:text-charcoal transition-colors"
