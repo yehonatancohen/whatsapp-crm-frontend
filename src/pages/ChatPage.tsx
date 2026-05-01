@@ -23,6 +23,7 @@ import {
 import { useAccounts } from '../hooks/useAccounts';
 import { useTheme } from '../context/ThemeContext';
 import { useCreateScheduledMessage } from '../hooks/useScheduledMessages';
+import { api } from '../lib/api';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'https://api.parties247.co.il/api').replace(/\/api\/?$/, '');
 
@@ -106,12 +107,34 @@ function LinkPreview({ url }: { url: string }) {
   let hostname: string;
   try { hostname = new URL(url).hostname; } catch { return null; }
 
+  const [og, setOg] = useState<{ title: string | null; description: string | null; image: string | null } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get(`/api/utils/link-preview?url=${encodeURIComponent(url)}`)
+      .then(res => { if (!cancelled) setOg(res.data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [url]);
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-1.5 rounded-lg border border-border/50 overflow-hidden hover:border-accent/30 transition-colors bg-white/10">
+      {og?.image && (
+        <img src={og.image} alt="" className="w-full max-h-36 object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+      )}
       <div className="px-3 py-2">
-        <p className="text-xs font-medium truncate opacity-90">{hostname}</p>
-        <p className="text-[10px] opacity-60 truncate" dir="ltr">{url}</p>
+        {og?.title ? (
+          <>
+            <p className="text-xs font-semibold truncate opacity-90">{og.title}</p>
+            {og.description && <p className="text-[10px] opacity-60 line-clamp-2" dir="auto">{og.description}</p>}
+            <p className="text-[10px] opacity-50 truncate mt-0.5" dir="ltr">{hostname}</p>
+          </>
+        ) : (
+          <>
+            <p className="text-xs font-medium truncate opacity-90">{hostname}</p>
+            <p className="text-[10px] opacity-60 truncate" dir="ltr">{url}</p>
+          </>
+        )}
       </div>
     </a>
   );
