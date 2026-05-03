@@ -761,8 +761,8 @@ export function ChatPage() {
     }
   }, [accounts, newChatAccountId]);
 
-  // Filter out @lid (Linked Identity) chats — not supported by whatsapp-web.js
-  const supportedConversations = conversations.filter((c) => !c.chatId.endsWith('@lid'));
+  // Allow all conversations including @lid
+  const supportedConversations = conversations;
 
   const filtered = searchQuery
     ? supportedConversations.filter((c) =>
