@@ -1123,7 +1123,10 @@ export function ChatPage() {
               </button>
               <ChatAvatar accountId={selectedChat.accountId} chatId={selectedChat.chatId} isGroup={selectedChat.isGroup} size="md" />
               <div className="min-w-0 flex-1 text-right">
-                <h3 className="text-charcoal font-medium leading-tight truncate">{selectedChat.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-charcoal font-medium leading-tight truncate">{selectedChat.name}</h3>
+                  <span className="text-[10px] bg-cream-dark border border-border text-muted px-1.5 py-0.5 rounded font-mono uppercase leading-none">{selectedChat.chatId.split('@')[1] || 'unknown'}</span>
+                </div>
                 <span className="text-xs text-muted truncate block">באמצעות {activeConv?.accountLabel || selectedChat.accountId}</span>
               </div>
               {selectedChat.isGroup && (
