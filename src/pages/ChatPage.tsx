@@ -1215,7 +1215,7 @@ export function ChatPage() {
                   <div className="text-center py-3 bg-white border border-border rounded-lg px-4 text-sm text-muted shadow-sm">אין הודעות עדיין. תגיד שלום!</div>
                 </div>
               ) : (
-                <div className="flex flex-col justify-end mt-auto gap-0.5">
+                <div className="flex flex-col justify-end mt-auto gap-0.5 w-full">
                   {/* Load earlier messages */}
                   {sortedMsgs.length >= msgLimit && (
                     <div className="flex justify-center py-2">
@@ -1248,7 +1248,7 @@ export function ChatPage() {
 
                     // RTL: justify-start = right, justify-end = left
                     return (
-                      <div key={msg.id}>
+                      <div key={msg.id} className="w-full">
                         {showDateSep && (
                           <div className="flex justify-center my-2">
                             <span className="text-[11px] px-3 py-1 rounded-full shadow-sm select-none"
@@ -1258,12 +1258,12 @@ export function ChatPage() {
                           </div>
                         )}
                         <div
-                          className={`flex ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : 'mt-px'} group/msg relative`}
+                          className={`flex w-full ${msg.fromMe ? 'justify-start' : 'justify-end'} ${showTail ? 'mt-1' : 'mt-px'} group/msg relative`}
                           onMouseEnter={() => setHoveredMsgId(msg.id)}
                           onMouseLeave={() => setHoveredMsgId(null)}
                         >
                           {/* Action buttons on hover */}
-                          <div className={`flex items-center gap-1 mx-1.5 transition-opacity duration-100 ${isHovered ? 'opacity-100' : 'opacity-0'} ${msg.fromMe ? 'order-first' : 'order-last'}`}>
+                          <div className={`flex items-center gap-1 mx-1.5 transition-opacity duration-100 ${isHovered ? 'opacity-100' : 'opacity-0'} ${msg.fromMe ? 'order-last' : 'order-first'}`}>
                             <button
                               onClick={() => setReplyTo(msg)}
                               title="ענה"
