@@ -918,7 +918,18 @@ export function ChatPage() {
   const getConversationPreview = (chat: Conversation) => {
     const text = chat.lastMessage?.body?.trim();
     if (text) return text;
-    return 'הודעה חדשה';
+
+    const type = chat.lastMessage?.type;
+    if (!type) return '';
+
+    if (type === 'image' || type === 'sticker') return '🖼️ תמונה';
+    if (type === 'video') return '🎥 וידאו';
+    if (type === 'audio' || type === 'ptt') return '🎤 הודעה קולית';
+    if (type === 'document') return '📄 מסמך';
+    if (type === 'location') return '📍 מיקום';
+    if (type === 'vcard') return '👤 איש קשר';
+
+    return 'הודעה';
   };
 
   const HIDDEN_MSG_TYPES = new Set(['gp2', 'e2e_notification', 'protocol', 'notification_template', 'call_log']);
@@ -1181,7 +1192,7 @@ export function ChatPage() {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 flex flex-col gap-1 z-10">
+            <div className="flex-1 overflow-y-auto px-2 py-4 sm:px-3 flex flex-col gap-1 z-10">
               {loadingMessages ? (
                 <div className="flex items-center justify-center flex-1">
                   <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -1273,7 +1284,7 @@ export function ChatPage() {
                             )}
                           </div>
 
-                          <div className={`msg-in relative max-w-[78%] sm:max-w-[68%] md:max-w-[58%] min-w-0 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? sentBubble : recvBubble} ${showTail ? (msg.fromMe ? 'rounded-tr-sm' : 'rounded-tl-sm') : ''}`}>
+                          <div className={`msg-in relative max-w-[90%] sm:max-w-[84%] md:max-w-[76%] min-w-0 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? sentBubble : recvBubble} ${showTail ? (msg.fromMe ? 'rounded-tr-sm' : 'rounded-tl-sm') : ''}`}>
                             {/* Sender name in group chats */}
                             {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
                               <p className="text-[11.5px] font-semibold mb-0.5 leading-tight" style={{ color: authorColor(authorId) }}>{authorDisplay}</p>

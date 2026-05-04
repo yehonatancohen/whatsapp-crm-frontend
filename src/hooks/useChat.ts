@@ -15,6 +15,7 @@ export interface Conversation {
     body: string;
     timestamp: number;
     fromMe: boolean;
+    type?: string;
   } | null;
 }
 
@@ -77,6 +78,7 @@ export function useConversations() {
           body: msg.body,
           timestamp: msg.timestamp,
           fromMe: msg.fromMe,
+          type: msg.type,
         };
 
         let updated: Conversation[];
