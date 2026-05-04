@@ -449,11 +449,13 @@ export function PromotionsPage() {
                 <label className="block text-sm font-medium text-muted mb-2">תזמון שליחה</label>
 
                 {/* Day of week selection */}
-                <div className="flex items-center gap-1 mb-3">
+                {/* dir="ltr" + flex-row-reverse keeps Hebrew visual order (Sat←Sun) while using */}
+                {/* LTR hit-testing, preventing RTL flex from misfiring adjacent button clicks.  */}
+                <div className="flex flex-row-reverse items-center gap-1 mb-3" dir="ltr">
                   <span className="text-xs text-muted ml-2">ימים:</span>
                   {DAY_LABELS.map((label, idx) => (
                     <button
-                      key={idx}
+                      key={`day-${idx}`}
                       type="button"
                       onClick={() => setDaysOfWeek(prev => prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx])}
                       className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${
@@ -467,9 +469,8 @@ export function PromotionsPage() {
                       {label}
                     </button>
                   ))}
-                  {daysOfWeek.length === 0 && (
-                    <span className="text-[10px] text-accent mr-2">כל יום</span>
-                  )}
+                  {/* Always rendered (not conditional) to avoid React reconciliation affecting button handlers */}
+                  <span className={`text-[10px] text-accent mr-2 ${daysOfWeek.length > 0 ? 'invisible' : ''}`}>כל יום</span>
                 </div>
 
                 {/* Send times */}
