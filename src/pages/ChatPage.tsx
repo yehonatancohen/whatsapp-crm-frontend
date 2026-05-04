@@ -942,7 +942,7 @@ export function ChatPage() {
   return (
     <div className="fixed inset-x-0 top-14 bottom-0 md:top-0 md:right-60 overflow-hidden flex border-t border-border md:border-0">
       {/* Sidebar: Chat List */}
-      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full max-w-sm md:max-w-none md:w-72 lg:w-80 xl:w-96 min-w-0 border-l border-border bg-white flex-shrink-0 overflow-hidden transition-all`}>
+      <div className={`${showList ? 'flex' : 'hidden'} md:flex flex-col w-full md:max-w-none md:w-72 lg:w-80 xl:w-96 min-w-0 border-l border-border bg-white flex-shrink-0 overflow-hidden transition-all`}>
         <div className="p-3 bg-cream-dark border-b border-border">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-charcoal font-semibold text-base sm:text-lg">תיבת הודעות</h2>
@@ -1120,11 +1120,9 @@ export function ChatPage() {
                         {chat.lastMessage?.fromMe && conversationPreview && (
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-muted shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
                         )}
-                        {conversationPreview ? (
-                          <p className="text-xs text-muted truncate flex-1 min-w-0" dir="auto">
-                            {conversationPreview}
-                          </p>
-                        ) : null}
+                        <p className="text-xs text-muted truncate flex-1 min-w-0" dir="auto">
+                          {conversationPreview || 'אין הודעות עדיין'}
+                        </p>
                       </div>
                       <div className="mt-1 flex justify-end">
                         <span className="text-[10px] shrink-0 px-1 py-0.5 rounded bg-accent-light text-accent border border-accent/20">{chat.accountLabel}</span>
