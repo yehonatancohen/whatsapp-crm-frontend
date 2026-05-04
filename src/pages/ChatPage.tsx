@@ -1287,7 +1287,7 @@ export function ChatPage() {
                             )}
                           </div>
 
-                          <div className={`msg-in relative max-w-[94%] sm:max-w-[90%] md:max-w-[84%] min-w-0 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? sentBubble : recvBubble} ${showTail ? (msg.fromMe ? 'rounded-tr-sm' : 'rounded-tl-sm') : ''}`}>
+                          <div className={`msg-in relative max-w-[72%] sm:max-w-[68%] md:max-w-[60%] min-w-0 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-[13.5px] sm:text-[14px] leading-[18px] sm:leading-[19px] overflow-hidden ${msg.fromMe ? sentBubble : recvBubble} ${showTail ? (msg.fromMe ? 'rounded-tr-sm' : 'rounded-tl-sm') : ''}`}>
                             {/* Sender name in group chats */}
                             {selectedChat.isGroup && authorDisplay && !msg.fromMe && (
                               <p className="text-[11.5px] font-semibold mb-0.5 leading-tight" style={{ color: authorColor(authorId) }}>{authorDisplay}</p>
