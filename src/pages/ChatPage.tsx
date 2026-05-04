@@ -1096,6 +1096,7 @@ export function ChatPage() {
             <div className="flex flex-col">
               {filtered.map((chat) => {
                 const isSelected = selectedChat?.accountId === chat.accountId && selectedChat?.chatId === chat.chatId;
+                const conversationPreview = getConversationPreview(chat);
                 return (
                   <button
                     key={`${chat.accountId}-${chat.chatId}`}
@@ -1116,12 +1117,14 @@ export function ChatPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 overflow-hidden">
-                        {chat.lastMessage?.fromMe && (
+                        {chat.lastMessage?.fromMe && conversationPreview && (
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-muted shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
                         )}
-                        <p className="text-xs text-muted truncate flex-1 min-w-0" dir="auto">
-                          {getConversationPreview(chat) || 'אין הודעות עדיין'}
-                        </p>
+                        {conversationPreview ? (
+                          <p className="text-xs text-muted truncate flex-1 min-w-0" dir="auto">
+                            {conversationPreview}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="mt-1 flex justify-end">
                         <span className="text-[10px] shrink-0 px-1 py-0.5 rounded bg-accent-light text-accent border border-accent/20">{chat.accountLabel}</span>
