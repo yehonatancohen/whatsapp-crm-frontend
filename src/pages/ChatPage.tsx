@@ -854,7 +854,10 @@ export function ChatPage() {
             mimeType,
             _limit: capturedLimit,
           });
-        } catch { /* ignore */ }
+        } catch (err: unknown) {
+          const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+          alert(msg || 'שגיאה בשליחת הודעה קולית');
+        }
       };
       reader.readAsDataURL(blob);
       mr.stream.getTracks().forEach(t => t.stop());
@@ -904,7 +907,12 @@ export function ChatPage() {
         caption: caption || undefined,
         _limit: msgLimit,
       });
-    } catch { /* ignore */ }
+    } catch (err: unknown) {
+      setPendingImage(img);
+      setImageCaption(caption);
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      alert(msg || 'שגיאה בשליחת תמונה');
+    }
   }
 
   const activeConv = conversations.find(
